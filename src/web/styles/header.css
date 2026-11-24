@@ -5,21 +5,21 @@
 
 .app-header-container {
   width: 100%;
-  background: #ccd2da;
+  background-color: #c0c2c7;
   border-bottom: 2px solid #8ea8cc;
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 100;
-  height: 60px;
+  height: 145px;
+  min-height: 145px;
 }
 
 /* Faixa Superior Global (Login e Menu Principal) */
 .header-top-bar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 0 40px;
-  height: 60px;
+  padding: 24px 60px 0 60px;
+  height: 100%;
   max-width: 100%;
   margin: 0 auto;
   position: relative;
@@ -45,8 +45,8 @@
 
 .brand-logo-img {
   width: auto;
-  height: 28px;
-  max-height: 28px;
+  height: 38px;
+  max-height: 38px;
   object-fit: contain;
   display: block;
 }
@@ -69,23 +69,36 @@
 }
 
 .brand-version-sub {
-  font-size: 10px;
-  color: #8a99a8;
-  font-weight: var(--weight-medium);
-  margin-top: 1px;
-  letter-spacing: 0.3px;
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+  margin-top: 4px;
+  text-align: center;
 }
 
 /* Centro: Card Retangular Flutuante no Header */
 .header-center-pill {
   position: absolute;
-  top: 60px;
+  top: 145px;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 20;
+  z-index: 25;
+}
+
+.header-center-pill .floating-pill {
+  width: 260px;
+  height: 56px;
+  background-color: #ffffff;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  font-weight: 700;
+  color: #0a2540;
+  padding: 0;
 }
 
 .header-spacer-right {
@@ -97,6 +110,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-md);
+  margin-top: 8px;
 }
 
 .header-divider-v {
@@ -166,10 +180,10 @@
    ========================================================================== */
 .header-work-bar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 0 40px;
-  height: 60px;
+  padding: 24px 60px 0 60px;
+  height: 100%;
   max-width: 100%;
   margin: 0 auto;
 }
@@ -484,16 +498,22 @@
    ========================================================================== */
 @media (max-width: 768px) {
   .app-header-container {
-    height: 56px;
+    height: 145px;
+    min-height: 145px;
   }
 
   .header-top-bar {
-    height: 56px;
-    padding: 0 16px;
+    height: 100%;
+    padding: 22px 24px 0 24px;
   }
 
   .header-center-pill {
-    top: 56px;
+    top: 145px;
+  }
+
+  .header-center-pill .floating-pill {
+    width: 230px;
+    height: 52px;
   }
 
   /* Menu Principal no mobile: apenas hambúrguer à direita (usuário/Sair ficam no drawer) */
@@ -501,10 +521,16 @@
     margin-left: auto;
   }
 
+  .btn-header-hamburger {
+    margin-top: 6px;
+    font-size: 24px;
+    color: #112346;
+  }
+
   /* Nas Telas de Trabalho internas: exibe hambúrguer e oculta tabs inline */
   .header-work-bar {
-    height: 56px;
-    padding: 0 16px;
+    height: 100%;
+    padding: 22px 24px 0 24px;
   }
 
   .header-inline-tabs {
@@ -519,4 +545,3 @@
     display: flex !important;
   }
 }
-

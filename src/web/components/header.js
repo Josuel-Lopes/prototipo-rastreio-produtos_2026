@@ -219,7 +219,7 @@ export class HeaderComponent {
         </div>
 
         <!-- Pill flutuante logo abaixo do header no centro -->
-        <div class="header-floating-pill-container">
+        <div class="header-center-pill">
           <span class="floating-pill">${currentPill}</span>
         </div>
 

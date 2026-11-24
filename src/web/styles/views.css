@@ -10,10 +10,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 145px);
   width: 100%;
   margin: 0 auto;
-  padding: 40px 16px 24px 16px;
+  padding: 50px 16px 24px 16px;
 }
 
 .login-card {
@@ -28,14 +28,14 @@
 
 @media (max-width: 768px) {
   .view-login-container {
-    min-height: calc(100vh - 56px);
-    padding: 24px 12px;
+    min-height: calc(100vh - 145px);
+    padding: 50px 12px 24px 12px;
   }
 
   .login-card {
     width: calc(100% - 36px);
     max-width: 360px;
-    margin: 60px auto 30px auto;
+    margin: 0 auto 30px auto;
     padding: 32px 24px 20px 24px;
   }
 }
@@ -112,6 +112,7 @@
   border-radius: 0px;
   box-shadow: var(--shadow-card);
   padding: 24px 28px;
+  margin: 50px auto 30px auto;
 }
 
 .menu-title {
@@ -194,6 +195,7 @@
     margin: 24px auto;
   }
   .menu-panel {
+    margin: 50px auto 30px auto;
     background: #ffffff;
     padding: 20px 14px;
   }
@@ -215,7 +217,7 @@
 .view-cadastro-container {
   width: 100%;
   max-width: 1100px;
-  margin: 0 auto;
+  margin: 50px auto 0 auto;
 }
 
 .form-two-cols {
