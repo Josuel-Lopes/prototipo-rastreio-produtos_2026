@@ -124,10 +124,23 @@
   margin-bottom: 14px;
 }
 
+.menu-title::after {
+  content: "";
+  display: block;
+  height: 2px;
+  margin: 14px 0 0;
+  background: linear-gradient(90deg, transparent, #1956ce 40%, #00bcd4 60%, transparent);
+}
+
 .menu-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.menu-grid > .menu-card:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
 }
 
 /* Card de módulo (componente ModuleCard) */
@@ -149,7 +162,7 @@
 
 .menu-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .menu-card:focus-visible {
@@ -166,16 +179,16 @@
 .menu-card-icon-img {
   height: 38px;
   width: auto;
-  max-width: 48px;
+  max-width: 46px;
   object-fit: contain;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   display: block;
 }
 
 .menu-card-title {
   font-size: 15px;
   font-weight: 700;
-  color: #0f2a4a;
+  color: #0a2540;
   text-transform: uppercase;
   margin: 0 0 4px;
   letter-spacing: 0.3px;
@@ -192,22 +205,17 @@
   .view-menu-container {
     width: calc(100% - 24px);
     max-width: 440px;
-    margin: 24px auto;
+    margin: 0 auto;
   }
   .menu-panel {
-    margin: 50px auto 30px auto;
+    width: 100%;
+    margin: 40px auto 20px auto;
     background: #ffffff;
     padding: 20px 14px;
   }
   .menu-grid {
     grid-template-columns: 1fr;
-    gap: 0;
-  }
-  .menu-card {
-    margin-bottom: 14px;
-  }
-  .menu-card:last-child {
-    margin-bottom: 0;
+    gap: 14px;
   }
 }
 

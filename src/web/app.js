@@ -54,38 +54,68 @@ class App {
   init() {
     console.log('Alvenius Spool Management v2.0.0 iniciado.');
     
-    // Inicia no login para exibição fiel de todas as telas solicitadas
-    this.navigateTo('login');
-  }
-
-  handleLogin({ username, password }) {
-    if (!username) {
-      toast.warning('Aviso', 'Por favor preencha o nome de usuário.');
-      return;
+    const savedUser = sessionStorage.getItem('app_user');
+    if (savedUser) {
+      try {
+        this.currentUser = JSON.parse(savedUser);
+        setCurrentUser(this.currentUser);
+      } catch (e) {
+        this.currentUser = null;
+      }
     }
 
+    const savedRoute = sessionStorage.getItem('app_current_route');
+    if (savedRoute && this.currentUser && this.currentUser.isLoggedIn) {
+      this.navigateTo(savedRoute);
+    } else {
+      this.navigateTo('login');
+    }
+
+    const savedScroll = sessionStorage.getItem('app_scroll_y');
+    if (savedScroll) {
+      setTimeout(() => {
+        window.scrollTo({ top: parseInt(savedScroll, 10), behavior: 'instant' });
+      }, 50);
+    }
+
+    window.addEventListener('beforeunload', () => {
+      sessionStorage.setItem('app_scroll_y', window.scrollY.toString());
+    });
+  }
+
+  handleLogin({ username, password } = {}) {
+    const finalUsername = (username && username.trim()) || 'josuellopes';
+
     const updatedUser = {
-      username: username,
-      name: username.charAt(0).toUpperCase() + username.slice(1),
+      username: finalUsername,
+      name: finalUsername === 'josuellopes' ? 'josuellopes' : (finalUsername.charAt(0).toUpperCase() + finalUsername.slice(1)),
       isLoggedIn: true
     };
     
     setCurrentUser(updatedUser);
     this.currentUser = getCurrentUser();
+    sessionStorage.setItem('app_user', JSON.stringify(this.currentUser));
+    sessionStorage.setItem('app_current_route', 'menu');
 
-    toast.success('Login Realizado', `Bem vindo ao sistema Alvenius, ${this.currentUser.username}!`);
+    toast.success('Login Realizado', `Bem vindo ao sistema Alvenius, ${this.currentUser?.username || 'josuellopes'}!`);
     this.navigateTo('menu');
   }
 
   handleLogout() {
     logoutUser();
     this.currentUser = null;
+    sessionStorage.removeItem('app_user');
+    sessionStorage.removeItem('app_current_route');
+    sessionStorage.removeItem('app_scroll_y');
     toast.info('Sessão Encerrada', 'Você saiu do sistema com segurança.');
     this.navigateTo('login');
   }
 
   navigateTo(route) {
     const isAuthed = !!(this.currentUser && this.currentUser.isLoggedIn);
+    if (isAuthed && route !== 'validar-qrcode' && route !== 'transferencia') {
+      sessionStorage.setItem('app_current_route', route);
+    }
     if (!isAuthed && route !== 'login') {
       this.currentRoute = 'login';
       this.render();
