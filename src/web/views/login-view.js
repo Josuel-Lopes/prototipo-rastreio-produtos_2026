@@ -32,7 +32,6 @@ export class LoginView {
                 id="login-username" 
                 class="form-input form-input-plain" 
                 placeholder="Digite seu nome de usuário" 
-                value="josuel" 
                 required
               />
             </div>
@@ -48,7 +47,6 @@ export class LoginView {
                 id="login-password" 
                 class="form-input form-input-plain" 
                 placeholder="Digite sua senha" 
-                value="••••••••" 
                 required
               />
             </div>
