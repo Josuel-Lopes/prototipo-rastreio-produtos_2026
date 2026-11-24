@@ -1,9 +1,7 @@
 /**
- * Tela de Login - Alvenius
- * Responsabilidade Única: Interface de autenticação com logo dos 3 anéis, campos e rodapé institucional
+ * Tela de Login - Alvenius (v2)
+ * Responsabilidade Única: Interface de autenticação com fidelidade visual aos prints oficiais
  */
-
-import { ALVENIUS_RINGS_SVG } from '../components/header.js';
 
 export class LoginView {
   constructor(containerId = 'app-view', options = {}) {
@@ -17,20 +15,6 @@ export class LoginView {
     this.container.innerHTML = `
       <div class="view-login-container">
         
-        <!-- Cabeçalho da Marca -->
-        <div class="login-brand-header">
-          <div class="login-rings-logo">
-            ${ALVENIUS_RINGS_SVG}
-          </div>
-          <span class="brand-title" style="font-size: 22px; color: var(--color-primary-dark);">Alvenius</span>
-          <span class="login-app-version">v1.3.1</span>
-          
-          <div class="floating-pill" style="margin-top: 4px;">
-            <span class="pill-dot"></span>
-            Rastreio de produtos
-          </div>
-        </div>
-
         <!-- Card Central de Login -->
         <div class="login-card">
           <h2 class="login-card-title">Login</h2>
@@ -38,59 +22,52 @@ export class LoginView {
 
           <form id="form-login" autocomplete="on">
             <!-- Campo Usuário -->
-            <div class="form-group">
-              <label class="form-label" for="login-username">Usuário</label>
-              <div class="input-container">
-                <span class="input-icon-left">
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                </span>
-                <input 
-                  type="text" 
-                  id="login-username" 
-                  class="form-input has-icon-left" 
-                  placeholder="Digite seu nome de usuário" 
-                  value="josuel" 
-                  required
-                />
-              </div>
+            <div class="form-group" style="margin-bottom: 22px;">
+              <label class="form-label-with-icon" for="login-username">
+                <span class="label-icon"><svg class="login-line-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
+                <span class="label-text">Usuário</span>
+              </label>
+              <input 
+                type="text" 
+                id="login-username" 
+                class="form-input form-input-plain" 
+                placeholder="Digite seu nome de usuário" 
+                value="josuel" 
+                required
+              />
             </div>
 
             <!-- Campo Senha -->
-            <div class="form-group" style="margin-bottom: var(--space-xl);">
-              <label class="form-label" for="login-password">Senha</label>
-              <div class="input-container">
-                <span class="input-icon-left">
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                  </svg>
-                </span>
-                <input 
-                  type="password" 
-                  id="login-password" 
-                  class="form-input has-icon-left" 
-                  placeholder="Digite sua senha" 
-                  value="••••••••" 
-                  required
-                />
-              </div>
+            <div class="form-group" style="margin-bottom: 0px;">
+              <label class="form-label-with-icon" for="login-password">
+                <span class="label-icon"><svg class="login-line-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></span>
+                <span class="label-text">Senha</span>
+              </label>
+              <input 
+                type="password" 
+                id="login-password" 
+                class="form-input form-input-plain" 
+                placeholder="Digite sua senha" 
+                value="••••••••" 
+                required
+              />
             </div>
 
-            <!-- Botão Entrar -->
+            <!-- Botão Entrar com Ícone de Entrada -->
             <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-entrar">
+              <!-- Ícone de seta de entrada [->] -->
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                <polyline points="10 17 15 12 10 7"></polyline>
+                <line x1="15" y1="12" x2="3" y2="12"></line>
               </svg>
               <span>ENTRAR</span>
             </button>
           </form>
 
-          <!-- Rodapé do Card -->
+          <!-- Rodapé Interno do Card -->
           <div class="login-card-footer">
-            &copy; 2026 - Alvenius Tubos e Conexões - v1.3.1
+            &reg; 2026 - Alvenius Tubos e Conexões - v2.0.0
           </div>
         </div>
 
@@ -118,3 +95,4 @@ export class LoginView {
     });
   }
 }
+

@@ -52,7 +52,7 @@ class App {
   }
 
   init() {
-    console.log('Alvenius Spool Management v1.3.1 iniciado.');
+    console.log('Alvenius Spool Management v2.0.0 iniciado.');
     
     // Inicia no login para exibição fiel de todas as telas solicitadas
     this.navigateTo('login');

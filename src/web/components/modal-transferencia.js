@@ -49,8 +49,8 @@ export class ModalTransferenciaComponent {
             <h3 class="modal-title-center" id="transfer-modal-title">
               Selecione qual TIPO de TRANSFERÊNCIA
             </h3>
-            <button class="modal-close-btn" id="transfer-btn-close-x" aria-label="Fechar">
-              &times;
+            <button class="modal-close-btn-red" id="transfer-btn-close-x" aria-label="Fechar" title="Fechar modal">
+              ✕
             </button>
           </div>
 
@@ -59,11 +59,7 @@ export class ModalTransferenciaComponent {
               <!-- Opção 1: COMPONENTE -->
               <div class="transfer-option-card" data-transfer-type="componente" tabindex="0" role="button">
                 <div class="transfer-icon-box">
-                  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                    <polyline points="2 17 12 22 22 17"></polyline>
-                    <polyline points="2 12 12 17 22 12"></polyline>
-                  </svg>
+                  <img src="assets/icon-componente.png" class="transfer-box-icon" alt="Componente">
                 </div>
                 <div class="transfer-info">
                   <div class="transfer-info-title">COMPONENTE</div>
@@ -74,10 +70,7 @@ export class ModalTransferenciaComponent {
               <!-- Opção 2: SPOOL -->
               <div class="transfer-option-card" data-transfer-type="spool" tabindex="0" role="button">
                 <div class="transfer-icon-box">
-                  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                  </svg>
+                  <img src="assets/icon-spool.png" class="transfer-box-icon" alt="Spool">
                 </div>
                 <div class="transfer-info">
                   <div class="transfer-info-title">SPOOL</div>
@@ -89,9 +82,11 @@ export class ModalTransferenciaComponent {
 
           <div class="modal-footer">
             <button class="btn btn-danger" id="transfer-btn-close-bottom">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
+              <!-- Ícone [⊗] Fechar -->
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
               </svg>
               <span>Fechar</span>
             </button>

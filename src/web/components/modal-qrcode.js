@@ -116,12 +116,12 @@ export class ModalQrCodeComponent {
           <!-- Cabeçalho do Leitor com Pill Centralizada -->
           <div class="modal-header">
             <div class="scanner-pill-header">
-              <span class="scanner-pill" id="qrcode-modal-title">
+              <span class="floating-pill" id="qrcode-modal-title">
                 Leitor de QRCode
               </span>
             </div>
-            <button class="modal-close-btn" id="qrcode-btn-close-x" aria-label="Fechar">
-              &times;
+            <button class="modal-close-btn-red" id="qrcode-btn-close-x" aria-label="Fechar" title="Fechar leitor">
+              ✕
             </button>
           </div>
 
@@ -130,28 +130,28 @@ export class ModalQrCodeComponent {
             <div class="scanner-viewfinder-container" title="Área de Leitura de QRCode">
               <div class="scanner-grid-bg"></div>
               
-              <!-- 4 Miras de Canto -->
+              <!-- 4 Miras de Canto Ciano Brilhante -->
               <div class="scanner-corner top-left"></div>
               <div class="scanner-corner top-right"></div>
               <div class="scanner-corner bottom-left"></div>
               <div class="scanner-corner bottom-right"></div>
 
-              <!-- Linha de Varredura Laser Animada -->
+              <!-- Linha de Varredura Laser Horizontal Animada Central -->
               <div class="scanner-laser-line"></div>
             </div>
 
-            <!-- Card de Orientações e Instruções -->
+            <!-- Card Branco Inferior com Handle Cinza -->
             <div class="scanner-instructions-card">
               <div class="scanner-handle"></div>
               <div class="scanner-instruction-line1">Ler o QRCode do Spool.</div>
               <div class="scanner-instruction-line2">PARA SEGUIR processo produto.</div>
-              <div class="scanner-divider-gradient"></div>
+              <div class="accent-line" style="margin: 10px 0 12px 0;"></div>
 
               <!-- Caixa do Último QRCode Lido -->
               <div class="scanner-last-code-box">
                 <span class="scanner-last-label">Último QRCode lido:</span>
                 <span class="scanner-last-value" id="scanner-last-code-display">
-                  ${this.lastScannedCode || '<em style="color:#8a939e; font-weight:normal;">Aguardando leitura...</em>'}
+                  ${this.lastScannedCode || '<em style="color:#94a3b8; font-weight:normal;">Aguardando leitura...</em>'}
                 </span>
               </div>
             </div>
@@ -183,9 +183,11 @@ export class ModalQrCodeComponent {
 
           <div class="modal-footer">
             <button class="btn btn-danger" id="qrcode-btn-close-bottom">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
+              <!-- Ícone [⊗] Fechar -->
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
               </svg>
               <span>Fechar</span>
             </button>

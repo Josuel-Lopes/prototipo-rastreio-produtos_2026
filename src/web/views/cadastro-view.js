@@ -29,6 +29,7 @@ export class CadastroView {
 
     this.container.innerHTML = `
       <div class="view-cadastro-container">
+
         <div class="card">
           
           <!-- Faixa Superior Cinza: SPOOL -->
@@ -45,11 +46,12 @@ export class CadastroView {
               </svg>
               <span>Realiza o cadastro de Spool e componentes iniciar processo produção.</span>
             </div>
+            <div class="accent-line"></div>
 
-            <!-- Formulário SPOOL (Código e Descrição) -->
+            <!-- Formulário SPOOL (Código : e Descrição:) -->
             <div class="form-two-cols">
               <div class="form-group">
-                <label class="form-label" for="cadastro-codigo">Código</label>
+                <label class="form-label" for="cadastro-codigo">Código :</label>
                 <input 
                   type="text" 
                   id="cadastro-codigo" 
@@ -61,7 +63,7 @@ export class CadastroView {
               </div>
 
               <div class="form-group">
-                <label class="form-label" for="cadastro-descricao">Descrição</label>
+                <label class="form-label" for="cadastro-descricao">Descrição:</label>
                 <input 
                   type="text" 
                   id="cadastro-descricao" 
@@ -105,20 +107,22 @@ export class CadastroView {
 
           <!-- Barra de Ações (Footer do Card) -->
           <div class="card-footer-actions">
-            <!-- Botão Ler QRCode -->
+            <!-- Botão Azul: [:#:] Ler QRCode -->
             <button class="btn btn-primary" id="btn-cadastro-qrcode">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7" height="7"></rect>
-                <rect x="14" y="3" width="7" height="7"></rect>
-                <rect x="14" y="14" width="7" height="7"></rect>
-                <rect x="3" y="14" width="7" height="7"></rect>
-                <path d="M7 17h.01M17 17h.01M7 7h.01M17 7h.01"></path>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"/>
+                <rect x="14" y="3" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/>
+                <rect x="14" y="14" width="3" height="3" fill="currentColor"/>
+                <rect x="18" y="18" width="3" height="3" fill="currentColor"/>
+                <line x1="14" y1="18" x2="14" y2="21"/>
+                <line x1="18" y1="14" x2="21" y2="14"/>
               </svg>
               <span>Ler QRCode</span>
             </button>
 
-            <!-- Botão Limpar -->
-            <button class="btn btn-clear" id="btn-cadastro-limpar">
+            <!-- Botão Cinza: [lixeira] Limpar -->
+            <button class="btn btn-gray-action" id="btn-cadastro-limpar">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="3 6 5 6 21 6"></polyline>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -126,8 +130,8 @@ export class CadastroView {
               <span>Limpar</span>
             </button>
 
-            <!-- Botão Gravar -->
-            <button class="btn btn-success" id="btn-cadastro-gravar">
+            <!-- Botão Cinza: [disquete] Gravar -->
+            <button class="btn btn-gray-action" id="btn-cadastro-gravar">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
                 <polyline points="17 21 17 13 7 13 7 21"></polyline>
