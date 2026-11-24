@@ -1,0 +1,10 @@
+{
+  "name": "spool-management-by-project",
+  "version": "0.1.0",
+  "description": "spool management by project",
+  "author": "Josuel Lopes",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "node src/server/index.js"
+  }
+}

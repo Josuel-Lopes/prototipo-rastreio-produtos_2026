@@ -1,0 +1,637 @@
+/**
+ * Alvenius Spool Management - UI Components
+ */
+
+/* ==========================================================================
+   Botões
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
+  font-weight: var(--weight-semibold);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.btn svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+  box-shadow: 0 4px 10px rgba(0, 112, 186, 0.3);
+  text-decoration: none;
+}
+
+.btn-success {
+  background-color: var(--action-save);
+  color: #ffffff;
+}
+
+.btn-success:hover {
+  background-color: #146c43;
+  box-shadow: 0 4px 10px rgba(25, 135, 84, 0.3);
+}
+
+.btn-clear {
+  background-color: var(--action-clear);
+  color: #ffffff;
+}
+
+.btn-clear:hover {
+  background-color: #5c636a;
+}
+
+.btn-danger {
+  background-color: var(--action-danger);
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  background-color: #bb2d3b;
+  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.btn-outline:hover {
+  background-color: var(--color-surface-alt);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.btn-lg {
+  padding: 12px 24px;
+  font-size: var(--font-md);
+  border-radius: var(--radius-md);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* ==========================================================================
+   Inputs e Formulários
+   ========================================================================== */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: var(--space-md);
+  width: 100%;
+}
+
+.form-label {
+  font-size: var(--font-xs);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-icon-left {
+  position: absolute;
+  left: 12px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-base);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-input.has-icon-left {
+  padding-left: 40px;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 112, 186, 0.15);
+}
+
+.form-input::placeholder {
+  color: #9aa0a6;
+}
+
+/* ==========================================================================
+   Cards Genéricos
+   ========================================================================== */
+.card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  width: 100%;
+}
+
+.card-header-strip {
+  background-color: var(--color-header-strip);
+  padding: var(--space-md) var(--space-xl);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-header-title {
+  font-size: var(--font-md);
+  font-weight: var(--weight-bold);
+  color: var(--color-navy);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.card-body {
+  padding: var(--space-xl);
+}
+
+.card-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-md);
+  padding: var(--space-lg) var(--space-xl);
+  background-color: var(--color-surface-alt);
+  border-top: 1px solid var(--color-border-light);
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   Banners Informativos e Alertas
+   ========================================================================== */
+.info-box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  background-color: var(--info-bg);
+  border: 1px solid var(--info-border);
+  color: var(--info-text);
+  padding: 10px var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
+  margin-bottom: var(--space-lg);
+}
+
+.info-box svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.instruction-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background-color: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  color: var(--warning-text);
+  padding: 10px var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
+  font-weight: var(--weight-medium);
+  margin-bottom: var(--space-lg);
+}
+
+.instruction-banner svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+/* ==========================================================================
+   Acordeão de Processos & Métricas
+   ========================================================================== */
+.process-accordion {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  margin-bottom: var(--space-lg);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 18px;
+  background-color: var(--color-surface);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.accordion-header:hover {
+  background-color: var(--color-surface-alt);
+}
+
+.accordion-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.accordion-icon-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background-color: var(--color-surface-alt);
+  color: var(--color-primary-dark);
+  transition: transform 0.25s ease;
+}
+
+.accordion-header.is-open .accordion-icon-toggle {
+  transform: rotate(180deg);
+}
+
+.accordion-title {
+  font-size: var(--font-base);
+  font-weight: var(--weight-bold);
+  color: var(--color-navy);
+  letter-spacing: 0.5px;
+}
+
+.accordion-badge-total {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.5px;
+}
+
+.accordion-content {
+  display: none;
+  border-top: 1px solid var(--color-border-light);
+  background-color: #fafbfc;
+  padding: var(--space-md) var(--space-lg);
+}
+
+.accordion-content.is-open {
+  display: block;
+}
+
+.process-status-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 10px;
+  list-style: none;
+}
+
+.process-status-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+}
+
+.status-item-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--font-sm);
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-count-badge {
+  font-family: monospace;
+  font-size: var(--font-sm);
+  font-weight: var(--weight-bold);
+  padding: 2px 8px;
+  border-radius: 4px;
+  background-color: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  color: var(--color-navy);
+}
+
+/* ==========================================================================
+   Badges Coloridos dos 8 Status
+   ========================================================================== */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-xs);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.badge-status.reservado {
+  background-color: rgba(241, 196, 15, 0.2);
+  color: #9a7d0a;
+  border: 1px solid #f1c40f;
+}
+
+.badge-status.execucao {
+  background-color: rgba(0, 188, 212, 0.15);
+  color: #00838f;
+  border: 1px solid #00bcd4;
+}
+
+.badge-status.pausado {
+  background-color: rgba(230, 126, 34, 0.15);
+  color: #b75e11;
+  border: 1px solid #e67e22;
+}
+
+.badge-status.continua {
+  background-color: rgba(149, 165, 166, 0.2);
+  color: #566573;
+  border: 1px solid #95a5a6;
+}
+
+.badge-status.finalizado {
+  background-color: rgba(39, 174, 96, 0.15);
+  color: #1e8449;
+  border: 1px solid #27ae60;
+}
+
+.badge-status.reversivel {
+  background-color: rgba(139, 195, 74, 0.2);
+  color: #558b2f;
+  border: 1px solid #8bc34a;
+}
+
+.badge-status.sucata {
+  background-color: rgba(231, 76, 60, 0.15);
+  color: #c0392b;
+  border: 1px solid #e74c3c;
+}
+
+.badge-status.romaneio {
+  background-color: rgba(0, 112, 186, 0.15);
+  color: #005696;
+  border: 1px solid #0070ba;
+}
+
+/* ==========================================================================
+   Toggle Switch (Histórico de Sucata)
+   ========================================================================== */
+.toggle-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-md);
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: var(--space-lg);
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #cbd5e1;
+  transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: var(--color-primary);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+.toggle-label-text {
+  font-size: var(--font-base);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+}
+
+/* ==========================================================================
+   Tabela de Componentes (Cadastro de Spool)
+   ========================================================================== */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-md);
+}
+
+.table-components {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: var(--font-sm);
+}
+
+.table-components thead {
+  background-color: var(--color-header-strip);
+  border-bottom: 2px solid var(--color-border);
+}
+
+.table-components th {
+  padding: 12px 16px;
+  font-size: var(--font-xs);
+  font-weight: var(--weight-bold);
+  color: var(--color-navy);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.table-components td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border-light);
+  color: var(--color-text);
+}
+
+.table-components tbody tr:nth-child(even) {
+  background-color: #fbfcfd;
+}
+
+.table-components tbody tr:hover {
+  background-color: #f1f6fb;
+}
+
+.col-item {
+  width: 90px;
+  font-family: monospace;
+  font-weight: var(--weight-bold);
+}
+
+.col-qtd {
+  width: 140px;
+  font-weight: var(--weight-semibold);
+  text-align: right;
+}
+
+/* ==========================================================================
+   Card Unitário de Spool (Caldeiraria)
+   ========================================================================== */
+.spool-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: var(--space-md);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  overflow: hidden;
+}
+
+.spool-card:hover {
+  border-color: #b0c9df;
+  box-shadow: var(--shadow-card-hover);
+}
+
+.spool-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background-color: var(--color-surface-alt);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.spool-seq-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 10px;
+  background-color: #e2e8f0;
+  color: var(--color-navy);
+  border-radius: var(--radius-sm);
+  font-family: monospace;
+  font-weight: var(--weight-bold);
+  font-size: var(--font-sm);
+}
+
+.spool-card-body {
+  padding: 14px 16px;
+}
+
+.spool-code-link {
+  font-size: var(--font-md);
+  font-weight: var(--weight-bold);
+  color: var(--color-primary);
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+.spool-code-link:hover {
+  text-decoration: underline;
+  color: var(--color-primary-dark);
+}
+
+.spool-dates-row {
+  display: flex;
+  gap: var(--space-lg);
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.spool-desc-text {
+  font-size: var(--font-base);
+  color: var(--color-text);
+  font-weight: var(--weight-medium);
+  margin-bottom: 8px;
+}
+
+.spool-scrap-history {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background-color: #fff5f5;
+  border-left: 3px solid var(--status-sucata);
+  border-radius: 4px;
+  font-size: var(--font-xs);
+  color: #721c24;
+}
+
+.spool-scrap-title {
+  font-weight: var(--weight-bold);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

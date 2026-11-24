@@ -1,0 +1,240 @@
+/**
+ * Alvenius Spool Management - Header & Navigation Bar
+ */
+
+.app-header-container {
+  width: 100%;
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border-light);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Faixa Superior Global */
+.header-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-xl);
+  min-height: 56px;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+/* Lado Esquerdo: Logo + Versão */
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.brand-logo-rings {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 44px;
+  height: 28px;
+}
+
+.brand-logo-rings svg {
+  width: 100%;
+  height: 100%;
+}
+
+.brand-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title {
+  font-size: var(--font-md);
+  font-weight: var(--weight-bold);
+  color: var(--color-primary-dark);
+  letter-spacing: 0.5px;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.brand-version {
+  font-size: var(--font-xs);
+  color: var(--color-text-muted);
+  font-weight: var(--weight-medium);
+}
+
+/* Centro: Pill Flutuante */
+.header-center-pill {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.floating-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 5px var(--space-lg);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-pill);
+  font-size: var(--font-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-navy);
+  letter-spacing: 0.3px;
+  text-transform: capitalize;
+  transition: all 0.2s ease;
+}
+
+.floating-pill .pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+}
+
+/* Lado Direito: Usuário & Sair */
+.header-user-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-base);
+  color: var(--color-text);
+}
+
+.user-badge strong {
+  color: var(--color-primary-dark);
+  font-weight: var(--weight-bold);
+}
+
+.btn-header-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 6px var(--space-md);
+  background-color: transparent;
+  color: var(--color-action-danger);
+  border: 1px solid rgba(220, 53, 69, 0.25);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-sm);
+  font-weight: var(--weight-semibold);
+  transition: all 0.2s ease;
+}
+
+.btn-header-logout:hover {
+  background-color: rgba(220, 53, 69, 0.08);
+  border-color: var(--color-action-danger);
+}
+
+/* Espaçador invisível para alinhamento simétrico da pill */
+.header-user-spacer {
+  display: flex;
+  min-width: 130px;
+}
+
+/* Barra de Navegação Horizontal Secundária (Tabs) */
+.header-nav-bar {
+  background-color: #fcfdfe;
+  border-top: 1px solid var(--color-border-light);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.header-nav-list {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  list-style: none;
+  padding: 0 var(--space-xl);
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.header-nav-item {
+  display: inline-block;
+}
+
+.header-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  font-size: var(--font-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.header-nav-link:hover {
+  color: var(--color-primary);
+  background-color: rgba(0, 112, 186, 0.04);
+  text-decoration: none;
+}
+
+.header-nav-link.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+  border-radius: 4px 4px 0 0;
+}
+
+/* Mobile Toggle */
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .header-top-bar {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .header-nav-list {
+    justify-content: flex-start;
+    padding: 0 var(--space-sm);
+  }
+
+  .header-nav-link {
+    padding: 8px 10px;
+    font-size: var(--font-xs);
+  }
+
+  .floating-pill {
+    padding: 3px var(--space-sm);
+    font-size: var(--font-xs);
+  }
+}
+
+@media (max-width: 640px) {
+  .header-top-bar {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .header-center-pill {
+    order: 3;
+    width: 100%;
+    margin-top: var(--space-xs);
+  }
+
+  .user-badge {
+    font-size: var(--font-xs);
+  }
+}

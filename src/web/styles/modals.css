@@ -1,0 +1,470 @@
+/**
+ * Alvenius Spool Management - Modals & Toasts
+ */
+
+/* ==========================================================================
+   Modais - Estrutura Base
+   ========================================================================== */
+#modal-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+#modal-root.has-modal {
+  pointer-events: auto;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(10, 20, 30, 0.65);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+  opacity: 0;
+  animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-dialog {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  transform: scale(0.95);
+  animation: modalPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-xl);
+  border-bottom: 1px solid var(--color-border-light);
+  position: relative;
+}
+
+.modal-title-center {
+  width: 100%;
+  text-align: center;
+  font-size: var(--font-lg);
+  font-weight: var(--weight-bold);
+  color: var(--color-navy);
+}
+
+.modal-close-btn {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-muted);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background-color: var(--color-surface-alt);
+  color: var(--color-action-danger);
+}
+
+.modal-body {
+  padding: var(--space-xl);
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-xl);
+  background-color: var(--color-surface-alt);
+  border-top: 1px solid var(--color-border-light);
+}
+
+/* ==========================================================================
+   Modal Transferência (Componente vs Spool)
+   ========================================================================== */
+.modal-transfer-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.transfer-option-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-lg) var(--space-xl);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+}
+
+.transfer-option-card:hover {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+
+.transfer-icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-md);
+  background-color: #eef4f9;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.transfer-option-card:hover .transfer-icon-box {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.transfer-info-title {
+  font-size: var(--font-md);
+  font-weight: var(--weight-bold);
+  color: var(--color-navy);
+  margin-bottom: 2px;
+}
+
+.transfer-info-desc {
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
+}
+
+/* ==========================================================================
+   Modal Leitor de QRCode (Scanner Câmera)
+   ========================================================================== */
+.scanner-pill-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.scanner-pill {
+  padding: 4px 18px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-size: var(--font-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.5px;
+}
+
+.scanner-viewfinder-container {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  background-color: var(--scanner-viewfinder-bg);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-md);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+/* Efeito de grade sutil no fundo do scanner */
+.scanner-grid-bg {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    linear-gradient(rgba(0, 188, 212, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 188, 212, 0.08) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.7;
+}
+
+/* Miras dos 4 cantos */
+.scanner-corner {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-color: var(--scanner-corner);
+  border-style: solid;
+  pointer-events: none;
+}
+
+.scanner-corner.top-left {
+  top: 24px;
+  left: 24px;
+  border-width: 4px 0 0 4px;
+  border-top-left-radius: 4px;
+}
+
+.scanner-corner.top-right {
+  top: 24px;
+  right: 24px;
+  border-width: 4px 4px 0 0;
+  border-top-right-radius: 4px;
+}
+
+.scanner-corner.bottom-left {
+  bottom: 24px;
+  left: 24px;
+  border-width: 0 0 4px 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.scanner-corner.bottom-right {
+  bottom: 24px;
+  right: 24px;
+  border-width: 0 4px 4px 0;
+  border-bottom-right-radius: 4px;
+}
+
+/* Linha de Varredura Laser Animada */
+.scanner-laser-line {
+  position: absolute;
+  left: 28px;
+  right: 28px;
+  height: 2px;
+  background-color: var(--scanner-laser);
+  box-shadow: 0 0 12px 2px var(--scanner-laser-glow);
+  animation: laserScan 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes laserScan {
+  0% { top: 32px; }
+  100% { top: 204px; }
+}
+
+/* Painel de Instruções inferior */
+.scanner-instructions-card {
+  background-color: var(--color-surface-alt);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  text-align: center;
+  margin-bottom: var(--space-md);
+}
+
+.scanner-handle {
+  width: 40px;
+  height: 4px;
+  background-color: #cbd5e1;
+  border-radius: 2px;
+  margin: 0 auto 10px auto;
+}
+
+.scanner-instruction-line1 {
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
+  margin-bottom: 2px;
+}
+
+.scanner-instruction-line2 {
+  font-size: var(--font-base);
+  font-weight: var(--weight-bold);
+  color: var(--color-navy);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.scanner-divider-gradient {
+  height: 2px;
+  width: 100%;
+  margin: 12px 0;
+  background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+}
+
+/* Bloco do Último QRCode Lido */
+.scanner-last-code-box {
+  background-color: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.scanner-last-label {
+  font-size: var(--font-xs);
+  color: var(--color-text-muted);
+  font-weight: var(--weight-semibold);
+}
+
+.scanner-last-value {
+  font-family: monospace;
+  font-size: var(--font-sm);
+  font-weight: var(--weight-bold);
+  color: var(--color-primary-dark);
+}
+
+/* Ações Interativas de Simulação de Leitura */
+.scanner-simulation-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.scanner-manual-input-box {
+  display: flex;
+  gap: var(--space-xs);
+  margin-top: var(--space-sm);
+}
+
+/* ==========================================================================
+   Toasts & Alertas Flutuantes
+   ========================================================================== */
+#toast-root {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 380px;
+  width: 100%;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background-color: #ffffff;
+  box-shadow: var(--shadow-toast);
+  border-left: 4px solid var(--color-primary);
+  animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.toast.toast-hiding {
+  transform: translateX(110%);
+  opacity: 0;
+}
+
+.toast-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+}
+
+.toast-content {
+  flex: 1;
+}
+
+.toast-title {
+  font-size: var(--font-sm);
+  font-weight: var(--weight-bold);
+  color: var(--color-navy);
+  margin-bottom: 2px;
+}
+
+.toast-message {
+  font-size: var(--font-xs);
+  color: var(--color-text-muted);
+  line-height: 1.35;
+}
+
+.toast-close {
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.toast-close:hover {
+  color: var(--color-text);
+}
+
+.toast.toast-success {
+  border-left-color: var(--action-save);
+}
+.toast.toast-success .toast-icon {
+  color: var(--action-save);
+}
+
+.toast.toast-info {
+  border-left-color: var(--color-primary);
+}
+.toast.toast-info .toast-icon {
+  color: var(--color-primary);
+}
+
+.toast.toast-warning {
+  border-left-color: var(--status-pausado);
+}
+.toast.toast-warning .toast-icon {
+  color: var(--status-pausado);
+}
+
+.toast.toast-danger {
+  border-left-color: var(--action-danger);
+}
+.toast.toast-danger .toast-icon {
+  color: var(--action-danger);
+}
