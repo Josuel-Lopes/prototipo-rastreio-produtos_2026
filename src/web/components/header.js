@@ -86,7 +86,7 @@ export class HeaderComponent {
               <span class="floating-pill">Rastreio de produtos</span>
             </div>
 
-            <div class="header-user-actions">
+            <div class="header-user-actions header-desktop-user-actions">
               <span class="header-divider-v">|</span>
               <div class="user-profile-badge">
                 <span class="user-profile-icon">${ICONS.user}</span>
@@ -97,6 +97,37 @@ export class HeaderComponent {
                 ${ICONS.logout}
                 <span>Sair</span>
               </button>
+            </div>
+
+            <!-- Mobile: apenas hambúrguer ☰ à direita -->
+            <button class="btn-header-hamburger" id="btn-header-hamburger" aria-label="Abrir Menu">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Drawer mobile: perfil do usuário e Sair -->
+          <div class="mobile-drawer-overlay" id="mobile-drawer-overlay">
+            <div class="mobile-drawer-content">
+              <div class="mobile-drawer-topbar">
+                <div class="mobile-drawer-brand">
+                  <span class="mobile-drawer-title">RASTREIO DE PRODUTOS</span>
+                </div>
+                <button class="mobile-drawer-close-btn" id="mobile-drawer-close-btn" aria-label="Fechar Menu" title="Fechar Menu">✕</button>
+              </div>
+              <div class="mobile-drawer-user-row">
+                <span class="user-profile-icon">${ICONS.user}</span>
+                <span class="user-welcome-text">Bem vindo, <strong>${user.username || 'josuel'}</strong></span>
+              </div>
+              <div class="mobile-drawer-logout-box">
+                <button class="btn-drawer-logout" id="btn-drawer-logout">
+                  ${ICONS.logout}
+                  <span>Sair</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

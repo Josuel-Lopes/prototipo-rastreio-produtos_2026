@@ -245,7 +245,7 @@
   border: none;
   border-radius: 0px;
   background-color: transparent;
-  color: #112346;
+  color: #6b7280;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -496,9 +496,9 @@
     top: 56px;
   }
 
-  /* No Menu Principal (Início): header compacto sem hambúrguer */
-  .header-top-bar .user-welcome-text {
-    display: none; /* Mantém apenas ícone e Sair no topo para não quebrar */
+  /* Menu Principal no mobile: apenas hambúrguer à direita (usuário/Sair ficam no drawer) */
+  .header-top-bar .btn-header-hamburger {
+    margin-left: auto;
   }
 
   /* Nas Telas de Trabalho internas: exibe hambúrguer e oculta tabs inline */
