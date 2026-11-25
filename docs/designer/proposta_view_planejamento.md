@@ -42,7 +42,7 @@ A tela é organizada verticalmente em 7 blocos modulares contidos em um containe
 +--------------------------------------------------------------------------+
 | 1. CABEÇALHO EXECUTIVO                                                   |
 |    - MAXCODE42 <-> Alvenius                                              |
-|    - Código: PROP-2026-001 | Versão: 1.0 | Emissão: 24/11/2026           |
+|    - Código: PROP-2026-011 | Versão: 1.0 | Emissão: 24/11/2026           |
 |    - Responsável Técnico: Josuel Lopes                                   |
 +--------------------------------------------------------------------------+
 | 2. SUMÁRIO EXECUTIVO & METAS DE NEGÓCIO                                  |
@@ -77,7 +77,7 @@ A tela é organizada verticalmente em 7 blocos modulares contidos em um containe
 
 #### A. Barra Superior Fixa (Action Bar)
 - **Posição:** Fixa no topo em tela (desaparece na impressão).
-- **Conteúdo à esquerda:** Tag "Proposta Comercial PROP-2026-001 · Alvenius".
+- **Conteúdo à esquerda:** Tag "Proposta Comercial PROP-2026-011 · Alvenius".
 - **Conteúdo à direita:**
   - Botão principal: **`[ 📄 Salvar Proposta em PDF ]`**
     - Estilo: Fundo `#1F4FD8`, texto branco, cantos arredondados (`radius: 8px`), ícone SVG de impressora/documento, sombra suave.
@@ -86,7 +86,7 @@ A tela é organizada verticalmente em 7 blocos modulares contidos em um containe
 #### B. Cabeçalho Executivo
 - Exibição das duas marcas em destaque com divisor sutil.
 - Metadados em grid de 4 colunas:
-  - **Número:** PROP-2026-001
+  - **Número:** PROP-2026-011
   - **Emissão:** 24/11/2026
   - **Validade:** 30 dias corridos
   - **Responsável Técnico:** Josuel Lopes (Full Stack Engineer)

@@ -77,13 +77,13 @@ export class HeaderComponent {
           <div class="header-brand-section">
             <div class="header-brand-block" id="header-brand-block" title="Alvenius">
               <img src="assets/logo-alvenius-rings-clean.png" alt="Alvenius" class="brand-logo-img">
-              <span class="brand-version-sub" id="header-brand-version">${APP_VERSION}</span>
+              <span class="brand-version-sub" id="header-brand-version">${APP_VERSION}<span class="demo-seal" title="Ambiente de demonstração" aria-label="Ambiente de demonstração">DEMO</span></span>
             </div>
             
             <div class="header-brand-inline" id="header-brand-work" title="Voltar ao Início" data-nav="menu">
               <div class="header-brand-logo-col">
                 <img src="assets/logo-alvenius-rings-clean.png" alt="Alvenius" class="brand-logo-img">
-                <span class="brand-version-sub">${APP_VERSION}</span>
+                <span class="brand-version-sub">${APP_VERSION}<span class="demo-seal" title="Ambiente de demonstração" aria-label="Ambiente de demonstração">DEMO</span></span>
               </div>
               <span class="header-brand-title">RASTREIO DE PRODUTOS</span>
             </div>

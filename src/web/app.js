@@ -19,9 +19,13 @@ import { PinturaView } from './views/pintura-view.js';
 import { TransferenciaComponenteView } from './views/transferencia-componente-view.js';
 import { TransferenciaSpoolView } from './views/transferencia-spool-view.js';
 import { NovaTransferenciaView } from './views/nova-transferencia-view.js';
+import { PropostaView } from './views/proposta-view.js';
 
 import { getCurrentUser, setCurrentUser, logoutUser, getSpoolByCode } from './mocks/spools-mock.js';
 import { APP_VERSION } from './version.js';
+
+// Sinalização de "Ambiente de demonstração" (ribbon, selo DEMO e marcas no PDF da proposta)
+const DEMO_MODE = true;
 
 class App {
   constructor() {
@@ -81,8 +85,13 @@ class App {
           const actualProcess = processo || this.activeSpoolProcess;
           this.openQrCodeScanner(callback, actualMode, actualProcess);
         }
+      }),
+      proposta: new PropostaView('app-view', {
+        onNavigate: (route, params) => this.navigateTo(route, params)
       })
     };
+
+    window.navigateTo = (route, params) => this.navigateTo(route, params);
   }
 
   init() {
@@ -103,15 +112,35 @@ class App {
       this.activeSpoolProcess = savedProcess;
     }
 
-    const savedRoute = sessionStorage.getItem('app_current_route');
-    if (savedRoute && this.currentUser && this.currentUser.isLoggedIn) {
-      this.navigateTo(savedRoute);
+    // Suporte a acesso direto via URL query parameter (?route=proposta) ou Hash (#proposta)
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryRoute = urlParams.get('route');
+    const hashRoute = window.location.hash.replace(/^#\/?/, '').trim();
+    const isDirectProposta = queryRoute === 'proposta' || hashRoute === 'proposta';
+
+    if (isDirectProposta) {
+      this.navigateTo('proposta');
     } else {
-      this.navigateTo('login');
+      const savedRoute = sessionStorage.getItem('app_current_route');
+      if (savedRoute && this.currentUser && this.currentUser.isLoggedIn) {
+        this.navigateTo(savedRoute);
+      } else {
+        this.navigateTo('login');
+      }
     }
 
+    // Monitoramento de hash para navegação direta (#proposta)
+    window.addEventListener('hashchange', () => {
+      const h = window.location.hash.replace(/^#\/?/, '').trim();
+      if (h === 'proposta') {
+        this.navigateTo('proposta');
+      } else if (h === 'menu' && this.currentUser && this.currentUser.isLoggedIn) {
+        this.navigateTo('menu');
+      }
+    });
+
     const savedScroll = sessionStorage.getItem('app_scroll_y');
-    if (savedScroll) {
+    if (savedScroll && !isDirectProposta) {
       setTimeout(() => {
         window.scrollTo({ top: parseInt(savedScroll, 10), behavior: 'instant' });
       }, 50);
@@ -151,6 +180,13 @@ class App {
   }
 
   navigateTo(route, params = {}) {
+    // Permite visualização executiva direta da proposta sem obrigatoriedade de login
+    if (route === 'proposta') {
+      this.currentRoute = 'proposta';
+      this.render();
+      return;
+    }
+
     const isAuthed = !!(this.currentUser && this.currentUser.isLoggedIn);
     if (isAuthed && route !== 'validar-qrcode' && route !== 'transferencia') {
       sessionStorage.setItem('app_current_route', route);
@@ -245,6 +281,18 @@ class App {
   }
 
   render() {
+    // Caso especial: View executiva da Proposta Comercial possui cabeçalho e action bar próprios
+    if (this.currentRoute === 'proposta') {
+      const headerEl = document.getElementById('app-header');
+      if (headerEl) headerEl.style.display = 'none';
+      this.views.proposta.render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    const headerEl = document.getElementById('app-header');
+    if (headerEl) headerEl.style.display = '';
+
     // 1. Atualiza Header
     this.header.render({
       user: this.currentUser,
@@ -401,6 +449,7 @@ class App {
 
 // Inicializa a aplicação ao carregar o DOM
 document.addEventListener('DOMContentLoaded', () => {
+  if (DEMO_MODE) document.body.classList.add('is-demo');
   const app = new App();
   app.init();
 });
