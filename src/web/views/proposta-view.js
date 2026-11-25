@@ -172,6 +172,7 @@ const validationInfo = (value) => {
   if (value === false) return { label: 'Pendente', tone: 'pending' };
   const text = String(value);
   const key = text.toLowerCase();
+  if (/^\s*estimad[oa] pelo comercial\s*$/.test(key)) return { label: 'Validado', tone: 'ok' };
   if (/(^|\b)(validated|validado|aprovado|approved|ok|confirmado|confirmed)/.test(key)) return { label: text, tone: 'ok' };
   if (/(pending|pendente|aguardando|estimated|estimado|em valida|review|revis)/.test(key)) return { label: text, tone: 'pending' };
   if (/(rejected|reprovado|divergente|blocked|bloqueado)/.test(key)) return { label: text, tone: 'error' };
@@ -530,6 +531,28 @@ export class PropostaView {
             ${meta.pricingNote ? `<p class="methodology-note">${lucide('info', { size: 14, strokeWidth: 2 })}<span>${t(meta.pricingNote)}</span></p>` : ''}
           </div>
 
+          <section class="calc-legend" id="legenda-calculo" aria-labelledby="legenda-calculo-titulo">
+            <h4 id="legenda-calculo-titulo">Como calculamos horas e valor</h4>
+            <p class="calc-legend-intro">O sistema atual (fases 1 a 6) já está pronto e funcional. Cobramos <strong>apenas o que é novo</strong>, reaproveitando o que já existe.</p>
+            <div class="calc-legend-formula" role="group" aria-label="Fórmulas de cálculo">
+              <p><span class="calc-chip">Horas</span> = Do zero − Reaproveitado + Ajustes</p>
+              <p><span class="calc-chip">Valor R$</span> = Horas × ${brl(meta.hourlyRate)} <small>(valor/hora)</small></p>
+            </div>
+            <dl class="calc-legend-terms">
+              <div><dt>Do zero</dt><dd>Horas que a área levaria para construir a entrega sem nenhuma base existente.</dd></div>
+              <div><dt>Reaproveitado (−)</dt><dd>Horas economizadas por já existirem telas, componentes, rotas, login e padrões no sistema atual.</dd></div>
+              <div><dt>Ajustes (+)</dt><dd>Horas para adaptar o que foi reaproveitado ao novo caso.</dd></div>
+              <div><dt>Testes</dt><dd>Limitados a 1 h por fase (smoke test), conforme aviso FORA DO ESCOPO.</dd></div>
+              <div><dt>Validado</dt><dd>Estimativa conferida pelo comercial com apoio dos times técnicos.</dd></div>
+            </dl>
+            <p class="calc-legend-example"><strong>Exemplo (Backend, Fase 7):</strong> 9 h − 3 h + 2 h = <strong>8 h</strong> → 8 × ${brl(meta.hourlyRate)} = <strong>${brl(8 * (Number(meta.hourlyRate) || 0))}</strong></p>
+          </section>
+
+          <p class="validation-legend" id="legenda-validacao">
+            <span class="validation-badge validation-badge--ok">Validado</span>
+            <span><strong>Validação:</strong> Validado = estimativa de horas e valor validada pelo comercial com o apoio dos times de backend, frontend e designer.</span>
+          </p>
+
           ${this.renderEstimationMethod(d)}
 
           <div data-collapsible-scope>
@@ -649,7 +672,7 @@ export class PropostaView {
     ];
 
     return `
-      <article class="proposal-feature-card ${existing ? 'is-existing' : 'is-new'} ${expanded ? '' : 'is-collapsed'}" id="card-${fid}" tabindex="-1" data-feature-card="${fid}">
+      <article class="proposal-feature-card ${existing ? 'is-existing' : 'is-new'} ${expanded ? '' : 'is-collapsed'}" id="card-${fid}" ${existing ? 'aria-disabled="true"' : ''} tabindex="-1" data-feature-card="${fid}">
         <header class="feature-card-header" data-feature-toggle-area>
           <div class="feature-header-left">
             <span class="feature-phase-badge">Fase ${t(feature.phase)}</span>
@@ -658,8 +681,8 @@ export class PropostaView {
           </div>
           <div class="feature-metrics-badges">
             ${existing ? `
-              <span class="prop-badge">${lucide('calendar', { size: 14, strokeWidth: 2 })}${num(feature.hours)} h</span>
-              <span class="prop-badge existing">Sem custo</span>
+              <span class="prop-badge">${lucide('calendar', { size: 14, strokeWidth: 2 })}0 h</span>
+              <span class="prop-badge price">${brl(0)}</span>
             ` : `
               <span class="prop-badge">${lucide('calendar', { size: 14, strokeWidth: 2 })}${num(feature.hours)} h</span>
               <span class="prop-badge">${num(feature.businessDays)} dias úteis</span>
@@ -807,6 +830,18 @@ export class PropostaView {
           </table>
         </div>
         ${sourceNote ? `<p class="area-sheet-note">${sourceNote}</p>` : ''}
+        ${this.renderOutOfScopeNotice(item.outOfScopeNotice)}
+      </div>
+    `;
+  }
+
+  /** Aviso "FORA DO ESCOPO" ({label, text}); só renderiza quando o campo existe. */
+  renderOutOfScopeNotice(n, { id = '' } = {}) {
+    if (!n || typeof n !== 'object' || !(n.label || n.text)) return '';
+    return `
+      <div class="out-of-scope-notice" role="note"${id ? ` id="${t(id)}" tabindex="-1"` : ''}>
+        ${n.label ? `<span class="out-of-scope-notice-label">${lucide('circle-alert', { size: 13, strokeWidth: 2.4 })}${t(n.label)}</span>` : ''}
+        ${n.text ? `<p class="out-of-scope-notice-text">${t(n.text)}</p>` : ''}
       </div>
     `;
   }
@@ -957,7 +992,7 @@ export class PropostaView {
     `;
   }
 
-  renderTestsAdjustDeploy(tad, title, idPrefix = 'tad') {
+  renderTestsAdjustDeploy(tad, title, idPrefix = 'tad', notice = tad?.outOfScopeNotice) {
     const rows = [
       { key: 'tests', label: 'Testes' },
       { key: 'adjustments', label: 'Ajustes' },
@@ -998,6 +1033,7 @@ export class PropostaView {
             </tfoot>
           </table>
         </div>
+        ${this.renderOutOfScopeNotice(notice)}
       </div>
     `;
   }
@@ -1075,7 +1111,7 @@ export class PropostaView {
                 ? t(phase.note || tad.note)
                 : `<strong>Cobrança única${coveredLabel ? ` cobrindo as ${coveredLabel}` : ''}.</strong>`}</p>
             </div>
-            ${breakdown ? this.renderTestsAdjustDeploy(breakdown, tableTitle, 'tad-entrega-final') : ''}
+            ${breakdown ? this.renderTestsAdjustDeploy(breakdown, tableTitle, 'tad-entrega-final', breakdown.outOfScopeNotice || phase.outOfScopeNotice) : ''}
             ${composition.length ? `
               <ul class="delivery-phase-composition" aria-label="Composição das horas">
                 ${composition.map(r => `<li><strong>${t(r.label || r.area)}:</strong> ${t(r.note)}</li>`).join('')}
@@ -1517,14 +1553,15 @@ export class PropostaView {
                   ${g.list.map(({ sp, sPhases, existing, hours: h, price: pr }) => {
                     const deliverables = sPhases.map(n => stripExistingSuffix(phaseOf(n).name)).filter(Boolean);
                     return `
-                      <div class="sprint-card ${existing ? 'is-existing' : ''}">
+                      <div class="sprint-card ${existing ? 'is-existing' : ''} ${sp.note ? 'has-note' : ''}">
+                        ${sp.note ? `<button type="button" class="sprint-note-toggle" aria-expanded="false" aria-controls="sprint-note-${t(sp.sprint)}" aria-label="Mostrar observação da Sprint ${t(sp.sprint)}">${lucide('info', { size: 14, strokeWidth: 2 })}</button>` : ''}
                         <div class="sprint-tag">Sprint ${t(sp.sprint)}</div>
                         <div class="sprint-phases">${sPhases.length ? joinPhases(sPhases) : t(sp.phases)}</div>
                         <div class="sprint-days">${existing ? existingBadge() : `${num(sp.businessDays)} dias úteis · ${num(h)} h`}</div>
                         ${!existing ? `<div class="sprint-price">${brl(pr)}</div>` : ''}
                         ${sp.startDate || sp.endDate ? `<div class="sprint-dates">${formatShortRange(sp.startDate, sp.endDate)}</div>` : ''}
                         ${sp.deliverables || deliverables.length ? `<div class="sprint-deliverables">${t(sp.deliverables || deliverables.join('; '))}</div>` : ''}
-                        ${sp.note ? `<div class="sprint-note">${lucide('info', { size: 13, strokeWidth: 2 })}<span>${t(sp.note)}</span></div>` : ''}
+                        ${sp.note ? `<div class="sprint-note" id="sprint-note-${t(sp.sprint)}">${lucide('info', { size: 13, strokeWidth: 2, className: 'sprint-note-icon' })}<span class="sprint-note-text">${t(sp.note)}</span></div>` : ''}
                       </div>
                     `;
                   }).join('')}
@@ -1600,6 +1637,7 @@ export class PropostaView {
             <ul>${(d.outOfScope || []).map((o, i) => `<li${i === (d.outOfScope || []).findIndex(x => CLIENT_ERP_RE.test(x)) ? ' id="topico-fora-escopo-erp" tabindex="-1" class="out-of-scope-erp"' : ''}>${t(o)}</li>`).join('')}</ul>
           </div>
         </div>
+        ${this.renderOutOfScopeNotice(d.outOfScopeNotice, { id: 'topico-fora-escopo-testes' })}
       </section>
     `;
   }
@@ -2098,7 +2136,7 @@ export class PropostaView {
     const expanded = this.isCollapsibleExpanded(key, existing);
     const title = t(existing ? stripExistingSuffix(p.name) : p.name);
     return `
-      <article class="proposal-feature-card phase-sheet-card ${existing ? 'is-existing' : 'is-new'} ${expanded ? '' : 'is-collapsed'}" id="${key}" tabindex="-1" data-feature-card="${key}">
+      <article class="proposal-feature-card phase-sheet-card ${existing ? 'is-existing' : 'is-new'} ${expanded ? '' : 'is-collapsed'}" id="${key}" ${existing ? 'aria-disabled="true"' : ''} tabindex="-1" data-feature-card="${key}">
         <header class="feature-card-header" data-feature-toggle-area>
           <div class="feature-header-left">
             <span class="feature-phase-badge">Fase ${t(p.phase)}</span>
@@ -2106,8 +2144,8 @@ export class PropostaView {
             <h4 class="feature-title" id="feature-title-${key}">${title}</h4>
           </div>
           <div class="feature-metrics-badges">
-            <span class="prop-badge">${lucide('calendar', { size: 14, strokeWidth: 2 })}${num(p.hours)} h</span>
-            ${existing ? '<span class="prop-badge existing">Sem custo</span>' : `<span class="prop-badge price">${brl(p.price)}</span>`}
+            <span class="prop-badge">${lucide('calendar', { size: 14, strokeWidth: 2 })}${existing ? 0 : num(p.hours)} h</span>
+            <span class="prop-badge price">${brl(existing ? 0 : p.price)}</span>
           </div>
           ${this.renderCollapseToggle(key, expanded)}
         </header>
@@ -2182,6 +2220,40 @@ export class PropostaView {
         img.addEventListener('error', fallback, { once: true });
       }
     });
+
+    // 0. Notas de sprint: ícone de info abre/fecha a observação (na impressão ficam sempre visíveis via CSS)
+    const setSprintNote = (btn, open) => {
+      btn.setAttribute('aria-expanded', String(open));
+      btn.closest('.sprint-card')?.classList.toggle('is-note-open', open);
+    };
+    const closeSprintNotes = (except) => {
+      this.container.querySelectorAll('.sprint-note-toggle[aria-expanded="true"]').forEach(b => {
+        if (b !== except) setSprintNote(b, false);
+      });
+    };
+    this.container.querySelectorAll('.sprint-note-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const open = btn.getAttribute('aria-expanded') !== 'true';
+        closeSprintNotes(btn);
+        setSprintNote(btn, open);
+      });
+    });
+    // Fecha ao clicar fora ou com Esc (listeners no document; substituídos a cada render)
+    if (this._sprintNoteOutside) document.removeEventListener('click', this._sprintNoteOutside);
+    if (this._sprintNoteEsc) document.removeEventListener('keydown', this._sprintNoteEsc);
+    this._sprintNoteOutside = (e) => {
+      if (!e.target.closest?.('.sprint-card.has-note')) closeSprintNotes();
+      else if (!e.target.closest('.sprint-note-toggle, .sprint-note')) closeSprintNotes();
+    };
+    this._sprintNoteEsc = (e) => {
+      if (e.key !== 'Escape') return;
+      const open = this.container.querySelector('.sprint-note-toggle[aria-expanded="true"]');
+      if (!open) return;
+      closeSprintNotes();
+      open.focus();
+    };
+    document.addEventListener('click', this._sprintNoteOutside);
+    document.addEventListener('keydown', this._sprintNoteEsc);
 
     // 1. Salvar em PDF (diálogo nativo de impressão)
     const btnPdf = this.container.querySelector('#btn-save-pdf');

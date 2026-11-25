@@ -43,7 +43,8 @@
       "features[].inventory": "Inventário real do MVP: {new[], reused[], adjusted[], outOfScope[], source}",
       "features[].breakdown[].note": "Observação da área (ex.: justificativa de ajuste fino)",
       "features[].deliveredNote": "Texto curto exibido no lugar dos visuais em funcionalidades 'existing' (já entregues); quando presente, não renderizar placeholders de print/diagrama pendente. visuals fica [] nessas features.",
-      "features[].deliveryNote": "Texto curto informando que testes/ajustes/deploy da funcionalidade são cobrados na fase de entrega final (11).",
+      "features[].deliveryNote": "Texto curto informando que ajustes/deploy da funcionalidade são cobrados na fase de entrega final (11) e que testes limitam-se a smoke test (1 h).",
+      "outOfScopeNotice": "Objeto {label, text} (aditivo v1.3) com aviso 'FORA DO ESCOPO' relativo a testes; label deve ser exibido em vermelho. Presente em: raiz (global), features[] 7–10, investment.phases[] 7–11 e investment.testsAdjustDeploy. Distinto do array raiz 'outOfScope' (lista de strings).",
       "investment.sprints[].note": "Observação opcional da sprint (ex.: sprint de entrega final e recesso)."
     }
   },
@@ -115,7 +116,7 @@
       "hours": "Horas (por área) = Do zero − Reaproveitado + Ajustes",
       "price": "Valor = Horas × R$ 90,00",
       "duration": "Prazo (dias úteis) = Horas ÷ 8 h/dia útil",
-      "testsAdjustDeploy": "Testes, Ajustes e Deploy para produção são cobrados uma única vez, na entrega final (Fase 11): Testes = soma dos testes de homologação/E2E/regressão de cada funcionalidade; Ajustes e Deploy = média das funcionalidades (arredondada). Os testes de desenvolvimento permanecem no breakdown de cada fase."
+      "testsAdjustDeploy": "Testes, Ajustes e Deploy para produção são cobrados uma única vez, na entrega final (Fase 11): Testes = smoke test (teste básico de sanidade), limitado a 1 h; Ajustes e Deploy = média das funcionalidades (arredondada). Em todas as fases, a área Testes é limitada a 1 h (smoke test); testes automatizados e homologação ampliada estão fora do escopo."
     },
     "definitions": {
       "fromScratch": "Do zero: horas para construir a entrega da área como se nada existisse",
@@ -132,7 +133,7 @@
       "Testes"
     ],
     "source": "Estimativa elaborada pelo comercial com base exclusivamente no escopo inicial da proposta e no código do repositório real (https://github.com/maxcode42/client-alvenius-rastreabilidade-produtos): tecnologias (NextJS pages router, React, TailwindCSS, Node, PostgreSQL + node-pg-migrate, Jest, integração ERP Protheus via API externa) e código que deverá ser gerado, reaproveitado ou ajustado. Referências de mercado não são base desta proposta.",
-    "transparencyNote": "Horas validadas apenas pelo escopo inicial e pelo código do repositório real. O levantamento ampliado por área (incluindo referências opcionais de mercado) está registrado nesta proposta. Mantém-se a estimativa inicial de 37 h para a Seleção de Projetos (28 h de desenvolvimento na Fase 7 + parcela de testes, ajustes e deploy consolidada na Fase 11 de entrega final, onde esses itens são cobrados uma única vez). Com base nas solicitações e no levantamento realizados em reunião com o cliente em 24/11/2026, foram adicionadas as demais fases e etapas do desenvolvimento, com a participação do desenvolvedor e do cliente. Qualquer alteração de valor só será aplicada mediante aprovação prévia e aceite do cliente Alvenius.",
+    "transparencyNote": "Horas validadas apenas pelo escopo inicial e pelo código do repositório real. O levantamento ampliado por área (incluindo referências opcionais de mercado) está registrado nesta proposta. Mantém-se a estimativa de 31 h para a Seleção de Projetos (25 h de desenvolvimento na Fase 7, com Testes limitados a 1 h, + parcela de ajustes e deploy consolidada na Fase 11 de entrega final, onde esses itens são cobrados uma única vez). Com base nas solicitações e no levantamento realizados em reunião com o cliente em 24/11/2026, foram adicionadas as demais fases e etapas do desenvolvimento, com a participação do desenvolvedor e do cliente. Qualquer alteração de valor só será aplicada mediante aprovação prévia e aceite do cliente Alvenius.",
     "validationStatusValues": [
       "estimado pelo comercial",
       "validado",
@@ -595,6 +596,89 @@
       "deliveredNote": "Módulo já entregue e em operação no ambiente do cliente. Representação visual dispensada nesta proposta, pois não há alteração de escopo."
     },
     {
+      "id": "homologacao-producao",
+      "phase": 6,
+      "title": "Homologação, Treinamento e Entrada em Produção (já existente)",
+      "businessGoal": "Já existente — Garantir que o sistema seja validado, os usuários sejam capacitados e a operação entre em produção com segurança.",
+      "steps": [
+        "O cliente homologa as funcionalidades em ambiente de validação.",
+        "As equipes de produção e gestão são treinadas no uso do sistema.",
+        "O sistema entra em produção e passa a operar no ambiente do cliente."
+      ],
+      "visuals": [],
+      "hours": 0,
+      "businessDays": 0,
+      "price": 0,
+      "assumption": "A Alvenius disponibiliza usuários-chave para homologação e treinamento.",
+      "status": "existing",
+      "note": "Funcionalidade já implementada e em operação no sistema atual; não compõe o investimento desta proposta.",
+      "breakdown": [
+        {
+          "area": "backend",
+          "label": "Backend",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "frontend",
+          "label": "Frontend",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "designer",
+          "label": "Designer",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "database",
+          "label": "Database",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "tests",
+          "label": "Testes",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        }
+      ],
+      "breakdownTotal": {
+        "fromScratch": 0,
+        "reused": 0,
+        "adjustments": 0,
+        "hours": 0,
+        "price": 0
+      },
+      "deliveredNote": "Módulo já entregue e em operação no ambiente do cliente. Representação visual dispensada nesta proposta, pois não há alteração de escopo."
+    },
+    {
       "id": "selecao-projetos",
       "phase": 7,
       "status": "new",
@@ -728,29 +812,31 @@
             "Estrutura de testes existente"
           ],
           "new": [
-            "Testes unitários/integração do endpoint de projetos e dos componentes de seleção"
+            "Smoke test (teste básico de sanidade) do fluxo de seleção de projetos"
           ],
-          "adjusted": [
-            "Ajuste de testes dos módulos impactados por projectId"
-          ],
-          "baseHours": 4,
-          "reusedHours": 1,
-          "adjustmentHours": 1,
-          "hours": 4,
-          "price": 360
+          "adjusted": [],
+          "baseHours": 1,
+          "reusedHours": 0,
+          "adjustmentHours": 0,
+          "hours": 1,
+          "price": 90
         }
       ],
       "reuseRatio": 0.35,
       "development": {
-        "baseHours": 34,
-        "reusedHours": 12,
-        "adjustmentHours": 6,
-        "hours": 28,
-        "price": 2520
+        "baseHours": 31,
+        "reusedHours": 11,
+        "adjustmentHours": 5,
+        "hours": 25,
+        "price": 2250
       },
-      "hours": 28,
-      "businessDays": 3.5,
-      "price": 2520,
+      "hours": 25,
+      "businessDays": 3.125,
+      "price": 2250,
+      "outOfScopeNotice": {
+        "label": "FORA DO ESCOPO",
+        "text": "Testes automatizados (unitários, integração e E2E/regressão) e homologação ampliada não fazem parte desta fase. Entrega limitada a smoke test (teste básico de sanidade), limitado a 1 h."
+      },
       "assumptions": [
         "Backend estimado pelo comercial com base no escopo inicial e no código do repositório real (NodeJS + PostgreSQL; padrões infra/provider/api-protheus, adapters/api-protheus, models, pages/api/v1).",
         "Contador de spools obtido da API externa (ou agregado no backend sem persistência).",
@@ -804,20 +890,21 @@
         {
           "area": "tests",
           "label": "Testes",
-          "fromScratch": 4,
-          "reused": -1,
-          "adjustments": 1,
-          "hours": 4,
-          "price": 360,
-          "validation": "estimado pelo comercial"
+          "fromScratch": 1,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 1,
+          "price": 90,
+          "validation": "estimado pelo comercial",
+          "note": "Limitado a 1 h por fase: somente smoke test (teste básico de sanidade)."
         }
       ],
       "breakdownTotal": {
-        "fromScratch": 34,
-        "reused": -12,
-        "adjustments": 6,
-        "hours": 28,
-        "price": 2520
+        "fromScratch": 31,
+        "reused": -11,
+        "adjustments": 5,
+        "hours": 25,
+        "price": 2250
       },
       "prints": [
         {
@@ -949,7 +1036,7 @@
           ]
         }
       ],
-      "deliveryNote": "Testes de homologação/E2E/regressão, ajustes e deploy desta funcionalidade são cobrados uma única vez na Fase 11 – Testes, ajustes e deploy para produção (entrega final)."
+      "deliveryNote": "Ajustes e deploy desta funcionalidade são cobrados uma única vez na Fase 11 – Testes, ajustes e deploy para produção (entrega final). Testes limitados a smoke test (1 h) na própria fase; demais testes estão FORA DO ESCOPO."
     },
     {
       "id": "vincular-cadastro-projeto",
@@ -1087,29 +1174,26 @@
           "discipline": "tests",
           "label": "Testes (desenvolvimento)",
           "reused": [
-            "Mocks Protheus e testes de register/component existentes (tests/integration, tests/unit)",
-            "Mocks de projetos da Fase 7"
+            "Estrutura de testes e mocks Protheus existentes"
           ],
           "new": [
-            "Caso de cadastro sem projeto (400)"
+            "Smoke test (teste básico de sanidade) do cadastro com projeto"
           ],
-          "adjusted": [
-            "tests/**/register/post.test.js e component/[code]/get.test.js passam a validar o projeto; mocks em tests/mocks/api-protheus/http-setup.js"
-          ],
-          "baseHours": 4,
-          "reusedHours": 1,
-          "adjustmentHours": 1,
-          "hours": 4,
-          "price": 360
+          "adjusted": [],
+          "baseHours": 1,
+          "reusedHours": 0,
+          "adjustmentHours": 0,
+          "hours": 1,
+          "price": 90
         }
       ],
       "reuseRatio": 0.38,
       "development": {
-        "baseHours": 29,
-        "reusedHours": 11,
-        "adjustmentHours": 5,
-        "hours": 23,
-        "price": 2070
+        "baseHours": 26,
+        "reusedHours": 10,
+        "adjustmentHours": 4,
+        "hours": 20,
+        "price": 1800
       },
       "breakdown": [
         {
@@ -1157,30 +1241,35 @@
         {
           "area": "tests",
           "label": "Testes",
-          "fromScratch": 4,
-          "reused": -1,
-          "adjustments": 1,
-          "hours": 4,
-          "price": 360,
-          "validation": "estimado pelo comercial"
+          "fromScratch": 1,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 1,
+          "price": 90,
+          "validation": "estimado pelo comercial",
+          "note": "Limitado a 1 h por fase: somente smoke test (teste básico de sanidade)."
         }
       ],
       "breakdownTotal": {
-        "fromScratch": 29,
-        "reused": -11,
-        "adjustments": 5,
-        "hours": 23,
-        "price": 2070
+        "fromScratch": 26,
+        "reused": -10,
+        "adjustments": 4,
+        "hours": 20,
+        "price": 1800
       },
-      "hours": 23,
-      "businessDays": 2.875,
-      "price": 2070,
+      "hours": 20,
+      "businessDays": 2.5,
+      "price": 1800,
+      "outOfScopeNotice": {
+        "label": "FORA DO ESCOPO",
+        "text": "Testes automatizados (unitários, integração e E2E/regressão) e homologação ampliada não fazem parte desta fase. Entrega limitada a smoke test (teste básico de sanidade), limitado a 1 h."
+      },
       "assumptions": [
         "Estimativa do comercial com base no escopo inicial e no código do repositório real (models/register.js, pages/api/v1/register, components/container/process-register, components/ui/modal/qr-code-*, components/ui/card-item, pages/validates-qrcode).",
         "O Protheus aceita o código do projeto no payload de cadastro (wsrastreio) e retorna o projeto nas consultas de spool/componente — responsabilidade da Alvenius, fora do escopo.",
         "Sem persistência em banco local: o vínculo spool↔projeto é gravado e consultado no Protheus.",
         "Depende da Fase 7 (Seleção de Projetos); horas a ajustar após inventário real do MVP pelo frontend.",
-        "Ajuste fino com inventário real do MVP (frontend): horas de desenvolvimento mantidas em 23 h / R$ 2.070,00 (testes, ajustes e deploy cobrados na Fase 11 – entrega final)."
+        "Ajuste fino com inventário real do MVP (frontend): horas de desenvolvimento ajustadas para 20 h / R$ 1.800,00 após limitação de Testes a 1 h (smoke test); ajustes e deploy cobrados na Fase 11 – entrega final."
       ],
       "prints": [
         {
@@ -1321,7 +1410,7 @@
         ],
         "source": "Inventário real do MVP reportado pelo frontend (2026-11-25)"
       },
-      "deliveryNote": "Testes de homologação/E2E/regressão, ajustes e deploy desta funcionalidade são cobrados uma única vez na Fase 11 – Testes, ajustes e deploy para produção (entrega final)."
+      "deliveryNote": "Ajustes e deploy desta funcionalidade são cobrados uma única vez na Fase 11 – Testes, ajustes e deploy para produção (entrega final). Testes limitados a smoke test (1 h) na própria fase; demais testes estão FORA DO ESCOPO."
     },
     {
       "id": "vincular-etapas-projeto",
@@ -1449,29 +1538,26 @@
           "discipline": "tests",
           "label": "Testes (desenvolvimento)",
           "reused": [
-            "Testes unit/integration de boilermaking, coating e painting",
-            "Mocks Protheus e de projetos (Fases 7–8)"
+            "Estrutura de testes e mocks Protheus existentes"
           ],
           "new": [
-            "Caso spool de outro projeto bloqueado (409)"
+            "Smoke test (teste básico de sanidade) das etapas com projeto"
           ],
-          "adjusted": [
-            "Testes das 3 etapas validam projeto na movimentação e contadores"
-          ],
-          "baseHours": 5,
-          "reusedHours": 2,
-          "adjustmentHours": 1,
-          "hours": 4,
-          "price": 360
+          "adjusted": [],
+          "baseHours": 1,
+          "reusedHours": 0,
+          "adjustmentHours": 0,
+          "hours": 1,
+          "price": 90
         }
       ],
-      "reuseRatio": 0.39,
+      "reuseRatio": 0.37,
       "development": {
-        "baseHours": 31,
-        "reusedHours": 12,
-        "adjustmentHours": 6,
-        "hours": 25,
-        "price": 2250
+        "baseHours": 27,
+        "reusedHours": 10,
+        "adjustmentHours": 5,
+        "hours": 22,
+        "price": 1980
       },
       "breakdown": [
         {
@@ -1518,24 +1604,29 @@
         {
           "area": "tests",
           "label": "Testes",
-          "fromScratch": 5,
-          "reused": -2,
-          "adjustments": 1,
-          "hours": 4,
-          "price": 360,
-          "validation": "estimado pelo comercial"
+          "fromScratch": 1,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 1,
+          "price": 90,
+          "validation": "estimado pelo comercial",
+          "note": "Limitado a 1 h por fase: somente smoke test (teste básico de sanidade)."
         }
       ],
       "breakdownTotal": {
-        "fromScratch": 31,
-        "reused": -12,
-        "adjustments": 6,
-        "hours": 25,
-        "price": 2250
+        "fromScratch": 27,
+        "reused": -10,
+        "adjustments": 5,
+        "hours": 22,
+        "price": 1980
       },
-      "hours": 25,
-      "businessDays": 3.125,
-      "price": 2250,
+      "hours": 22,
+      "businessDays": 2.75,
+      "price": 1980,
+      "outOfScopeNotice": {
+        "label": "FORA DO ESCOPO",
+        "text": "Testes automatizados (unitários, integração e E2E/regressão) e homologação ampliada não fazem parte desta fase. Entrega limitada a smoke test (teste básico de sanidade), limitado a 1 h."
+      },
       "inventory": {
         "new": [
           "getCountersByProject (contadores por projeto)",
@@ -1691,7 +1782,7 @@
         "Validação spool×projeto e movimentação com projeto feitas no Protheus via backend; sem persistência em banco local.",
         "A Alvenius é responsável por o Protheus aceitar o código do projeto nas movimentações das etapas e retornar o projeto do spool — fora do escopo."
       ],
-      "deliveryNote": "Testes de homologação/E2E/regressão, ajustes e deploy desta funcionalidade são cobrados uma única vez na Fase 11 – Testes, ajustes e deploy para produção (entrega final)."
+      "deliveryNote": "Ajustes e deploy desta funcionalidade são cobrados uma única vez na Fase 11 – Testes, ajustes e deploy para produção (entrega final). Testes limitados a smoke test (1 h) na própria fase; demais testes estão FORA DO ESCOPO."
     },
     {
       "id": "vincular-transferencia-projeto",
@@ -1827,29 +1918,26 @@
           "discipline": "tests",
           "label": "Testes (desenvolvimento)",
           "reused": [
-            "Testes integration de transfer/[process] (get/post) e supplier",
-            "Mocks Protheus e de projetos"
+            "Estrutura de testes e mocks Protheus existentes"
           ],
           "new": [
-            "Caso item de outro projeto bloqueado (409)"
+            "Smoke test (teste básico de sanidade) das transferências com projeto"
           ],
-          "adjusted": [
-            "Testes de transfer validam projeto na gravação, filtro e contadores"
-          ],
-          "baseHours": 5,
-          "reusedHours": 2,
-          "adjustmentHours": 1,
-          "hours": 4,
-          "price": 360
+          "adjusted": [],
+          "baseHours": 1,
+          "reusedHours": 0,
+          "adjustmentHours": 0,
+          "hours": 1,
+          "price": 90
         }
       ],
-      "reuseRatio": 0.39,
+      "reuseRatio": 0.38,
       "development": {
-        "baseHours": 33,
-        "reusedHours": 13,
-        "adjustmentHours": 6,
-        "hours": 26,
-        "price": 2340
+        "baseHours": 29,
+        "reusedHours": 11,
+        "adjustmentHours": 5,
+        "hours": 23,
+        "price": 2070
       },
       "breakdown": [
         {
@@ -1896,24 +1984,29 @@
         {
           "area": "tests",
           "label": "Testes",
-          "fromScratch": 5,
-          "reused": -2,
-          "adjustments": 1,
-          "hours": 4,
-          "price": 360,
-          "validation": "estimado pelo comercial"
+          "fromScratch": 1,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 1,
+          "price": 90,
+          "validation": "estimado pelo comercial",
+          "note": "Limitado a 1 h por fase: somente smoke test (teste básico de sanidade)."
         }
       ],
       "breakdownTotal": {
-        "fromScratch": 33,
-        "reused": -13,
-        "adjustments": 6,
-        "hours": 26,
-        "price": 2340
+        "fromScratch": 29,
+        "reused": -11,
+        "adjustments": 5,
+        "hours": 23,
+        "price": 2070
       },
-      "hours": 26,
-      "businessDays": 3.25,
-      "price": 2340,
+      "hours": 23,
+      "businessDays": 2.875,
+      "price": 2070,
+      "outOfScopeNotice": {
+        "label": "FORA DO ESCOPO",
+        "text": "Testes automatizados (unitários, integração e E2E/regressão) e homologação ampliada não fazem parte desta fase. Entrega limitada a smoke test (teste básico de sanidade), limitado a 1 h."
+      },
       "inventory": {
         "new": [
           "Vínculo do projeto nas transferências",
@@ -2120,7 +2213,7 @@
         "A conclusão de transferência (Em Trânsito → Concluído) e o detalhe são responsabilidade da API externa Protheus ADVPL do cliente — fora do escopo.",
         "A Alvenius é responsável por o Protheus aceitar o código do projeto nas transferências e retorná-lo nas consultas — fora do escopo."
       ],
-      "deliveryNote": "Testes de homologação/E2E/regressão, ajustes e deploy desta funcionalidade são cobrados uma única vez na Fase 11 – Testes, ajustes e deploy para produção (entrega final)."
+      "deliveryNote": "Ajustes e deploy desta funcionalidade são cobrados uma única vez na Fase 11 – Testes, ajustes e deploy para produção (entrega final). Testes limitados a smoke test (1 h) na própria fase; demais testes estão FORA DO ESCOPO."
     }
   ],
   "investment": {
@@ -2633,9 +2726,13 @@
         "phase": 7,
         "name": "Fase 7 – Seleção de Projetos (pós-login) – desenvolvimento",
         "featureId": "selecao-projetos",
-        "hours": 28,
-        "businessDays": 3.5,
-        "price": 2520,
+        "hours": 25,
+        "businessDays": 3.125,
+        "price": 2250,
+        "outOfScopeNotice": {
+          "label": "FORA DO ESCOPO",
+          "text": "Testes automatizados (unitários, integração e E2E/regressão) e homologação ampliada não fazem parte desta fase. Entrega limitada a smoke test (teste básico de sanidade), limitado a 1 h."
+        },
         "breakdown": [
           {
             "area": "backend",
@@ -2681,29 +2778,34 @@
           {
             "area": "tests",
             "label": "Testes",
-            "fromScratch": 4,
-            "reused": -1,
-            "adjustments": 1,
-            "hours": 4,
-            "price": 360,
-            "validation": "estimado pelo comercial"
+            "fromScratch": 1,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 1,
+            "price": 90,
+            "validation": "estimado pelo comercial",
+            "note": "Limitado a 1 h por fase: somente smoke test (teste básico de sanidade)."
           }
         ],
         "breakdownTotal": {
-          "fromScratch": 34,
-          "reused": -12,
-          "adjustments": 6,
-          "hours": 28,
-          "price": 2520
+          "fromScratch": 31,
+          "reused": -11,
+          "adjustments": 5,
+          "hours": 25,
+          "price": 2250
         }
       },
       {
         "phase": 8,
         "name": "Fase 8 – Vincular Cadastro ao Projeto – desenvolvimento",
         "featureId": "vincular-cadastro-projeto",
-        "hours": 23,
-        "businessDays": 2.875,
-        "price": 2070,
+        "hours": 20,
+        "businessDays": 2.5,
+        "price": 1800,
+        "outOfScopeNotice": {
+          "label": "FORA DO ESCOPO",
+          "text": "Testes automatizados (unitários, integração e E2E/regressão) e homologação ampliada não fazem parte desta fase. Entrega limitada a smoke test (teste básico de sanidade), limitado a 1 h."
+        },
         "breakdown": [
           {
             "area": "backend",
@@ -2749,29 +2851,34 @@
           {
             "area": "tests",
             "label": "Testes",
-            "fromScratch": 4,
-            "reused": -1,
-            "adjustments": 1,
-            "hours": 4,
-            "price": 360,
-            "validation": "estimado pelo comercial"
+            "fromScratch": 1,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 1,
+            "price": 90,
+            "validation": "estimado pelo comercial",
+            "note": "Limitado a 1 h por fase: somente smoke test (teste básico de sanidade)."
           }
         ],
         "breakdownTotal": {
-          "fromScratch": 29,
-          "reused": -11,
-          "adjustments": 5,
-          "hours": 23,
-          "price": 2070
+          "fromScratch": 26,
+          "reused": -10,
+          "adjustments": 4,
+          "hours": 20,
+          "price": 1800
         }
       },
       {
         "phase": 9,
         "name": "Fase 9 – Vincular Etapas ao Projeto – desenvolvimento",
         "featureId": "vincular-etapas-projeto",
-        "hours": 25,
-        "businessDays": 3.125,
-        "price": 2250,
+        "hours": 22,
+        "businessDays": 2.75,
+        "price": 1980,
+        "outOfScopeNotice": {
+          "label": "FORA DO ESCOPO",
+          "text": "Testes automatizados (unitários, integração e E2E/regressão) e homologação ampliada não fazem parte desta fase. Entrega limitada a smoke test (teste básico de sanidade), limitado a 1 h."
+        },
         "breakdown": [
           {
             "area": "backend",
@@ -2817,29 +2924,34 @@
           {
             "area": "tests",
             "label": "Testes",
-            "fromScratch": 5,
-            "reused": -2,
-            "adjustments": 1,
-            "hours": 4,
-            "price": 360,
-            "validation": "estimado pelo comercial"
+            "fromScratch": 1,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 1,
+            "price": 90,
+            "validation": "estimado pelo comercial",
+            "note": "Limitado a 1 h por fase: somente smoke test (teste básico de sanidade)."
           }
         ],
         "breakdownTotal": {
-          "fromScratch": 31,
-          "reused": -12,
-          "adjustments": 6,
-          "hours": 25,
-          "price": 2250
+          "fromScratch": 27,
+          "reused": -10,
+          "adjustments": 5,
+          "hours": 22,
+          "price": 1980
         }
       },
       {
         "phase": 10,
         "name": "Fase 10 – Vincular Projeto ao Fluxo de Transferência – desenvolvimento",
         "featureId": "vincular-transferencia-projeto",
-        "hours": 26,
-        "businessDays": 3.25,
-        "price": 2340,
+        "hours": 23,
+        "businessDays": 2.875,
+        "price": 2070,
+        "outOfScopeNotice": {
+          "label": "FORA DO ESCOPO",
+          "text": "Testes automatizados (unitários, integração e E2E/regressão) e homologação ampliada não fazem parte desta fase. Entrega limitada a smoke test (teste básico de sanidade), limitado a 1 h."
+        },
         "breakdown": [
           {
             "area": "backend",
@@ -2885,41 +2997,46 @@
           {
             "area": "tests",
             "label": "Testes",
-            "fromScratch": 5,
-            "reused": -2,
-            "adjustments": 1,
-            "hours": 4,
-            "price": 360,
-            "validation": "estimado pelo comercial"
+            "fromScratch": 1,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 1,
+            "price": 90,
+            "validation": "estimado pelo comercial",
+            "note": "Limitado a 1 h por fase: somente smoke test (teste básico de sanidade)."
           }
         ],
         "breakdownTotal": {
-          "fromScratch": 33,
-          "reused": -13,
-          "adjustments": 6,
-          "hours": 26,
-          "price": 2340
+          "fromScratch": 29,
+          "reused": -11,
+          "adjustments": 5,
+          "hours": 23,
+          "price": 2070
         }
       },
       {
         "phase": 11,
         "name": "Fase 11 – Testes, ajustes e deploy para produção (entrega final)",
         "featureId": null,
-        "hours": 19,
-        "businessDays": 2.375,
-        "price": 1710,
-        "note": "Cobrada uma única vez, na entrega final, cobrindo as Fases 7 a 10. Testes = soma dos testes de homologação/E2E/regressão das quatro funcionalidades (4 + 3 + 4 + 4 = 15 h); Ajustes = média das quatro funcionalidades (2,25 h → 2 h); Deploy = média (2 h).",
+        "hours": 5,
+        "businessDays": 0.625,
+        "price": 450,
+        "note": "Cobrada uma única vez, na entrega final, cobrindo as Fases 7 a 10. Testes limitados a 1 h (smoke test – teste básico de sanidade da aplicação); Ajustes = média das quatro funcionalidades (2,25 h → 2 h); Deploy = média (2 h).",
+        "outOfScopeNotice": {
+          "label": "FORA DO ESCOPO",
+          "text": "Por decisão do cliente, a suíte de testes automatizados (unitários, integração e E2E/regressão) e a homologação/QA ampliada foram removidas do escopo, sendo entregue apenas smoke test (teste básico de sanidade) para verificação do funcionamento da aplicação, limitado a 1 h. Cobertura de testes e homologação ampliada ficam sob responsabilidade do cliente ou poderão ser contratadas como item adicional, mediante estimativa e aprovação prévia."
+        },
         "breakdown": [
           {
             "area": "tests",
-            "label": "Testes (homologação/E2E/regressão – soma das Fases 7 a 10)",
-            "fromScratch": 15,
+            "label": "Testes (smoke test – limitado a 1 h)",
+            "fromScratch": 1,
             "reused": 0,
             "adjustments": 0,
-            "hours": 15,
-            "price": 1350,
+            "hours": 1,
+            "price": 90,
             "validation": "estimado pelo comercial",
-            "note": "Seleção de Projetos 4 h + Vincular Cadastro 3 h + Vincular Etapas 4 h + Transferência 4 h."
+            "note": "Somente smoke test (teste básico de sanidade) pós-deploy. Testes automatizados e homologação ampliada fora do escopo."
           },
           {
             "area": "adjustments",
@@ -2945,19 +3062,19 @@
           }
         ],
         "breakdownTotal": {
-          "fromScratch": 19,
+          "fromScratch": 5,
           "reused": 0,
           "adjustments": 0,
-          "hours": 19,
-          "price": 1710
+          "hours": 5,
+          "price": 450
         }
       }
     ],
     "totals": {
-      "hours": 121,
-      "businessDays": 15.125,
+      "hours": 95,
+      "businessDays": 11.875,
       "approxWeeks": 3,
-      "price": 10890
+      "price": 8550
     },
     "sprints": [
       {
@@ -2996,7 +3113,7 @@
         "phases": [
           7
         ],
-        "businessDays": 3.5,
+        "businessDays": 3.125,
         "startDate": "2026-12-01",
         "endDate": "2026-12-04"
       },
@@ -3005,37 +3122,37 @@
         "phases": [
           8
         ],
-        "businessDays": 2.875,
+        "businessDays": 2.5,
         "startDate": "2026-12-04",
-        "endDate": "2026-12-09"
+        "endDate": "2026-12-08"
       },
       {
         "sprint": 7,
         "phases": [
           9
         ],
-        "businessDays": 3.125,
-        "startDate": "2026-12-09",
-        "endDate": "2026-12-14"
+        "businessDays": 2.75,
+        "startDate": "2026-12-08",
+        "endDate": "2026-12-11"
       },
       {
         "sprint": 8,
         "phases": [
           10
         ],
-        "businessDays": 3.25,
-        "startDate": "2026-12-14",
-        "endDate": "2026-12-17"
+        "businessDays": 2.875,
+        "startDate": "2026-12-11",
+        "endDate": "2026-12-16"
       },
       {
         "sprint": 9,
         "phases": [
           11
         ],
-        "businessDays": 2.375,
-        "startDate": "2026-12-18",
-        "endDate": "2026-12-22",
-        "note": "Sprint dedicada à entrega final (homologação, ajustes e deploy em produção), iniciada em dia útil cheio após a Sprint 8; deploy concluído antes do recesso de 25/12, com 23–24/12 reservados como contingência."
+        "businessDays": 0.625,
+        "startDate": "2026-12-17",
+        "endDate": "2026-12-17",
+        "note": "Sprint dedicada à entrega final (smoke test, ajustes e deploy em produção), iniciada em dia útil cheio após a Sprint 8; deploy concluído antes do recesso de 25/12, com 18–24/12 reservados como contingência."
       }
     ],
     "payment": [
@@ -3066,7 +3183,7 @@
       {
         "milestone": "1ª parcela – na aprovação da proposta (D+0)",
         "percent": 30,
-        "amount": 3267,
+        "amount": 2565,
         "scope": "new-features",
         "dueInDays": 0,
         "dueDate": "2026-12-01"
@@ -3074,7 +3191,7 @@
       {
         "milestone": "2ª parcela – 15 dias após a aprovação (D+15)",
         "percent": 40,
-        "amount": 4356,
+        "amount": 3420,
         "scope": "new-features",
         "dueInDays": 15,
         "dueDate": "2026-12-16"
@@ -3082,7 +3199,7 @@
       {
         "milestone": "3ª parcela – 30 dias após a aprovação (D+30)",
         "percent": 30,
-        "amount": 3267,
+        "amount": 2565,
         "scope": "new-features",
         "dueInDays": 30,
         "dueDate": "2026-12-31"
@@ -3090,8 +3207,8 @@
     ],
     "testsAdjustDeploy": {
       "tests": {
-        "hours": 15,
-        "price": 1350
+        "hours": 1,
+        "price": 90
       },
       "adjustments": {
         "hours": 2,
@@ -3102,12 +3219,16 @@
         "price": 180
       },
       "total": {
-        "hours": 19,
-        "price": 1710
+        "hours": 5,
+        "price": 450
       },
       "phase": 11,
       "chargedOnce": true,
-      "note": "Cobrado uma única vez na entrega final (Fase 11): testes somados; ajustes e deploy pela média das funcionalidades."
+      "note": "Cobrado uma única vez na entrega final (Fase 11): testes limitados a 1 h (smoke test); ajustes e deploy pela média das funcionalidades.",
+      "outOfScopeNotice": {
+        "label": "FORA DO ESCOPO",
+        "text": "Por decisão do cliente, a suíte de testes automatizados (unitários, integração e E2E/regressão) e a homologação/QA ampliada foram removidas do escopo, sendo entregue apenas smoke test (teste básico de sanidade) para verificação do funcionamento da aplicação, limitado a 1 h. Cobertura de testes e homologação ampliada ficam sob responsabilidade do cliente ou poderão ser contratadas como item adicional, mediante estimativa e aprovação prévia."
+      }
     }
   },
   "postDelivery": {
@@ -3133,10 +3254,15 @@
     "Internet e dispositivos (celular/tablet) disponíveis no chão de fábrica.",
     "Endpoint de projetos no Protheus (listagem/consulta via wsrastreio) e filtro por projeto nos endpoints existentes são responsabilidade da Alvenius e devem estar disponíveis antes do desenvolvimento."
   ],
+  "outOfScopeNotice": {
+    "label": "FORA DO ESCOPO",
+    "text": "Por decisão do cliente, a suíte de testes automatizados (unitários, integração e E2E/regressão) e a homologação/QA ampliada foram removidas do escopo, sendo entregue apenas smoke test (teste básico de sanidade) para verificação do funcionamento da aplicação, limitado a 1 h por fase. Cobertura de testes e homologação ampliada ficam sob responsabilidade do cliente ou poderão ser contratadas como item adicional, mediante estimativa e aprovação prévia."
+  },
   "outOfScope": [
     "Compra de hardware (impressoras de etiqueta, leitores, tablets)",
     "Hospedagem em nuvem (orçada separadamente)",
     "Customizações não listadas",
+    "Testes automatizados (unitários, integração e E2E/regressão) e homologação/QA ampliada — apenas smoke test (1 h por fase) incluso.",
     "Treinamento além do previsto",
     "Desenvolvimento/ajuste no ERP Protheus (endpoint de projetos e filtro por projeto) — responsabilidade do cliente."
   ]
