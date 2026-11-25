@@ -39,7 +39,7 @@ class App {
       }),
       menu: new MenuView('app-view', {
         onNavigate: (route) => this.navigateTo(route),
-        onOpenQrCode: () => this.openQrCodeScanner(),
+        onOpenQrCode: (mode) => this.openQrCodeScanner(null, mode || 'validar-qrcode'),
         onOpenTransfer: () => this.openModalTransferencia()
       }),
       cadastro: new CadastroView('app-view', {
@@ -65,7 +65,7 @@ class App {
   }
 
   init() {
-    console.log('Alvenius Spool Management v2.3.0 iniciado.');
+    console.log('Alvenius Spool Management v2.4.0 iniciado.');
     
     const savedUser = sessionStorage.getItem('app_user');
     if (savedUser) {
@@ -137,7 +137,7 @@ class App {
 
     // Rotas de modais diretos
     if (route === 'validar-qrcode') {
-      this.openQrCodeScanner();
+      this.openQrCodeScanner(null, 'validar-qrcode');
       return;
     }
 
@@ -261,8 +261,9 @@ class App {
     }
   }
 
-  openQrCodeScanner(onScanSuccess) {
+  openQrCodeScanner(onScanSuccess, mode = 'cadastro') {
     this.modalQrCode.open({
+      mode,
       onScan: (code, spool) => {
         if (typeof onScanSuccess === 'function') {
           onScanSuccess(code, spool);

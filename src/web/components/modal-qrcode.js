@@ -5,6 +5,7 @@
  */
 
 import { lucide } from './icons.js';
+import { toast } from './toast.js';
 
 export const MOCK_SPOOL_CADASTRADO = {
   codigo: 'SP-0414-00001-001',
@@ -16,13 +17,47 @@ export const MOCK_SPOOL_CADASTRADO = {
   ]
 };
 
+export const MOCK_VALIDAR_ITEMS = [
+  {
+    tipo: 'spool',
+    tipoLabel: 'Spool',
+    textoModal: 'Spool: SP041500345003 - CARRETEL FS+FF 20POL X 6,35 X 2961MM 150 PSI',
+    textoUltimoLido: 'SP041500345003 - CARRETEL FS+FF 20POL X 6,35 X 2961MM 150 PSI',
+    codigo: 'SP041500345003'
+  },
+  {
+    tipo: 'componente',
+    tipoLabel: 'Componente',
+    textoModal: 'Componente: COD_PRODUTO: FLW21224113Z211 | COD_FORNEC: 005436 | CORRIDA: teste FS | DESC: Flange solto, 20pol, face plana, dimensões conforme AWWA C 207 TAB.2 CLASSE D',
+    textoUltimoLido: 'COD_PRODUTO: FLW21224113Z211 | COD_FORNEC: 005436 | CORRIDA: teste FS | DESC: Flange solto, 20pol, face plana, dimensões conforme AWWA C 207 TAB.2 CLASSE D',
+    codigo: 'FLW21224113Z211'
+  },
+  {
+    tipo: 'spool',
+    tipoLabel: 'Spool',
+    textoModal: 'Spool: SP-0414-00001-001 - Tubo Condução Aço Carbono 4" Sch 40',
+    textoUltimoLido: 'SP-0414-00001-001 - Tubo Condução Aço Carbono 4" Sch 40',
+    codigo: 'SP-0414-00001-001'
+  },
+  {
+    tipo: 'componente',
+    tipoLabel: 'Componente',
+    textoModal: 'Componente: COD_PRODUTO: TB4012431 | COD_FORNEC: 001290 | CORRIDA: C-4412 | DESC: Tubo Condução Aço Carbono 4" Sch 40 x 6000mm NBR 5590',
+    textoUltimoLido: 'COD_PRODUTO: TB4012431 | COD_FORNEC: 001290 | CORRIDA: C-4412 | DESC: Tubo Condução Aço Carbono 4" Sch 40 x 6000mm NBR 5590',
+    codigo: 'TB4012431'
+  }
+];
+
 export class ModalQrCodeComponent {
   constructor(containerId = 'modal-root') {
     this.container = document.getElementById(containerId);
     this.isOpen = false;
-    this.mode = 'cadastro'; // 'cadastro' ou 'caldeiraria'
+    this.mode = 'cadastro'; // 'cadastro', 'caldeiraria' ou 'validar-qrcode'
     this.spool = null;
     this.isScanned = false;
+    this.validarScanIndex = 0;
+    this.lastScannedItem = null;
+    this.showingSuccessModal = false;
     this.onScanCallback = null;
     this.onCloseCallback = null;
     this.onActionCallback = null;
@@ -38,6 +73,12 @@ export class ModalQrCodeComponent {
     this.onCloseCallback = onClose;
     this.onActionCallback = onAction || onStart;
     this.onStartCallback = onStart || onAction;
+    if (this.mode === 'validar-qrcode') {
+      this.validarScanIndex = 0;
+      this.lastScannedItem = null;
+      this.showingSuccessModal = false;
+      this.isScanned = false;
+    }
     this.isOpen = true;
     this.render();
     document.addEventListener('keydown', this.handleKeyDown);
@@ -87,7 +128,12 @@ export class ModalQrCodeComponent {
 
   handleKeyDown(e) {
     if (e.key === 'Escape' && this.isOpen) {
-      this.close();
+      if (this.mode === 'validar-qrcode' && this.showingSuccessModal) {
+        this.showingSuccessModal = false;
+        this.render();
+      } else {
+        this.close();
+      }
     }
   }
 
@@ -256,7 +302,13 @@ export class ModalQrCodeComponent {
 
     this.container.classList.add('has-modal');
 
-    if (this.mode !== 'cadastro') {
+    if (this.mode === 'validar-qrcode') {
+      if (this.showingSuccessModal) {
+        this.renderValidarSuccessModal();
+      } else {
+        this.renderValidarQrCodeMode();
+      }
+    } else if (this.mode !== 'cadastro') {
       this.renderCaldeirariaMode();
     } else {
       this.renderCadastroMode();
@@ -486,15 +538,144 @@ export class ModalQrCodeComponent {
     `;
   }
 
+  renderValidarSuccessModal() {
+    const item = this.lastScannedItem || MOCK_VALIDAR_ITEMS[0];
+    const isSpool = item.tipo === 'spool';
+    const label = isSpool ? 'Spool:' : 'Componente:';
+    const cleanContent = item.textoModal.replace(/^(Spool:\s*|Componente:\s*)/i, '');
+
+    this.container.innerHTML = `
+      <div class="modal-backdrop qrcode-backdrop-fullscreen" id="qrcode-modal-backdrop">
+        <div class="qrcode-container-wrapper" role="dialog" aria-modal="true" aria-labelledby="qrcode-modal-validar-success-title">
+          
+          <!-- Topo: "Leitor de QRCode" com linha divisória cinza -->
+          <div class="qrcode-top-header">
+            <h2 class="qrcode-top-title" id="qrcode-modal-validar-success-title">Leitor de QRCode</h2>
+            <div class="qrcode-top-divider"></div>
+          </div>
+
+          <!-- Card Branco Central de Sucesso -->
+          <div class="qrcode-modal-success-card">
+            <!-- Botão fechar X vermelho no canto superior direito -->
+            <button class="qrcode-success-close-x" id="btn-success-close-x" type="button" aria-label="Fechar" title="Fechar">&times;</button>
+            
+            <!-- Ícone circular verde com checkmark -->
+            <div class="qrcode-success-icon-wrap">
+              <div class="qrcode-success-circle-icon">
+                ${lucide('check', { size: 30, stroke: '#ffffff', strokeWidth: 3 })}
+              </div>
+            </div>
+
+            <!-- Título: Sucesso -->
+            <h3 class="qrcode-success-title">Sucesso</h3>
+
+            <!-- Mensagem: O QRCode está conforme e Válido. -->
+            <p class="qrcode-success-subtitle">O QRCode está conforme e Válido.</p>
+
+            <!-- Exibição dos dados validados -->
+            <div class="qrcode-success-data-box">
+              <strong class="qrcode-success-data-label">${label}</strong>
+              <span class="qrcode-success-data-val">${cleanContent}</span>
+            </div>
+
+            <!-- Linha divisória horizontal cinza clara -->
+            <div class="qrcode-success-card-divider"></div>
+
+            <!-- Botão Vermelho com ícone circle-x: Fechar -->
+            <button class="qrcode-btn-close-red" id="btn-success-close-bottom" type="button">
+              ${lucide('circle-x', { size: 20, stroke: '#ffffff', strokeWidth: 2.2 })}
+              <span>Fechar</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    `;
+  }
+
+  renderValidarQrCodeMode() {
+    const item = this.lastScannedItem;
+
+    this.container.innerHTML = `
+      <div class="modal-backdrop qrcode-backdrop-fullscreen" id="qrcode-modal-backdrop">
+        <div class="qrcode-container-wrapper" role="dialog" aria-modal="true" aria-labelledby="qrcode-modal-validar-title">
+          
+          <!-- Topo: Leitor de QRCode centralizado com divisória horizontal -->
+          <div class="qrcode-top-header">
+            <h2 class="qrcode-top-title" id="qrcode-modal-validar-title">Leitor de QRCode</h2>
+            <div class="qrcode-top-divider"></div>
+          </div>
+
+          <!-- Card 1: Visor da Câmera (Com ou sem desenho SVG do QRCode dependendo de isScanned) -->
+          ${this.renderViewfinder(this.isScanned)}
+
+          <!-- Card 2: Instrução e Botão de Leitura -->
+          <div class="qrcode-card-validar-instruction">
+            <div class="qrcode-validar-instr-line1">Ler o QRCode do Spool e Componentes.</div>
+            <div class="qrcode-validar-instr-line2">
+              <span class="qrcode-asterisk-red">*</span> Verificar os campos e dados, validar o QRCode.
+            </div>
+            <div class="qrcode-validar-btn-wrap">
+              <button 
+                class="qrcode-btn-validar-scan" 
+                id="btn-validar-scan" 
+                type="button" 
+                title="Clique para ler o QRCode"
+              >
+                ${lucide('qr-code', { size: 18, stroke: '#ffffff', strokeWidth: 2 })}
+                <span>Ler QRCode</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Card 3: Último QRCode Lido -->
+          <div class="qrcode-card-last-read">
+            <div class="qrcode-last-read-title">Último QRCode lido:</div>
+            ${item 
+              ? `<div class="qrcode-validar-last-read-data">${item.textoUltimoLido}</div>` 
+              : `<div class="qrcode-waiting-text-center">Aguardando leitura...</div>`
+            }
+          </div>
+
+          <!-- Rodapé: Botão Fechar Vermelho em toda a largura -->
+          <button class="qrcode-btn-close-red" id="qrcode-btn-close-bottom" type="button">
+            ${lucide('circle-x', { size: 20, stroke: '#ffffff', strokeWidth: 2.2 })}
+            <span>Fechar</span>
+          </button>
+
+        </div>
+      </div>
+    `;
+  }
+
   bindEvents() {
     const backdrop = this.container.querySelector('#qrcode-modal-backdrop');
     const closeBtnBottom = this.container.querySelector('#qrcode-btn-close-bottom');
+    const btnSuccessCloseX = this.container.querySelector('#btn-success-close-x');
+    const btnSuccessCloseBottom = this.container.querySelector('#btn-success-close-bottom');
     const btnIniciar = this.container.querySelector('#qrcode-btn-iniciar');
     const btnTriggerScan = this.container.querySelector('#btn-modal-trigger-scan');
+    const btnValidarScan = this.container.querySelector('#btn-validar-scan');
     const viewfinder = this.container.querySelector('#qrcode-camera-viewfinder');
 
+    // Ao fechar a modal de Sucesso: volta para a modal do Leitor de QRCode
+    const handleCloseSuccess = (e) => {
+      e.stopPropagation();
+      this.showingSuccessModal = false;
+      this.render();
+    };
+
+    if (btnSuccessCloseX) btnSuccessCloseX.addEventListener('click', handleCloseSuccess);
+    if (btnSuccessCloseBottom) btnSuccessCloseBottom.addEventListener('click', handleCloseSuccess);
+
+    // Ao fechar a modal do Leitor: fecha a modal e volta para o menu
     const handleClose = (e) => {
       e.stopPropagation();
+      if (this.mode === 'validar-qrcode' && this.showingSuccessModal) {
+        this.showingSuccessModal = false;
+        this.render();
+        return;
+      }
       this.close();
     };
 
@@ -503,14 +684,38 @@ export class ModalQrCodeComponent {
     if (backdrop) {
       backdrop.addEventListener('click', (e) => {
         if (e.target === backdrop) {
-          this.close();
+          handleClose(e);
         }
       });
     }
 
-    // Ação "Ler QRCode" na modal (via botão dedicado ou toque no visor da câmera)
-    const handleTriggerScan = (e) => {
+    // Ação "Ler QRCode" na modal de Validação: intercala itens e abre a modal de Sucesso
+    const handleTriggerScanValidar = (e) => {
       e.stopPropagation();
+      const item = MOCK_VALIDAR_ITEMS[this.validarScanIndex % MOCK_VALIDAR_ITEMS.length];
+      this.validarScanIndex++;
+      this.lastScannedItem = item;
+      this.isScanned = true;
+      this.showingSuccessModal = true;
+
+      if (typeof this.onScanCallback === 'function') {
+        this.onScanCallback(item.codigo, item);
+      }
+
+      this.render();
+    };
+
+    if (btnValidarScan) {
+      btnValidarScan.addEventListener('click', handleTriggerScanValidar);
+    }
+
+    // Ação "Ler QRCode" nos outros modos (Cadastro / Caldeiraria)
+    const handleTriggerScanGeneral = (e) => {
+      e.stopPropagation();
+      if (this.mode === 'validar-qrcode') {
+        handleTriggerScanValidar(e);
+        return;
+      }
       if (!this.isScanned) {
         this.isScanned = true;
         if (this.mode !== 'cadastro') {
@@ -523,11 +728,11 @@ export class ModalQrCodeComponent {
     };
 
     if (btnTriggerScan) {
-      btnTriggerScan.addEventListener('click', handleTriggerScan);
+      btnTriggerScan.addEventListener('click', handleTriggerScanGeneral);
     }
 
     if (viewfinder) {
-      viewfinder.addEventListener('click', handleTriggerScan);
+      viewfinder.addEventListener('click', handleTriggerScanGeneral);
     }
 
     if (btnIniciar) {

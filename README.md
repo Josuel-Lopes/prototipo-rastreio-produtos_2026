@@ -252,10 +252,19 @@ jobs:
 
 Este projeto adota as convenções do [Semantic Versioning (SemVer)](https://semver.org/lang/pt-BR/):
 
-- Versão Atual: **`v2.3.0`**
+- Versão Atual: **`v2.4.0`**
 
 ##### Histórico Recente
 
+- **`v2.4.0`**:
+  - Implementação completa da Modal "Validar QRCode" (`copilot-image-bb7df0.png` e `copilot-image-aed5ce.png`):
+    - Leitor de QRCode com visor de câmera, miras azuis fluorescentes, glow beam e animação laser.
+    - Card de instruções com verificação de campos e dados (marcador asterisco vermelho).
+    - Botão azul centralizado "Ler QRCode" com fluxo de simulação em tempo real.
+    - Intercalação automática de dados validados a cada scan: alternância contínua entre Spools e Componentes técnicos rastreáveis.
+    - Modal de Sucesso desacoplada: badge circular com checkmark verde, status de conformidade e validade, exibição dos dados detalhados e fechamento duplo (botão 'X' superior e botão 'Fechar' inferior).
+    - Retorno fluido para o leitor exibindo o QRCode renderizado no visor e preenchimento dinâmico do card "Último QRCode lido".
+    - Fechamento suave do leitor com retorno à tela Home / Menu.
 - **`v2.3.0`**:
   - Componentização modular avançada:
     - `ProcessesAccordionComponent`: componente reutilizável do acordeão retrátil com os 8 status e contadores.
