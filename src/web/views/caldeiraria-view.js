@@ -1,12 +1,16 @@
 /**
- * Tela de Caldeiraria - Alvenius
+ * Tela de Caldeiraria - Alvenius Spool Management
  * Responsabilidade Única: Acompanhamento de processos de caldeiraria, busca rápida,
- * acordeão retrátil dos 8 status com contadores, histórico de sucata e listagem de spools.
+ * acordeão retrátil de processos, histórico de sucata e listagem de spools.
+ * Fidelidade visual absoluta a copilot-image-177404.png
  */
 
-import { getSpools, getCounters, statusDefinitions, updateSpoolStatus } from '../mocks/spools-mock.js';
+import { getSpools, getCounters, statusDefinitions } from '../mocks/spools-mock.js';
 import { toast } from '../components/toast.js';
 import { lucide } from '../components/icons.js';
+import { PageContainer } from '../components/page-container.js';
+import { PageTitle } from '../components/page-title.js';
+import { SpoolCard } from '../components/spool-card.js';
 
 export class CaldeirariaView {
   constructor(containerId = 'app-view', options = {}) {
@@ -14,146 +18,154 @@ export class CaldeirariaView {
     this.options = options;
     this.searchQuery = '';
     this.selectedStatusFilter = null;
-    this.isAccordionOpen = true;
+    this.isAccordionOpen = false; // Fechado por padrão conforme print de referência
     this.showScrapHistory = false;
   }
 
   render() {
     if (!this.container) return;
 
+    // Garante que o título na pill flutuante central seja "Caldeiraria"
+    PageTitle.setTitle('Caldeiraria');
+
     const countersData = getCounters();
     const spools = this.getFilteredSpools();
 
-    this.container.innerHTML = `
-      <div class="view-caldeiraria-container">
+    // Conteúdo principal para dentro do card padrão
+    const content = `
+      <!-- Linha de Busca Rápida + Botão Ler QRCode -->
+      <div class="caldeiraria-search-row">
+        <div class="caldeiraria-search-box">
+          <span class="caldeiraria-search-icon">
+            ${lucide('search', { size: 18, stroke: '#9ca3af', strokeWidth: 2 })}
+          </span>
+          <input 
+            type="text" 
+            id="caldeiraria-search-input" 
+            class="caldeiraria-search-input" 
+            placeholder="Buscar por código, statu" 
+            value="${this.searchQuery}"
+            autocomplete="off"
+          />
+        </div>
 
-        <div class="card">
-          
-          <!-- Faixa Superior Cinza: Processo -->
-          <div class="card-header-strip">
-            <span class="card-header-title">Processo</span>
+        <!-- Botão Azul: Ler QRCode (2 linhas verticais de texto) -->
+        <button class="btn-caldeiraria-qrcode" id="btn-caldeiraria-qrcode" type="button" title="Ler QRCode">
+          <span class="btn-caldeiraria-qrcode-icon">
+            ${lucide('qr-code', { size: 20, stroke: '#ffffff', strokeWidth: 2 })}
+          </span>
+          <div class="btn-caldeiraria-qrcode-label">
+            <span>Ler</span>
+            <span>QRCode</span>
           </div>
+        </button>
+      </div>
 
-          <div class="card-body">
-            
-            <!-- Barra de Mensagem Informativa (i) -->
-            <div class="info-box">
-              ${lucide('info', { size: 18, strokeWidth: 2 })}
-              <span>Leitura Spool, iniciar, finalizar e executar processo produção.</span>
-            </div>
-            <div class="accent-line"></div>
+      <!-- Card de Instrução em Destaque -->
+      <div class="caldeiraria-instruction-card">
+        <span class="instruction-line-1">Clique no código SPOOL para</span>
+        <span class="instruction-line-2">continuar</span>
+      </div>
 
-            <!-- Barra de Busca Rápida e Botão Ler QRCode -->
-            <div class="caldeiraria-search-bar">
-              <div class="caldeiraria-search-input-wrapper">
-                <span class="search-icon-left">
-                  ${lucide('search', { size: 18, strokeWidth: 2 })}
-                </span>
-                <input 
-                  type="text" 
-                  id="caldeiraria-search-input" 
-                  class="caldeiraria-search-input" 
-                  placeholder="Buscar por código, status..." 
-                  value="${this.searchQuery}"
-                />
-              </div>
-
-              <!-- Botão Azul: Ler QRCode -->
-              <button class="btn btn-primary" id="btn-caldeiraria-qrcode">
-                ${lucide('qr-code', { size: 18, strokeWidth: 2 })}
-                <span>Ler QRCode</span>
-              </button>
-            </div>
-
-            <!-- Banner de Instrução em Destaque -->
-            <div class="instruction-banner-highlight">
-              ${lucide('info', { size: 18, strokeWidth: 2 })}
-              <span>Clique no código SPOOL para continuar</span>
-            </div>
-
-            <!-- Acordeão Colapsável: PROCESSOS | QTD. -->
-            <div class="process-accordion" id="process-accordion-block">
-              <button class="accordion-header ${this.isAccordionOpen ? 'is-open' : ''}" id="btn-toggle-accordion" aria-expanded="${this.isAccordionOpen}">
-                <div class="accordion-header-left">
-                  <span class="accordion-icon-toggle">
-                    ${this.isAccordionOpen ? lucide('chevron-up', { size: 16, strokeWidth: 2.5 }) : lucide('chevron-down', { size: 16, strokeWidth: 2.5 })}
-                  </span>
-                  <span class="accordion-title">PROCESSOS | QTD.</span>
-                </div>
-                <span class="accordion-badge-total">TOTAL [${countersData.total}]</span>
-              </button>
-
-              <div class="accordion-content ${this.isAccordionOpen ? 'is-open' : ''}" id="accordion-content-panel">
-                <ul class="process-status-list">
-                  ${this.renderStatusList(countersData)}
-                </ul>
-
-                <!-- Linha Rodapé do Painel: TOTAL [1099] -->
-                <div class="process-total-footer-row">
-                  <span class="total-footer-label">TOTAL</span>
-                  <span class="total-footer-badge">[${countersData.total}]</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Toggle Switch Estilo iOS (Histórico de Sucata) -->
-            <label class="toggle-wrapper" for="toggle-scrap-history">
-              <span class="toggle-switch">
-                <input type="checkbox" id="toggle-scrap-history" ${this.showScrapHistory ? 'checked' : ''} />
-                <span class="toggle-slider"></span>
-              </span>
-              <span class="toggle-label-text">Click para exibir histórico de sucata</span>
-            </label>
-
-            <!-- Filtro Ativo (se houver) -->
-            ${this.selectedStatusFilter ? `
-              <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 13px; color: var(--color-text-muted);">Filtrado por:</span>
-                <span class="badge-status ${this.selectedStatusFilter}">
-                  ${statusDefinitions[this.selectedStatusFilter]?.label || this.selectedStatusFilter}
-                </span>
-                <button id="btn-clear-status-filter" style="font-size: 12px; color: var(--color-primary); cursor: pointer; text-decoration: underline;">
-                  Remover filtro
-                </button>
-              </div>
-            ` : ''}
-
-            <!-- Lista de Cards de Spool -->
-            <div class="spools-list-container" id="spools-list-container">
-              ${this.renderSpoolCards(spools)}
-            </div>
-
+      <!-- Bloco de Processos e Contadores (Acordeão) -->
+      <div class="caldeiraria-processes-block ${this.isAccordionOpen ? 'is-open' : ''}" id="caldeiraria-processes-block">
+        <!-- Cabeçalho com Chevron à esquerda, PROCESSOS ao centro e QTD. à direita -->
+        <div class="processes-block-header" id="btn-toggle-processes-accordion" role="button" tabindex="0" aria-expanded="${this.isAccordionOpen}">
+          <div class="processes-chevron-box">
+            ${this.isAccordionOpen 
+              ? lucide('chevron-up', { size: 14, stroke: '#1e293b', strokeWidth: 2.5 }) 
+              : lucide('chevron-down', { size: 14, stroke: '#1e293b', strokeWidth: 2.5 })}
           </div>
+          <span class="processes-title-label">PROCESSOS</span>
+          <span class="processes-qtd-label">QTD.</span>
+        </div>
 
+        <!-- Painel Expansível com os 8 Status -->
+        <div class="processes-accordion-panel ${this.isAccordionOpen ? 'is-open' : ''}" id="processes-accordion-panel">
+          <ul class="processes-status-list">
+            ${this.renderStatusList(countersData)}
+          </ul>
+        </div>
+
+        <!-- Linha TOTAL com Badge Azul -->
+        <div class="processes-total-row">
+          <span class="processes-total-label">TOTAL</span>
+          <span class="processes-total-badge">${countersData.total}</span>
         </div>
       </div>
+
+      <!-- Switch "Click para exibir histórico de sucata" -->
+      <div class="caldeiraria-scrap-toggle-row">
+        <div class="scrap-toggle-text">
+          <span>Click para exibir histórico de</span>
+          <span>sucata</span>
+        </div>
+        <label class="scrap-switch-label" for="toggle-caldeiraria-scrap">
+          <input 
+            type="checkbox" 
+            id="toggle-caldeiraria-scrap" 
+            class="scrap-switch-input" 
+            ${this.showScrapHistory ? 'checked' : ''} 
+          />
+          <span class="scrap-switch-track">
+            <span class="scrap-switch-thumb"></span>
+          </span>
+        </label>
+      </div>
+
+      <!-- Indicador de Filtro Ativo (se houver) -->
+      ${this.selectedStatusFilter ? `
+        <div class="caldeiraria-active-filter-bar">
+          <span class="filter-bar-label">Filtro ativo:</span>
+          <span class="filter-bar-tag">${statusDefinitions[this.selectedStatusFilter]?.label || this.selectedStatusFilter}</span>
+          <button type="button" class="btn-clear-status-filter" id="btn-clear-status-filter">Remover</button>
+        </div>
+      ` : ''}
+
+      <!-- Lista de Cards de Spool -->
+      <div class="caldeiraria-spools-list" id="caldeiraria-spools-list">
+        ${this.renderSpoolCards(spools)}
+      </div>
     `;
+
+    // Renderiza a casca padronizada via PageContainer
+    this.container.innerHTML = PageContainer.render({
+      bannerTitle: 'Processo',
+      bannerDescription: '<span class="caldeiraria-banner-text">Leitura Spool, iniciar, finalizar e executar processo produção.</span>',
+      content,
+      footerActions: '',
+      containerClass: 'view-caldeiraria-container',
+      cardClass: 'card-caldeiraria'
+    });
 
     this.bindEvents();
   }
 
   renderStatusList(countersData) {
     const statuses = [
-      { key: 'reservado', label: 'Reservado (aguardando início)', color: '#f1c40f', count: countersData.items.reservado },
-      { key: 'execucao', label: 'Execução (em processo produção)', color: '#00bcd4', count: countersData.items.execucao },
-      { key: 'pausado', label: 'Pausado (aguardando para continuar)', color: '#e67e22', count: countersData.items.pausado },
-      { key: 'continua', label: 'Continua (retornar para execução)', color: '#95a5a6', count: countersData.items.continua },
-      { key: 'finalizado', label: 'Finalizado (aguardando "Aprova CQ")', color: '#27ae60', count: countersData.items.finalizado },
-      { key: 'reversivel', label: 'Reversível (retorna início processo.)', color: '#8bc34a', count: countersData.items.reversivel },
-      { key: 'sucata', label: 'Sucata (descarte do produto)', color: '#e74c3c', count: countersData.items.sucata },
-      { key: 'romaneio', label: 'Romaneio (aguardando próxima etapa)', color: '#0070ba', count: countersData.items.romaneio }
+      { key: 'reservado', name: 'Reservado', sub: '(aguardando início)', color: '#f59e0b', count: countersData.items.reservado },
+      { key: 'execucao', name: 'Execução', sub: '(em processo produção)', color: '#00bcd4', count: countersData.items.execucao },
+      { key: 'pausado', name: 'Pausado', sub: '(aguardando para continuar)', color: '#f97316', count: countersData.items.pausado },
+      { key: 'continua', name: 'Continua', sub: '(retornar para execução)', color: '#9ca3af', count: countersData.items.continua },
+      { key: 'finalizado', name: 'Finalizado', sub: '(aguardando "Aprova CQ")', color: '#22c55e', count: countersData.items.finalizado },
+      { key: 'reversivel', name: 'Reversível', sub: '(retorna início processo.)', color: '#84cc16', count: countersData.items.reversivel },
+      { key: 'sucata', name: 'Sucata', sub: '(descarte do produto)', color: '#f87171', count: countersData.items.sucata },
+      { key: 'romaneio', name: 'Romaneio', sub: '(aguardando próxima etapa)', color: '#0284c7', count: countersData.items.romaneio }
     ];
 
     return statuses.map(st => {
       const formattedCount = String(st.count).padStart(4, '0');
       const isSelected = this.selectedStatusFilter === st.key;
       return `
-        <li class="process-status-item" data-filter-status="${st.key}" style="cursor: pointer; ${isSelected ? 'border-color: var(--color-primary); background-color: var(--color-primary-light);' : ''}">
+        <li class="process-status-item ${isSelected ? 'is-selected' : ''}" data-filter-status="${st.key}">
           <div class="status-item-label">
             <span class="status-dot" style="background-color: ${st.color};"></span>
-            <span>${st.label}</span>
+            <div class="status-name-group">
+              <strong class="status-name-title">${st.name}</strong>
+              <span class="status-name-sub">${st.sub}</span>
+            </div>
           </div>
-          <span class="status-count-badge">[${formattedCount}]</span>
+          <span class="status-count-badge">${formattedCount}</span>
         </li>
       `;
     }).join('');
@@ -162,68 +174,24 @@ export class CaldeirariaView {
   renderSpoolCards(spools) {
     if (spools.length === 0) {
       return `
-        <div class="empty-state-card">
-          <p style="font-weight: 600; margin-bottom: 4px;">Nenhum spool encontrado</p>
-          <p style="font-size: 13px;">Tente ajustar sua busca ou limpar os filtros de status.</p>
+        <div class="caldeiraria-empty-state">
+          <p class="empty-state-title">Nenhum spool encontrado</p>
+          <p class="empty-state-subtitle">Tente ajustar o termo da busca ou remover o filtro de status selecionado.</p>
         </div>
       `;
     }
 
     return spools.map(spool => {
-      const statusMeta = statusDefinitions[spool.status] || { shortLabel: spool.status, color: '#6c757d' };
-      const hasScrap = spool.historicoSucata && spool.historicoSucata.length > 0;
-      const scrapCount = hasScrap ? String(spool.historicoSucata.length).padStart(2, '0') : '00';
+      // No print de caldeiraria, os campos de Início e Finalizado exibem '-- / -- / ---- às -- : --' para spools aguardando a etapa
+      const spoolData = {
+        ...spool,
+        inicio: spool.inicioCaldeiraria || '-- / -- / ---- às -- : --',
+        finalizado: spool.finalizadoCaldeiraria || '-- / -- / ---- às -- : --'
+      };
 
-      return `
-        <div class="spool-card" data-spool-id="${spool.id}" data-spool-code="${spool.codigo}">
-          <!-- Cabeçalho do Card: Sequencial + Badge de Status -->
-          <div class="spool-card-header">
-            <span class="spool-seq-badge">${spool.sequencial}</span>
-            <span class="badge-status ${spool.status}">
-              ${statusMeta.shortLabel}
-            </span>
-          </div>
-
-          <div class="spool-card-body">
-            <!-- Linha do Código do Spool com label 'Código: ' -->
-            <div class="spool-code-row">
-              <span class="spool-code-label">Código:</span>
-              <a href="#" class="spool-code-link" data-code="${spool.codigo}" title="Clique no código SPOOL para continuar">
-                ${spool.codigo}
-              </a>
-            </div>
-
-            <!-- Linha de Datas com Ícones de Calendário Oficiais Lucide -->
-            <div class="spool-dates-row">
-              <span class="spool-date-item">${lucide('calendar', { size: 14, strokeWidth: 2 })} <strong>Início:</strong> ${spool.inicio}</span>
-              <span class="spool-date-item">${lucide('calendar', { size: 14, strokeWidth: 2 })} <strong>Finalizado:</strong> ${spool.finalizado}</span>
-            </div>
-
-            <!-- Descrição Técnica -->
-            <div class="spool-desc-text">
-              ${spool.descricao}
-            </div>
-
-            <!-- Histórico de Sucata -->
-            <div style="font-size: 13px; color: var(--color-text-muted); margin-top: 6px;">
-              <span>${scrapCount} Histórico de sucata:</span>
-            </div>
-
-            ${(this.showScrapHistory && hasScrap) ? `
-              <div class="spool-scrap-history">
-                <div class="spool-scrap-title">
-                  ${lucide('circle-alert', { size: 14, strokeWidth: 2 })}
-                  <span>Registro de Não-Conformidade / Sucata:</span>
-                </div>
-                ${spool.historicoSucata.map(h => `
-                  <div>&bull; <strong>${h.data}</strong> [${h.usuario}]: ${h.motivo}</div>
-                `).join('')}
-              </div>
-            ` : ''}
-
-          </div>
-        </div>
-      `;
+      return SpoolCard.render(spoolData, {
+        showScrapHistory: this.showScrapHistory
+      });
     }).join('');
   }
 
@@ -237,10 +205,10 @@ export class CaldeirariaView {
     if (this.searchQuery && this.searchQuery.trim()) {
       const q = this.searchQuery.trim().toLowerCase();
       list = list.filter(s => 
-        s.codigo.toLowerCase().includes(q) ||
-        s.descricao.toLowerCase().includes(q) ||
-        s.status.toLowerCase().includes(q) ||
-        s.sequencial.includes(q)
+        (s.codigo && s.codigo.toLowerCase().includes(q)) ||
+        (s.descricao && s.descricao.toLowerCase().includes(q)) ||
+        (s.status && s.status.toLowerCase().includes(q)) ||
+        (s.sequencial && s.sequencial.includes(q))
       );
     }
 
@@ -253,7 +221,7 @@ export class CaldeirariaView {
     if (searchInput) {
       searchInput.addEventListener('input', (e) => {
         this.searchQuery = e.target.value;
-        const listContainer = this.container.querySelector('#spools-list-container');
+        const listContainer = this.container.querySelector('#caldeiraria-spools-list');
         if (listContainer) {
           listContainer.innerHTML = this.renderSpoolCards(this.getFilteredSpools());
           this.bindCardClicks();
@@ -276,30 +244,38 @@ export class CaldeirariaView {
       });
     }
 
-    // Toggle Acordeão
-    const btnAccordion = this.container.querySelector('#btn-toggle-accordion');
-    const accordionContent = this.container.querySelector('#accordion-content-panel');
-    if (btnAccordion && accordionContent) {
+    // Toggle do Acordeão de Processos
+    const btnAccordion = this.container.querySelector('#btn-toggle-processes-accordion');
+    if (btnAccordion) {
       btnAccordion.addEventListener('click', () => {
         this.isAccordionOpen = !this.isAccordionOpen;
-        btnAccordion.classList.toggle('is-open', this.isAccordionOpen);
-        accordionContent.classList.toggle('is-open', this.isAccordionOpen);
+        const block = this.container.querySelector('#caldeiraria-processes-block');
+        const panel = this.container.querySelector('#processes-accordion-panel');
+        const chevronBox = btnAccordion.querySelector('.processes-chevron-box');
+
+        if (block) block.classList.toggle('is-open', this.isAccordionOpen);
+        if (panel) panel.classList.toggle('is-open', this.isAccordionOpen);
+        if (chevronBox) {
+          chevronBox.innerHTML = this.isAccordionOpen
+            ? lucide('chevron-up', { size: 14, stroke: '#1e293b', strokeWidth: 2.5 })
+            : lucide('chevron-down', { size: 14, stroke: '#1e293b', strokeWidth: 2.5 });
+        }
         btnAccordion.setAttribute('aria-expanded', String(this.isAccordionOpen));
       });
     }
 
     // Toggle Histórico de Sucata
-    const toggleScrap = this.container.querySelector('#toggle-scrap-history');
+    const toggleScrap = this.container.querySelector('#toggle-caldeiraria-scrap');
     if (toggleScrap) {
       toggleScrap.addEventListener('change', (e) => {
         this.showScrapHistory = e.target.checked;
-        const listContainer = this.container.querySelector('#spools-list-container');
+        const listContainer = this.container.querySelector('#caldeiraria-spools-list');
         if (listContainer) {
           listContainer.innerHTML = this.renderSpoolCards(this.getFilteredSpools());
           this.bindCardClicks();
         }
         if (this.showScrapHistory) {
-          toast.info('Histórico de Sucata', 'Exibindo detalhes de não-conformidade nos spools com ocorrências.');
+          toast.info('Histórico de Sucata', 'Exibindo registro de não-conformidade nos spools.');
         }
       });
     }
@@ -310,7 +286,7 @@ export class CaldeirariaView {
       item.addEventListener('click', () => {
         const statusKey = item.getAttribute('data-filter-status');
         if (this.selectedStatusFilter === statusKey) {
-          this.selectedStatusFilter = null; // desmarca se clicar de novo
+          this.selectedStatusFilter = null;
         } else {
           this.selectedStatusFilter = statusKey;
         }
@@ -318,7 +294,7 @@ export class CaldeirariaView {
       });
     });
 
-    // Remover filtro
+    // Remover filtro de status ativo
     const btnClearFilter = this.container.querySelector('#btn-clear-status-filter');
     if (btnClearFilter) {
       btnClearFilter.addEventListener('click', () => {
@@ -331,19 +307,101 @@ export class CaldeirariaView {
   }
 
   bindCardClicks() {
-    const codeLinks = this.container.querySelectorAll('.spool-code-link');
-    codeLinks.forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const code = link.getAttribute('data-code');
+    // Clique em qualquer parte do Card de Spool
+    const cards = this.container.querySelectorAll('.spool-item-card');
+    cards.forEach(card => {
+      const handleCardAction = () => {
+        const code = card.getAttribute('data-spool-code');
+        const status = card.getAttribute('data-spool-status');
+
+        if (status === 'romaneio') {
+          // Status Romaneio: Alert/Modal customizado com design industrial Alvenius
+          this.showRomaneioModal();
+          return;
+        }
+
+        // Demais status: executa continuidade e seleção do Spool
         toast.info(
           `Spool ${code}`,
-          'Próxima etapa: Ler QRCode para avançar no processo produtivo ou criar transferência.'
+          'Clique no botão Ler QRCode para validar ou avance para transferência.'
         );
         if (typeof this.options.onSpoolSelected === 'function') {
           this.options.onSpoolSelected(code);
         }
+      };
+
+      card.addEventListener('click', handleCardAction);
+
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleCardAction();
+        }
       });
     });
+  }
+
+  /**
+   * Exibe modal dialog customizado para status Romaneio
+   */
+  showRomaneioModal() {
+    const modalRoot = document.getElementById('modal-root');
+    if (!modalRoot) {
+      toast.warning('Romaneio', 'Processo concluido aguardando Romaneio');
+      return;
+    }
+
+    modalRoot.classList.add('has-modal');
+    modalRoot.innerHTML = `
+      <div class="modal-backdrop" id="romaneio-alert-backdrop">
+        <div class="modal-dialog modal-alert-dialog" role="dialog" aria-modal="true" aria-labelledby="romaneio-alert-title">
+          <div class="modal-header modal-alert-header">
+            <div class="modal-alert-header-info">
+              <span class="modal-alert-icon">
+                ${lucide('info', { size: 20, stroke: '#1956ce', strokeWidth: 2.2 })}
+              </span>
+              <h3 class="modal-alert-title" id="romaneio-alert-title">Romaneio</h3>
+            </div>
+            <button class="modal-alert-close-btn" id="romaneio-alert-btn-close" aria-label="Fechar" title="Fechar modal">
+              ${lucide('x', { size: 16, stroke: '#64748b', strokeWidth: 2.2 })}
+            </button>
+          </div>
+          <div class="modal-body modal-alert-body">
+            <p class="modal-alert-message">Processo concluido aguardando Romaneio</p>
+          </div>
+          <div class="modal-footer modal-alert-footer">
+            <button type="button" class="btn-modal-alert-ok" id="romaneio-alert-btn-ok">OK</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const closeModal = () => {
+      modalRoot.innerHTML = '';
+      modalRoot.classList.remove('has-modal');
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') closeModal();
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    const btnOk = modalRoot.querySelector('#romaneio-alert-btn-ok');
+    const btnClose = modalRoot.querySelector('#romaneio-alert-btn-close');
+    const backdrop = modalRoot.querySelector('#romaneio-alert-backdrop');
+
+    if (btnOk) btnOk.addEventListener('click', closeModal);
+    if (btnClose) btnClose.addEventListener('click', closeModal);
+    if (backdrop) {
+      backdrop.addEventListener('click', (e) => {
+        if (e.target === backdrop) closeModal();
+      });
+    }
+
+    if (btnOk) {
+      setTimeout(() => btnOk.focus(), 50);
+    }
   }
 }

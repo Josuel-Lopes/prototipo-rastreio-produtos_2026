@@ -110,7 +110,15 @@ export const initialSpools = [
     finalizado: '-- / -- / ---- às -- : --',
     projeto: 'PRJ-VALE-CARAJAS-2026',
     etapaAtual: 'Caldeiraria (Ponteamento e Solda)',
-    historicoSucata: [],
+    historicoSucata: [
+      {
+        data: '22/11/2026',
+        processo: 'Caldeiraria',
+        motivo: 'Biselamento irregular na extremidade do tubo.',
+        usuario: 'operador_1',
+        acao: 'Retrabalho de chanfro'
+      }
+    ],
     componentes: [
       { item: '01', descricao: 'CURVA 90 GRAUS RAIO CURTO 16POL SCH80 ASTM A234 WPB', qtd: '1 UN' },
       { item: '02', descricao: 'FLANGE SOLTO (LAP JOINT) 16POL 300# FORJADO', qtd: '2 UN' },
@@ -145,8 +153,9 @@ export const initialSpools = [
     etapaAtual: 'Caldeiraria - Ajuste de Bisel Requerido',
     historicoSucata: [
       {
-        data: '23/11/2026 às 15:30',
-        motivo: 'Rebordo de bisel fora da tolerância dimensional (3.2mm vs 1.6mm especificado). Aguardando retífica e esmerilhamento.',
+        data: '23/11/2026',
+        processo: 'Corte',
+        motivo: 'Comprimento cortado 12mm além da tolerância máxima no niple de extensão.',
         usuario: 'josuellopes',
         acao: 'Pausado para retrabalho dimensional'
       }
@@ -187,8 +196,16 @@ export const initialSpools = [
     etapaAtual: 'Reprovado pelo CQ - Destinado a Sucata',
     historicoSucata: [
       {
-        data: '15/11/2026 às 12:30',
-        motivo: 'Trinca no cordão de raiz detectada no ensaio por líquido penetrante (LP) após pré-aquecimento inadequado. Descarte total reprovado pelo CQ.',
+        data: '14/11/2026',
+        processo: 'Caldeiraria',
+        motivo: 'Deformação angular no flange após aperto.',
+        usuario: 'operador_1',
+        acao: 'Tentativa de desempeno'
+      },
+      {
+        data: '15/11/2026',
+        processo: 'Solda',
+        motivo: 'Trinca no cordão de raiz detectada no ensaio por líquido penetrante (LP). Descarte total reprovado pelo CQ.',
         usuario: 'inspetor_cq',
         acao: 'Classificado como Sucata'
       }
@@ -196,6 +213,61 @@ export const initialSpools = [
     componentes: [
       { item: '01', descricao: 'FLANGE CEGO 10POL CLASSE 300 COM FURAÇÃO ESPECIAL', qtd: '1 UN' },
       { item: '02', descricao: 'NIPLE DE TESTE 2POL SCH80 NPT', qtd: '1 UN' }
+    ]
+  },
+  {
+    id: 'spool-0007',
+    sequencial: '0007',
+    codigo: 'SP-0414-00006-003',
+    descricao: 'Spool Curva 45° 20pol x SCH40 c/ Flange Sobreposto',
+    status: 'pausado',
+    inicio: '05/11/2026 às 08:00',
+    finalizado: '-- / -- / ---- às -- : --',
+    projeto: 'PRJ-VALE-CARAJAS-2026',
+    etapaAtual: 'Pausado para Retrabalho de Pintura',
+    historicoSucata: [
+      {
+        data: '05/11/2026',
+        processo: 'Corte',
+        motivo: 'Empeno térmico após corte a plasma de chanfro.',
+        usuario: 'operador_corte',
+        acao: 'Ajuste de extremidade'
+      },
+      {
+        data: '12/11/2026',
+        processo: 'Caldeiraria',
+        motivo: 'Desalinhamento angular na montagem de derivação além da norma ASME B31.3.',
+        usuario: 'operador_cald',
+        acao: 'Desponteamento e realinhamento'
+      },
+      {
+        data: '19/11/2026',
+        processo: 'Pintura',
+        motivo: 'Bolhas e destacamento de película primer por umidade superficial.',
+        usuario: 'inspetor_cq',
+        acao: 'Reprovado em CQ / Jateamento novo requerido'
+      }
+    ],
+    componentes: [
+      { item: '01', descricao: 'CURVA 45 GRAUS 20POL SCH40 A234 WPB', qtd: '1 UN' },
+      { item: '02', descricao: 'FLANGE SOBREPOSTO 20POL 150# ANSI B16.5', qtd: '1 UN' }
+    ]
+  },
+  {
+    id: 'spool-0008',
+    sequencial: '0008',
+    codigo: 'SP-0414-00007-001',
+    descricao: 'Carretel Redução Excêntrica 14pol x 10pol SCH80',
+    status: 'reservado',
+    inicio: '-- / -- / ---- às -- : --',
+    finalizado: '-- / -- / ---- às -- : --',
+    projeto: 'PRJ-PETROBRAS-SUBSEA-26',
+    etapaAtual: 'Aguardando Início na Caldeiraria',
+    historicoSucata: [],
+    componentes: [
+      { item: '01', descricao: 'REDUÇÃO EXCÊNTRICA 14X10POL SCH80 ASTM A234', qtd: '1 UN' },
+      { item: '02', descricao: 'TUBO SEM COSTURA 14POL PAREDE SCH80', qtd: '1500 MM' },
+      { item: '03', descricao: 'FLANGE PESCOÇO 14POL 300# RF', qtd: '1 UN' }
     ]
   }
 ];
@@ -286,6 +358,7 @@ export function updateSpoolStatus(codigo, novoStatus) {
   if (novoStatus === 'sucata') {
     spool.historicoSucata.push({
       data: dataFormatada,
+      processo: 'Caldeiraria',
       motivo: 'Spool descartado via operação de escaneamento de campo.',
       usuario: state.user?.username || 'operador',
       acao: 'Classificado como Sucata'

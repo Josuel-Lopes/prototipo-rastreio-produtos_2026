@@ -690,76 +690,516 @@
 }
 
 /* ==========================================================================
-   4. Tela de Caldeiraria
+   4. Tela de Caldeiraria - Fidelidade Definitiva copilot-image-177404.png
    ========================================================================== */
 .view-caldeiraria-container {
   width: 100%;
-  max-width: 1100px;
-  margin: 24px auto 0 auto;
-}
-
-.caldeiraria-search-bar {
   display: flex;
-  gap: 12px;
-  align-items: stretch;
-  margin-bottom: 16px;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
 
-.caldeiraria-search-input-wrapper {
+.card-caldeiraria {
+  width: calc(100% - 24px) !important;
+  max-width: 330px !important;
+  min-height: auto !important;
+  margin: 20px auto 30px auto !important;
+  box-sizing: border-box !important;
+  background: #ffffff !important;
+  border: 1.5px solid #7188a4 !important;
+  border-radius: 0px !important;
+  overflow: visible !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  position: relative;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 18px 12px 14px 12px !important;
+}
+
+/* Banner Informativo em Linha Única na Caldeiraria */
+.card-caldeiraria .page-info-banner-title {
+  text-transform: none !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #000000 !important;
+  margin-bottom: 4px !important;
+  letter-spacing: 0.2px !important;
+}
+
+.card-caldeiraria .page-info-banner-desc {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  font-size: 9.5px !important;
+  color: #111827 !important;
+  white-space: nowrap !important;
+}
+
+.card-caldeiraria .page-info-banner-desc-text {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  white-space: nowrap !important;
+}
+
+.card-caldeiraria .page-info-banner-desc .info-icon {
+  margin-top: 0 !important;
+  align-self: center !important;
+}
+
+.card-caldeiraria .caldeiraria-banner-text {
+  font-size: 9.5px !important;
+  color: #111827 !important;
+  white-space: nowrap !important;
+  display: inline-block !important;
+  text-align: left !important;
+  font-weight: 500 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.2px !important;
+}
+
+/* 4.1 Linha de Busca Rápida + Botão Ler QRCode */
+.caldeiraria-search-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  margin-top: 2px;
+  margin-bottom: 12px;
+  height: 44px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.caldeiraria-search-box {
   position: relative;
   flex: 1;
   display: flex;
   align-items: center;
+  height: 44px;
 }
 
-.search-icon-left {
+.caldeiraria-search-icon {
   position: absolute;
-  left: 14px;
-  color: var(--color-text-muted);
+  left: 10px;
+  color: #9ca3af;
   pointer-events: none;
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
 }
 
 .caldeiraria-search-input {
   width: 100%;
-  height: 46px;
-  padding: 10px 14px 10px 42px;
+  height: 44px;
+  padding: 0 10px 0 34px;
   border: 1px solid #d1d5db;
-  border-radius: 0px;
-  font-size: var(--font-base);
+  border-radius: 4px;
+  font-size: 13px;
+  color: #111827;
   background-color: #ffffff;
-  transition: all 0.2s ease;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.caldeiraria-search-bar #btn-caldeiraria-qrcode {
-  height: 46px;
-  border-radius: 0px;
-  background-color: #1956ce;
-  padding: 0 16px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+.caldeiraria-search-input::placeholder {
+  color: #9ca3af;
+  font-size: 13px;
 }
 
 .caldeiraria-search-input:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(0, 112, 186, 0.2);
+  border-color: #1956ce;
+  box-shadow: 0 0 0 2px rgba(25, 86, 206, 0.15);
 }
 
-.spools-list-container {
+.btn-caldeiraria-qrcode {
+  height: 44px;
+  background-color: #1956ce;
+  color: #ffffff;
+  border: none;
+  border-radius: 0px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  transition: background-color 0.15s ease;
+  user-select: none;
+}
+
+.btn-caldeiraria-qrcode:hover {
+  background-color: #1446a8;
+}
+
+.btn-caldeiraria-qrcode-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.btn-caldeiraria-qrcode-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: #ffffff !important;
+}
+
+.btn-caldeiraria-qrcode-label {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.15;
+  text-align: left;
+  color: #ffffff;
+  white-space: nowrap;
 }
 
-.empty-state-card {
+/* 4.2 Card de Instrução em Destaque */
+.caldeiraria-instruction-card {
+  background-color: #f8f9fa;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 14px 10px;
   text-align: center;
-  padding: var(--space-xxl) var(--space-lg);
-  background-color: var(--color-surface-alt);
-  border: 1px dashed #71889e;
-  border-radius: 0px;
-  color: var(--color-text-muted);
+  margin-bottom: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.caldeiraria-instruction-card .instruction-line-1,
+.caldeiraria-instruction-card .instruction-line-2 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+  line-height: 1.35;
+  display: block;
+  text-align: center;
+}
+
+/* 4.3 Bloco de Processos e Contadores (Acordeão) */
+.caldeiraria-processes-block {
+  background-color: #ebeef2;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  box-sizing: border-box;
+}
+
+.processes-block-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  cursor: pointer;
+  user-select: none;
+  background-color: #ebeef2;
+  transition: background-color 0.15s ease;
+}
+
+.processes-block-header:hover {
+  background-color: #e2e8f0;
+}
+
+.processes-chevron-box {
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid #64748b;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.processes-chevron-box svg {
+  stroke: #1e293b;
+  width: 14px;
+  height: 14px;
+}
+
+.processes-title-label {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #374151;
+  letter-spacing: 0.5px;
+}
+
+.processes-qtd-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #374151;
+  letter-spacing: 0.5px;
+  text-align: right;
+  min-width: 40px;
+}
+
+.processes-accordion-panel {
+  display: none;
+  border-top: 1px solid #cbd5e1;
+  background-color: #f8fafc;
+}
+
+.processes-accordion-panel.is-open {
+  display: block;
+}
+
+.processes-status-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.processes-status-list .process-status-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  border-bottom: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.processes-status-list .process-status-item:hover {
+  background-color: #edf2f7;
+}
+
+.processes-status-list .process-status-item.is-selected {
+  background-color: #e0e7ff;
+}
+
+.processes-status-list .status-item-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #1f2937;
+  flex: 1;
+  margin-right: 8px;
+}
+
+.processes-status-list .status-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.processes-status-list .status-name-group {
+  display: inline;
+  line-height: 1.35;
+}
+
+.processes-status-list .status-name-title {
+  font-weight: 700;
+  color: #111827;
+  font-size: 11.5px;
+  margin-right: 4px;
+}
+
+.processes-status-list .status-name-sub {
+  font-weight: 400;
+  color: #64748b;
+  font-size: 11px;
+}
+
+.processes-status-list .status-count-badge {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  background-color: #374151;
+  padding: 2px 8px;
+  border-radius: 10px;
+  min-width: 38px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+  flex-shrink: 0;
+  letter-spacing: 0.3px;
+}
+
+.processes-total-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-top: 1px solid #cbd5e1;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.04);
+  background-color: #ebeef2;
+}
+
+.processes-total-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: 0.4px;
+}
+
+.processes-total-badge {
+  background-color: #1956ce;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 11px;
+  border-radius: 10px;
+  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  text-align: center;
+  line-height: 1.2;
+  letter-spacing: 0.3px;
+}
+
+/* 4.4 Switch "Click para exibir histórico de sucata" */
+.caldeiraria-scrap-toggle-row {
+  background-color: #ebeef2;
+  border-radius: 4px;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.scrap-toggle-text {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1.25;
+}
+
+.scrap-switch-label {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 22px;
+  cursor: pointer;
+  margin: 0;
+  user-select: none;
+}
+
+.scrap-switch-input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.scrap-switch-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #dbeafe;
+  border: 1px solid #93c5fd;
+  border-radius: 20px;
+  transition: all 0.25s ease;
+  box-sizing: border-box;
+}
+
+.scrap-switch-thumb {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 18px;
+  height: 18px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.25s ease;
+}
+
+.scrap-switch-input:checked + .scrap-switch-track {
+  background-color: #1956ce;
+  border-color: #1956ce;
+}
+
+.scrap-switch-input:checked + .scrap-switch-track .scrap-switch-thumb {
+  transform: translateX(22px);
+}
+
+/* 4.5 Lista de Cards de Spool */
+.caldeiraria-spools-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.caldeiraria-active-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background-color: #e0f2fe;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+
+.caldeiraria-active-filter-bar .filter-bar-label {
+  color: #0369a1;
+  font-weight: 600;
+}
+
+.caldeiraria-active-filter-bar .filter-bar-tag {
+  color: #0c4a6e;
+  font-weight: 700;
+}
+
+.caldeiraria-active-filter-bar .btn-clear-status-filter {
+  background: none;
+  border: none;
+  color: #0284c7;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.caldeiraria-empty-state {
+  text-align: center;
+  padding: 24px 12px;
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 6px;
+  margin: 10px 0;
+  color: #64748b;
+}
+
+.caldeiraria-empty-state .empty-state-title {
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.caldeiraria-empty-state .empty-state-subtitle {
+  font-size: 12px;
+  margin: 0;
 }
