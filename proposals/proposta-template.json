@@ -178,6 +178,89 @@
   },
   "features": [
     {
+      "id": "descoberta-design-telas",
+      "phase": 0,
+      "title": "Descoberta, alinhamento e design das telas (já existente)",
+      "businessGoal": "Já existente — Alinhar o escopo com o cliente e definir o design das telas antes do desenvolvimento, reduzindo retrabalho.",
+      "steps": [
+        "Levantamento das necessidades e do processo atual junto ao cliente.",
+        "Alinhamento do escopo e das prioridades de entrega.",
+        "Definição do design e do fluxo das telas do sistema."
+      ],
+      "visuals": [],
+      "hours": 0,
+      "businessDays": 0,
+      "price": 0,
+      "assumption": "A Alvenius disponibiliza responsáveis para o levantamento e a validação do design.",
+      "status": "existing",
+      "note": "Funcionalidade já implementada e em operação no sistema atual; não compõe o investimento desta proposta.",
+      "breakdown": [
+        {
+          "area": "backend",
+          "label": "Backend",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "frontend",
+          "label": "Frontend",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "designer",
+          "label": "Designer",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "database",
+          "label": "Database",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "tests",
+          "label": "Testes",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        }
+      ],
+      "breakdownTotal": {
+        "fromScratch": 0,
+        "reused": 0,
+        "adjustments": 0,
+        "hours": 0,
+        "price": 0
+      },
+      "deliveredNote": "Módulo já entregue e em operação no ambiente do cliente. Representação visual dispensada nesta proposta, pois não há alteração de escopo."
+    },
+    {
       "id": "qr-rastreio",
       "phase": 1,
       "title": "Rastreio de Produtos por QR Code (já existente)",
