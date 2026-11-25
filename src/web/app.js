@@ -6,6 +6,7 @@
 import { HeaderComponent } from './components/header.js';
 import { toast } from './components/toast.js';
 import { ModalTransferenciaComponent } from './components/modal-transferencia.js';
+import { ModalProcessoTransferenciaComponent } from './components/modal-processo-transferencia.js';
 import { ModalQrCodeComponent } from './components/modal-qrcode.js';
 import { lucide } from './components/icons.js';
 
@@ -19,6 +20,7 @@ import { TransferenciaComponenteView } from './views/transferencia-componente-vi
 import { NovaTransferenciaView } from './views/nova-transferencia-view.js';
 
 import { getCurrentUser, setCurrentUser, logoutUser, getSpoolByCode } from './mocks/spools-mock.js';
+import { APP_VERSION } from './version.js';
 
 class App {
   constructor() {
@@ -32,6 +34,7 @@ class App {
     });
 
     this.modalTransferencia = new ModalTransferenciaComponent('modal-root');
+    this.modalProcessoTransferencia = new ModalProcessoTransferenciaComponent('modal-root');
     this.modalQrCode = new ModalQrCodeComponent('modal-root');
 
     // Inicialização das views
@@ -74,7 +77,7 @@ class App {
   }
 
   init() {
-    console.log('Alvenius Spool Management v2.7.0 iniciado.');
+    console.log(`Alvenius Spool Management ${APP_VERSION} iniciado.`);
     
     const savedUser = sessionStorage.getItem('app_user');
     if (savedUser) {
@@ -314,20 +317,34 @@ class App {
           return;
         }
 
-        const tipoLabel = tipo === 'spool' ? 'SPOOL' : 'COMPONENTE';
-        toast.info(
-          'Transferência Selecionada',
-          `Fluxo de transferência de ${tipoLabel} iniciado. Aponte o leitor para escanear a etiqueta de romaneio.`
-        );
-        // Em seguida abre o leitor de QR Code para continuar o processo
-        setTimeout(() => {
-          this.openQrCodeScanner((code) => {
-            toast.success(
-              'Transferência Concluída',
-              `Registro de movimentação do ${tipoLabel} (${code}) gerado para a expedição.`
-            );
-          });
-        }, 400);
+        if (tipo === 'spool') {
+          setTimeout(() => {
+            this.modalProcessoTransferencia.open({
+              onSelect: (processo) => {
+                const PROCESSO_LABELS = {
+                  'caldeiraria-revestimento': 'CALDEIRARIA → REVESTIMENTO',
+                  'revestimento-pintura': 'REVESTIMENTO → PINTURA',
+                  'pintura-faturamento': 'PINTURA → FATURAMENTO'
+                };
+                const label = PROCESSO_LABELS[processo] || processo;
+                toast.info(
+                  'Processo Selecionado',
+                  `Transferência de Spool: ${label}. Aponte o leitor para o QRCode.`
+                );
+                // Em seguida abre o leitor de QR Code para continuar o processo
+                setTimeout(() => {
+                  this.openQrCodeScanner((code) => {
+                    toast.success(
+                      'Transferência Concluída',
+                      `Registro de movimentação do SPOOL (${code}) gerado para ${label}.`
+                    );
+                  }, 'transferencia');
+                }, 350);
+              }
+            });
+          }, 150);
+          return;
+        }
       }
     });
   }
@@ -343,12 +360,31 @@ class App {
           return;
         }
 
-        toast.success(
-          'Avanço de Processo',
-          `Spool ${spool.codigo} avançou para a próxima etapa via transferência de ${tipo.toUpperCase()}.`
-        );
-        if (this.currentRoute === 'caldeiraria') {
-          this.views.caldeiraria.render();
+        if (tipo === 'spool') {
+          setTimeout(() => {
+            this.modalProcessoTransferencia.open({
+              onSelect: (processo) => {
+                const PROCESSO_LABELS = {
+                  'caldeiraria-revestimento': 'CALDEIRARIA → REVESTIMENTO',
+                  'revestimento-pintura': 'REVESTIMENTO → PINTURA',
+                  'pintura-faturamento': 'PINTURA → FATURAMENTO'
+                };
+                const label = PROCESSO_LABELS[processo] || processo;
+                toast.success(
+                  'Avanço de Processo',
+                  `Spool ${spool.codigo} avançou para ${label}.`
+                );
+                if (this.currentRoute === 'caldeiraria') {
+                  this.views.caldeiraria.render();
+                } else if (this.currentRoute === 'revestimento') {
+                  this.views.revestimento.render();
+                } else if (this.currentRoute === 'pintura') {
+                  this.views.pintura.render();
+                }
+              }
+            });
+          }, 150);
+          return;
         }
       }
     });

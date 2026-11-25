@@ -4,6 +4,7 @@
  */
 
 import { lucide } from '../components/icons.js';
+import { APP_VERSION } from '../version.js';
 
 export class LoginView {
   constructor(containerId = 'app-view', options = {}) {
@@ -64,7 +65,7 @@ export class LoginView {
 
           <!-- Rodapé Interno do Card -->
           <div class="login-card-footer">
-            &reg; 2026 - Alvenius Tubos e Conexões - v2.7.0
+            &reg; 2026 - Alvenius Tubos e Conexões - ${APP_VERSION}
           </div>
         </div>
 

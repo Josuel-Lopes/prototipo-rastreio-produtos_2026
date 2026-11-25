@@ -252,11 +252,11 @@ jobs:
 
 Este projeto adota as convenções do [Semantic Versioning (SemVer)](https://semver.org/lang/pt-BR/):
 
-- Versão Atual: **`v2.7.0`**
+- Versão Atual: **`v2.8.0`**
 
 ##### Histórico Recente
 
-- **`v2.7.0`**:
+- **`v2.8.0`**:
   - Implementação da tela **Criar Nova Transferência** (`copilot-image-3a2fe1.png`):
     - Acesso direto pelo botão azul "Criar Nova Transferência" na listagem de transferências de componentes.
     - PageContainer padrão Alvenius com banner informativo "Transferência", subtítulo descritivo com ícone info e separador com degradê luminoso `page-accent-line`.

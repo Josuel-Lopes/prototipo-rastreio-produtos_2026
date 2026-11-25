@@ -1,11 +1,12 @@
 /**
- * Componente Header Global & Navbar - Alvenius (v2.7.0)
+ * Componente Header Global & Navbar - Alvenius (v2.8.0)
  * Responsabilidade Única: Identidade da marca, status de autenticação, pill e rotas de topo
  * Arquitetura Unificada e Condicional sem recriação destrutiva no expandir/colapsar.
  */
 
 import { lucide } from './icons.js';
 import { PageTitle } from './page-title.js';
+import { APP_VERSION } from '../version.js';
 
 export const ICONS = {
   logout: lucide('log-out', { size: 16, strokeWidth: 2.2, className: 'header-icon-logout' }),
@@ -76,13 +77,13 @@ export class HeaderComponent {
           <div class="header-brand-section">
             <div class="header-brand-block" id="header-brand-block" title="Alvenius">
               <img src="assets/logo-alvenius-rings-clean.png" alt="Alvenius" class="brand-logo-img">
-              <span class="brand-version-sub" id="header-brand-version">v2.5.0</span>
+              <span class="brand-version-sub" id="header-brand-version">${APP_VERSION}</span>
             </div>
             
             <div class="header-brand-inline" id="header-brand-work" title="Voltar ao Início" data-nav="menu">
               <div class="header-brand-logo-col">
                 <img src="assets/logo-alvenius-rings-clean.png" alt="Alvenius" class="brand-logo-img">
-                <span class="brand-version-sub">v2.5.0</span>
+                <span class="brand-version-sub">${APP_VERSION}</span>
               </div>
               <span class="header-brand-title">RASTREIO DE PRODUTOS</span>
             </div>
