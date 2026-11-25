@@ -1,13 +1,49 @@
 {
   "meta": {
-    "id": "PROP-2026-001",
-    "version": "1.0",
-    "issuedAt": "2026-11-24",
+    "id": "PROP-2026-011",
+    "version": "1.1",
+    "issuedAt": "2026-11-25",
     "validityDays": 30,
+    "startDate": "2026-12-01",
     "currency": "BRL",
     "hourlyRate": 90,
     "hoursPerBusinessDay": 8,
-    "title": "Sistema de Rastreio de Produtos e Gestão de Spools"
+    "title": "Sistema de Rastreio de Produtos e Gestão de Spools",
+    "pricingBasis": "existing-project",
+    "pricingNote": "Projeto já existente e funcional: funcionalidades/fases anteriores ficam com 0 h / R$ 0,00; somente novas funcionalidades (adicionadas, criadas ou ajustadas) são precificadas.",
+    "schemaNotes": {
+      "additiveFields": "Campos aditivos (opcionais) introduzidos na v1.1; consumidores antigos podem ignorá-los.",
+      "features[].status": "existing | new",
+      "features[].correlationScenario": "A (reaproveitamento) | B (alteração) | C (independente); pode ser composto, ex.: \"A+B\"",
+      "features[].disciplines": "Lista por disciplina (backend, frontend, designer, database, tests) com reused/new/adjusted (textos), baseHours, reusedHours (subtraídas), adjustmentHours (somadas), hours e price finais",
+      "features[].reuseRatio": "reusedHours / baseHours do desenvolvimento (0–1)",
+      "features[].development": "Subtotal do desenvolvimento (soma das disciplinas)",
+      "features[].testsAdjustDeploy": "Itens tests, adjustments, deploy (hours, price) + total, separados do desenvolvimento",
+      "features[].visuals[].annotation": "Destaque obrigatório a marcar no print",
+      "investment.phases[].featureId": "Vínculo da fase com a funcionalidade",
+      "investment.testsAdjustDeploy": "Consolidado de Testes/Ajustes/Deploy das novas funcionalidades",
+      "investment.payment[].scope": "existing | new-features",
+      "features[].note": "Observação de status (ex.: já existente)",
+      "investment.phases[].note": "Observação de status da fase",
+      "investment.payment[].status": "active (omitido) | superseded — marcos substituídos não entram na soma",
+      "investment.payment[].dueInDays": "Vencimento em dias corridos a partir da aprovação da proposta (D+0, D+15, D+30 — parcelas quinzenais); presente apenas em marcos ativos",
+      "meta.startDate": "Data de início do projeto (ISO 8601); base para vencimentos e cronograma",
+      "investment.payment[].dueDate": "Data de vencimento (ISO 8601) = meta.startDate + dueInDays dias corridos; apenas marcos ativos",
+      "investment.sprints[].startDate/endDate": "Datas (ISO 8601) da sprint em dias úteis a partir de meta.startDate; presentes apenas em sprints com esforço",
+      "estimationMethod": "Objeto com fórmulas (hours, price, duration, testsAdjustDeploy), definições das colunas, fonte da estimativa, nota de transparência e status de validação por área (validationByArea[].status)",
+      "features[].breakdown / investment.phases[].breakdown": "Array uniforme por área: {area, label, fromScratch, reused, adjustments, hours, price, validation, note?}. reused é negativo (horas subtraídas); hours = fromScratch + reused + adjustments; price = hours × hourlyRate; validation ∈ estimationMethod.validationStatusValues",
+      "features[].breakdownTotal / investment.phases[].breakdownTotal": "Soma das colunas do breakdown {fromScratch, reused, adjustments, hours, price}",
+      "features[].testsAdjustDeployBreakdown(+Total)": "Mesmo formato de breakdown para Testes/Ajustes/Deploy (areas: tests, adjustments, deploy)",
+      "estimationMethod.sourceRepository": "URL do repositório real usado como base da estimativa",
+      "estimationMethod.referenceDocs": "Documentos internos de referência (levantamentos detalhados; não compõem o preço)",
+      "features[].dependsOn": "IDs de funcionalidades das quais esta depende",
+      "features[].prints": "Prints anotados (spec docs/designer/proposta_prints_anotacoes): [{id, title, path (desktop 1726x768; null se mobileOnly), mobilePath, mobilePath2?, rawPath, mobileOnly?, legend:[{n, type: novo|ajustado|incluso, text}], note?}]",
+      "features[].visuals[].src": "Caminho do print anotado correspondente (desktop) quando disponível; null se pendente",
+      "features[].includedItems": "Itens complementares inclusos sem cobrança: [{title, hours: 0, price: 0, note, files?, prints?}]",
+      "features[].inventory": "Inventário real do MVP: {new[], reused[], adjusted[], outOfScope[], source}",
+      "features[].breakdown[].note": "Observação da área (ex.: justificativa de ajuste fino)",
+      "features[].deliveredNote": "Texto curto exibido no lugar dos visuais em funcionalidades 'existing' (já entregues); quando presente, não renderizar placeholders de print/diagrama pendente. visuals fica [] nessas features."
+    }
   },
   "theme": {
     "navy": "#0B2545",
@@ -20,12 +56,29 @@
     "url": "https://maxcode42.com.br",
     "slogan": "Construindo seu software — Código limpo, produto no centro e entregas orgânicas contínuas.",
     "stats": [
-      { "label": "Anos de experiência", "value": "8+" },
-      { "label": "Repositórios", "value": "50" },
-      { "label": "Projetos entregues", "value": "26" },
-      { "label": "Humano + IA", "value": "100%" }
+      {
+        "label": "Anos de experiência",
+        "value": "8+"
+      },
+      {
+        "label": "Repositórios",
+        "value": "50"
+      },
+      {
+        "label": "Projetos entregues",
+        "value": "26"
+      },
+      {
+        "label": "Humano + IA",
+        "value": "100%"
+      }
     ],
-    "pillars": ["Custo", "Valor", "Tempo", "Qualidade"],
+    "pillars": [
+      "Custo",
+      "Valor",
+      "Tempo",
+      "Qualidade"
+    ],
     "engineering": [
       "Clean Architecture",
       "APIs & Microsserviços",
@@ -54,12 +107,78 @@
       "Operação simples: uso por celular ou tablet no chão de fábrica."
     ]
   },
+  "estimationMethod": {
+    "title": "Metodologia de estimativa — lógica e fonte das horas",
+    "formulas": {
+      "hours": "Horas (por área) = Do zero − Reaproveitado + Ajustes",
+      "price": "Valor = Horas × R$ 90,00",
+      "duration": "Prazo (dias úteis) = Horas ÷ 8 h/dia útil",
+      "testsAdjustDeploy": "Testes, Ajustes e Deploy para produção são estimados e apresentados em separado, com total próprio, e somados ao total da funcionalidade"
+    },
+    "definitions": {
+      "fromScratch": "Do zero: horas para construir a entrega da área como se nada existisse",
+      "reused": "Reaproveitado: horas economizadas por reúso de componentes, endpoints, layouts e estruturas já existentes (subtraídas)",
+      "adjustments": "Ajustes: horas para adaptar funcionalidades existentes impactadas pela nova entrega (somadas)"
+    },
+    "hourlyRate": 90,
+    "hoursPerBusinessDay": 8,
+    "areas": [
+      "Backend",
+      "Frontend",
+      "Designer",
+      "Database",
+      "Testes"
+    ],
+    "source": "Estimativa elaborada pelo comercial com base exclusivamente no escopo inicial da proposta e no código do repositório real (https://github.com/maxcode42/client-alvenius-rastreabilidade-produtos): tecnologias (NextJS pages router, React, TailwindCSS, Node, PostgreSQL + node-pg-migrate, Jest, integração ERP Protheus via API externa) e código que deverá ser gerado, reaproveitado ou ajustado. Referências de mercado não são base desta proposta.",
+    "transparencyNote": "Horas validadas apenas pelo escopo inicial e pelo código do repositório real. O levantamento ampliado por área (incluindo referências opcionais de mercado) está registrado nesta proposta. Mantém-se a estimativa inicial de 37 h para a Seleção de Projetos. Com base nas solicitações e no levantamento realizados em reunião com o cliente em 24/11/2026, foram adicionadas as demais fases e etapas do desenvolvimento, com a participação do desenvolvedor e do cliente. Qualquer alteração de valor só será aplicada mediante aprovação prévia e aceite do cliente Alvenius.",
+    "validationStatusValues": [
+      "estimado pelo comercial",
+      "validado",
+      "já existente"
+    ],
+    "validationByArea": [
+      {
+        "area": "backend",
+        "label": "Backend",
+        "status": "estimado pelo comercial"
+      },
+      {
+        "area": "frontend",
+        "label": "Frontend",
+        "status": "estimado pelo comercial"
+      },
+      {
+        "area": "designer",
+        "label": "Designer",
+        "status": "estimado pelo comercial"
+      },
+      {
+        "area": "database",
+        "label": "Database",
+        "status": "estimado pelo comercial"
+      },
+      {
+        "area": "tests",
+        "label": "Testes",
+        "status": "estimado pelo comercial"
+      },
+      {
+        "area": "testsAdjustDeploy",
+        "label": "Testes/Ajustes/Deploy",
+        "status": "estimado pelo comercial"
+      }
+    ],
+    "sourceRepository": "https://github.com/maxcode42/client-alvenius-rastreabilidade-produtos",
+    "referenceDocs": [
+      "_docs/estimativas/2026-11-25_selecao-projetos-estimativas-areas.md"
+    ]
+  },
   "features": [
     {
       "id": "qr-rastreio",
       "phase": 1,
-      "title": "Rastreio de Produtos por QR Code",
-      "businessGoal": "Saber em segundos o que é, onde está e em que etapa está cada peça, sem planilhas e papel.",
+      "title": "Rastreio de Produtos por QR Code (já existente)",
+      "businessGoal": "Já existente — Saber em segundos o que é, onde está e em que etapa está cada peça, sem planilhas e papel.",
       "steps": [
         "O sistema gera uma etiqueta com QR Code para cada spool/produto.",
         "O encarregado cola a etiqueta na peça.",
@@ -67,20 +186,83 @@
         "Confirma a etapa com um toque; o sistema registra data, hora e responsável.",
         "O histórico completo da peça fica disponível para consulta."
       ],
-      "visuals": [
-        { "type": "screenshot", "caption": "Tela de leitura do QR Code", "src": null },
-        { "type": "screenshot", "caption": "Modelo da etiqueta impressa", "src": null },
-        { "type": "diagram", "caption": "Fluxo de etapas da peça", "src": null }
+      "visuals": [],
+      "hours": 0,
+      "businessDays": 0,
+      "price": 0,
+      "status": "existing",
+      "note": "Funcionalidade já implementada e em operação no sistema atual; não compõe o investimento desta proposta.",
+      "breakdown": [
+        {
+          "area": "backend",
+          "label": "Backend",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "frontend",
+          "label": "Frontend",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "designer",
+          "label": "Designer",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "database",
+          "label": "Database",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "tests",
+          "label": "Testes",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        }
       ],
-      "hours": 40,
-      "businessDays": 5,
-      "price": 3600
+      "breakdownTotal": {
+        "fromScratch": 0,
+        "reused": 0,
+        "adjustments": 0,
+        "hours": 0,
+        "price": 0
+      },
+      "deliveredNote": "Módulo já entregue e em operação no ambiente do cliente. Representação visual dispensada nesta proposta, pois não há alteração de escopo."
     },
     {
       "id": "gestao-spools",
       "phase": 2,
-      "title": "Gestão de Spools e Projetos",
-      "businessGoal": "Dar visão agrupada por projeto para saber se o pedido será entregue no prazo.",
+      "title": "Gestão de Spools e Projetos (já existente)",
+      "businessGoal": "Já existente — Dar visão agrupada por projeto para saber se o pedido será entregue no prazo.",
       "steps": [
         "O gerente cadastra o projeto/pedido e seus spools (ou importa uma lista).",
         "Define prazo, prioridade e responsável.",
@@ -88,20 +270,83 @@
         "O sistema calcula automaticamente o percentual de conclusão.",
         "Atrasos e pendências ficam destacados em cores."
       ],
-      "visuals": [
-        { "type": "screenshot", "caption": "Lista de projetos com percentual de conclusão", "src": null },
-        { "type": "screenshot", "caption": "Detalhe do spool (dados, etapas, histórico)", "src": null },
-        { "type": "diagram", "caption": "Projeto → spools → etapas", "src": null }
+      "visuals": [],
+      "hours": 0,
+      "businessDays": 0,
+      "price": 0,
+      "status": "existing",
+      "note": "Funcionalidade já implementada e em operação no sistema atual; não compõe o investimento desta proposta. A nova funcionalidade \"Seleção de Projetos (pós-login)\" acrescenta apenas: tela inicial pós-login, modal de listagem/seleção de projetos (dados da API externa via backend), faixa de projeto ativo com troca de projeto e filtro dos módulos pelo projeto ativo.",
+      "breakdown": [
+        {
+          "area": "backend",
+          "label": "Backend",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "frontend",
+          "label": "Frontend",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "designer",
+          "label": "Designer",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "database",
+          "label": "Database",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "tests",
+          "label": "Testes",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        }
       ],
-      "hours": 40,
-      "businessDays": 5,
-      "price": 3600
+      "breakdownTotal": {
+        "fromScratch": 0,
+        "reused": 0,
+        "adjustments": 0,
+        "hours": 0,
+        "price": 0
+      },
+      "deliveredNote": "Módulo já entregue e em operação no ambiente do cliente. Representação visual dispensada nesta proposta, pois não há alteração de escopo."
     },
     {
       "id": "sucata-retrabalho",
       "phase": 3,
-      "title": "Controle de Sucata e Retrabalho",
-      "businessGoal": "Tornar visível o custo escondido de material descartado ou refeito e seus motivos.",
+      "title": "Controle de Sucata e Retrabalho (já existente)",
+      "businessGoal": "Já existente — Tornar visível o custo escondido de material descartado ou refeito e seus motivos.",
       "steps": [
         "Na leitura do QR Code, o operador escolhe Sucata ou Retrabalho.",
         "Informa o motivo em uma lista simples e, opcionalmente, anexa foto.",
@@ -109,75 +354,3111 @@
         "Ao resolver, o encarregado encerra a ocorrência.",
         "Relatórios mostram motivos mais frequentes e custo estimado das perdas."
       ],
-      "visuals": [
-        { "type": "screenshot", "caption": "Formulário de ocorrência", "src": null },
-        { "type": "diagram", "caption": "Gráfico de perdas por motivo", "src": null }
+      "visuals": [],
+      "hours": 0,
+      "businessDays": 0,
+      "price": 0,
+      "status": "existing",
+      "note": "Funcionalidade já implementada e em operação no sistema atual; não compõe o investimento desta proposta.",
+      "breakdown": [
+        {
+          "area": "backend",
+          "label": "Backend",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "frontend",
+          "label": "Frontend",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "designer",
+          "label": "Designer",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "database",
+          "label": "Database",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "tests",
+          "label": "Testes",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        }
       ],
-      "hours": 36,
-      "businessDays": 4.5,
-      "price": 3240
+      "breakdownTotal": {
+        "fromScratch": 0,
+        "reused": 0,
+        "adjustments": 0,
+        "hours": 0,
+        "price": 0
+      },
+      "deliveredNote": "Módulo já entregue e em operação no ambiente do cliente. Representação visual dispensada nesta proposta, pois não há alteração de escopo."
     },
     {
       "id": "painel-gerencial",
       "phase": 4,
-      "title": "Painel Gerencial",
-      "businessGoal": "Oferecer visão única da fábrica a diretores e gerentes, sem relatórios manuais.",
+      "title": "Painel Gerencial (já existente)",
+      "businessGoal": "Já existente — Oferecer visão única da fábrica a diretores e gerentes, sem relatórios manuais.",
       "steps": [
         "O gestor acessa o painel pelo navegador, no computador ou celular.",
         "Vê spools por etapa, entregas no prazo, atrasos e perdas.",
         "Filtra por projeto, cliente ou período.",
         "Exporta relatórios em PDF ou planilha."
       ],
-      "visuals": [
-        { "type": "screenshot", "caption": "Painel com indicadores principais", "src": null },
-        { "type": "screenshot", "caption": "Exemplo de relatório exportado", "src": null }
+      "visuals": [],
+      "hours": 0,
+      "businessDays": 0,
+      "price": 0,
+      "status": "existing",
+      "note": "Funcionalidade já implementada e em operação no sistema atual; não compõe o investimento desta proposta.",
+      "breakdown": [
+        {
+          "area": "backend",
+          "label": "Backend",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "frontend",
+          "label": "Frontend",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "designer",
+          "label": "Designer",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "database",
+          "label": "Database",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "tests",
+          "label": "Testes",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        }
       ],
-      "hours": 48,
-      "businessDays": 6,
-      "price": 4320
+      "breakdownTotal": {
+        "fromScratch": 0,
+        "reused": 0,
+        "adjustments": 0,
+        "hours": 0,
+        "price": 0
+      },
+      "deliveredNote": "Módulo já entregue e em operação no ambiente do cliente. Representação visual dispensada nesta proposta, pois não há alteração de escopo."
     },
     {
       "id": "integracao-erp",
       "phase": 5,
-      "title": "Integração com o ERP / Sistema Atual",
-      "businessGoal": "Eliminar digitação dupla, reduzindo erros e perda de tempo.",
+      "title": "Integração com o ERP / Sistema Atual (já existente)",
+      "businessGoal": "Já existente — Eliminar digitação dupla, reduzindo erros e perda de tempo.",
       "steps": [
         "O sistema recebe automaticamente pedidos e cadastros já existentes.",
         "Na expedição do spool, o status retorna ao sistema atual.",
         "Falhas de comunicação são registradas e reenviadas automaticamente."
       ],
-      "visuals": [
-        { "type": "diagram", "caption": "Integração entre os sistemas", "src": null },
-        { "type": "screenshot", "caption": "Monitoramento das integrações", "src": null }
+      "visuals": [],
+      "hours": 0,
+      "businessDays": 0,
+      "price": 0,
+      "assumption": "A Alvenius disponibiliza acesso e documentação do sistema a ser integrado.",
+      "status": "existing",
+      "note": "Funcionalidade já implementada e em operação no sistema atual; não compõe o investimento desta proposta.",
+      "breakdown": [
+        {
+          "area": "backend",
+          "label": "Backend",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "frontend",
+          "label": "Frontend",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "designer",
+          "label": "Designer",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "database",
+          "label": "Database",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        },
+        {
+          "area": "tests",
+          "label": "Testes",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "já existente",
+          "note": "Já existente — implementado e em operação; não compõe o investimento."
+        }
       ],
-      "hours": 36,
-      "businessDays": 4.5,
-      "price": 3240,
-      "assumption": "A Alvenius disponibiliza acesso e documentação do sistema a ser integrado."
+      "breakdownTotal": {
+        "fromScratch": 0,
+        "reused": 0,
+        "adjustments": 0,
+        "hours": 0,
+        "price": 0
+      },
+      "deliveredNote": "Módulo já entregue e em operação no ambiente do cliente. Representação visual dispensada nesta proposta, pois não há alteração de escopo."
+    },
+    {
+      "id": "selecao-projetos",
+      "phase": 7,
+      "status": "new",
+      "title": "Seleção de Projetos (pós-login)",
+      "label": "Fase 7 – Seleção de Projetos (pós-login)",
+      "businessGoal": "Contextualizar toda a operação por projeto: o usuário escolhe o projeto logo após o login e todos os módulos passam a trabalhar no projeto ativo, evitando registros no projeto errado.",
+      "steps": [
+        "O usuário faz login (fluxo existente).",
+        "É exibida a nova tela inicial, no mesmo padrão do menu atual, com 2 opções: Listar Projetos e Validar QRCode.",
+        "Em Listar Projetos, abre-se um modal com cards de projetos (número, status, código, cliente, início/previsão, descrição e contador de spools), carregados da API externa via backend.",
+        "Ao escolher um projeto, abre-se o menu atual (Cadastro, Caldeiraria, Revestimento, Pintura, Transferência) com nome e código do projeto no topo; Validar QRCode deixa de constar nesse menu.",
+        "A qualquer momento o usuário pode usar Trocar projeto; o projeto ativo fica salvo apenas na sessão (sem banco) e é limpo no logout."
+      ],
+      "visuals": [
+        {
+          "type": "screenshot",
+          "caption": "Nova tela inicial pós-login",
+          "annotation": "Destacar card Listar Projetos e card Validar QRCode (nova tela)",
+          "src": "proposals/prints/fase-1/01-home-projetos.png"
+        },
+        {
+          "type": "screenshot",
+          "caption": "Modal Listar Projetos",
+          "annotation": "Destacar modal e um card de projeto (número, status, código, cliente, datas, contador de spools)",
+          "src": "proposals/prints/fase-1/02-modal-projetos.png"
+        },
+        {
+          "type": "screenshot",
+          "caption": "Menu de módulos com projeto ativo",
+          "annotation": "Destacar faixa nome/código do projeto no topo e ação Trocar projeto; anotar remoção de Validar QRCode do menu",
+          "src": "proposals/prints/fase-1/03-menu-projeto-ativo.png"
+        },
+        {
+          "type": "diagram",
+          "caption": "Fluxo Login → Seleção → Projeto → Menu",
+          "annotation": "Destacar etapas novas (Seleção e Projeto ativo)",
+          "src": null
+        }
+      ],
+      "correlationScenario": "A+B",
+      "correlationNote": "A (reaproveitamento): login, menu, cards, modal, design system e cliente da API externa. B (alteração): menu atual, fluxo pós-login e endpoints/módulos passam a usar projectId. Não é C: depende do fluxo existente.",
+      "disciplines": [
+        {
+          "discipline": "backend",
+          "label": "Backend (NodeJS)",
+          "reused": [
+            "Autenticação/sessão e gestão de login em PostgreSQL",
+            "Cliente HTTP da API externa e padrão de tratamento/normalização de dados",
+            "Estrutura de rotas/controllers existente"
+          ],
+          "new": [
+            "GET /api/projects: busca projetos na API externa, normaliza (número, status, código, cliente, início/previsão, descrição) e calcula contador de spools",
+            "GET /api/projects/:id para validar/carregar o projeto ativo"
+          ],
+          "adjusted": [
+            "Endpoints de módulos (Cadastro, Caldeiraria, Revestimento, Pintura, Transferência) passam a receber/filtrar por projectId"
+          ],
+          "baseHours": 9,
+          "reusedHours": 3,
+          "adjustmentHours": 2,
+          "hours": 8,
+          "price": 720
+        },
+        {
+          "discipline": "frontend",
+          "label": "Frontend (NextJS/React/Tailwind)",
+          "reused": [
+            "Layout/cards do menu atual (module-card)",
+            "Card de spool (spool-card) como base do card de projeto",
+            "Padrão de modal existente",
+            "Header, sessão de login e consumo da API do backend"
+          ],
+          "new": [
+            "Tela inicial pós-login com 2 opções: Listar Projetos e Validar QRCode",
+            "Modal Listar Projetos com cards de projeto",
+            "Faixa no topo com nome e código do projeto ativo + ação Trocar projeto"
+          ],
+          "adjusted": [
+            "Menu atual: remoção de Validar QRCode e exibição do projeto ativo",
+            "Fluxo pós-login redireciona para a nova tela inicial",
+            "Projeto ativo persistido na sessão; logout limpa o projeto",
+            "Chamadas dos módulos enviam projectId"
+          ],
+          "baseHours": 16,
+          "reusedHours": 5,
+          "adjustmentHours": 2,
+          "hours": 13,
+          "price": 1170
+        },
+        {
+          "discipline": "designer",
+          "label": "Designer (UI/UX)",
+          "reused": [
+            "Design system, cores, tipografia e ícones",
+            "Cards de módulo e de spool",
+            "Padrão de modal"
+          ],
+          "new": [
+            "Layout da tela de seleção (2 opções)",
+            "Layout do modal de projetos e da faixa de projeto ativo"
+          ],
+          "adjusted": [
+            "Menu atual sem Validar QRCode e com faixa de projeto"
+          ],
+          "baseHours": 5,
+          "reusedHours": 3,
+          "adjustmentHours": 1,
+          "hours": 3,
+          "price": 270
+        },
+        {
+          "discipline": "database",
+          "label": "Database (PostgreSQL)",
+          "reused": [
+            "Tabelas existentes de usuários/login"
+          ],
+          "new": [],
+          "adjusted": [
+            "Sem alteração: nesta fase não há persistência; os dados de projetos são consumidos da API externa, tratados no backend e fornecidos via API ao frontend."
+          ],
+          "baseHours": 0,
+          "reusedHours": 0,
+          "adjustmentHours": 0,
+          "hours": 0,
+          "price": 0
+        },
+        {
+          "discipline": "tests",
+          "label": "Testes (desenvolvimento)",
+          "reused": [
+            "Estrutura de testes existente"
+          ],
+          "new": [
+            "Testes unitários/integração do endpoint de projetos e dos componentes de seleção"
+          ],
+          "adjusted": [
+            "Ajuste de testes dos módulos impactados por projectId"
+          ],
+          "baseHours": 4,
+          "reusedHours": 1,
+          "adjustmentHours": 1,
+          "hours": 4,
+          "price": 360
+        }
+      ],
+      "reuseRatio": 0.35,
+      "development": {
+        "baseHours": 34,
+        "reusedHours": 12,
+        "adjustmentHours": 6,
+        "hours": 28,
+        "price": 2520
+      },
+      "testsAdjustDeploy": {
+        "tests": {
+          "hours": 4,
+          "price": 360
+        },
+        "adjustments": {
+          "hours": 3,
+          "price": 270
+        },
+        "deploy": {
+          "hours": 2,
+          "price": 180
+        },
+        "total": {
+          "hours": 9,
+          "price": 810
+        }
+      },
+      "hours": 37,
+      "businessDays": 4.625,
+      "price": 3330,
+      "assumptions": [
+        "Backend estimado pelo comercial com base no escopo inicial e no código do repositório real (NodeJS + PostgreSQL; padrões infra/provider/api-protheus, adapters/api-protheus, models, pages/api/v1).",
+        "Contador de spools obtido da API externa (ou agregado no backend sem persistência).",
+        "Frontend estimado com base nos componentes existentes (module-card, spool-card, modal, header) em reaproveitamento no MVP.",
+        "Sem persistência em banco nesta fase: projeto ativo apenas na sessão; dados de projetos sempre da API externa via backend.",
+        "Endpoint de projetos no Protheus (listagem/consulta via wsrastreio) e filtro por projeto nos endpoints existentes são responsabilidade da Alvenius e devem estar disponíveis antes do desenvolvimento.",
+        "\"Trocar projeto\" no menu lateral é complemento incluso na Fase 7 – Seleção de Projetos (0 h, sem cobrança adicional)."
+      ],
+      "breakdown": [
+        {
+          "area": "backend",
+          "label": "Backend",
+          "fromScratch": 9,
+          "reused": -3,
+          "adjustments": 2,
+          "hours": 8,
+          "price": 720,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "frontend",
+          "label": "Frontend",
+          "fromScratch": 16,
+          "reused": -5,
+          "adjustments": 2,
+          "hours": 13,
+          "price": 1170,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "designer",
+          "label": "Designer",
+          "fromScratch": 5,
+          "reused": -3,
+          "adjustments": 1,
+          "hours": 3,
+          "price": 270,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "database",
+          "label": "Database",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "estimado pelo comercial",
+          "note": "Sem persistência nesta fase: dados consumidos da API externa via backend."
+        },
+        {
+          "area": "tests",
+          "label": "Testes",
+          "fromScratch": 4,
+          "reused": -1,
+          "adjustments": 1,
+          "hours": 4,
+          "price": 360,
+          "validation": "estimado pelo comercial"
+        }
+      ],
+      "breakdownTotal": {
+        "fromScratch": 34,
+        "reused": -12,
+        "adjustments": 6,
+        "hours": 28,
+        "price": 2520
+      },
+      "testsAdjustDeployBreakdown": [
+        {
+          "area": "tests",
+          "label": "Testes (homologação/E2E/regressão)",
+          "fromScratch": 4,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 4,
+          "price": 360,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "adjustments",
+          "label": "Ajustes (pós-homologação)",
+          "fromScratch": 3,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 3,
+          "price": 270,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "deploy",
+          "label": "Deploy para produção",
+          "fromScratch": 2,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 2,
+          "price": 180,
+          "validation": "estimado pelo comercial"
+        }
+      ],
+      "testsAdjustDeployBreakdownTotal": {
+        "fromScratch": 9,
+        "reused": 0,
+        "adjustments": 0,
+        "hours": 9,
+        "price": 810
+      },
+      "prints": [
+        {
+          "id": "01-home-projetos",
+          "title": "Home pós-login",
+          "path": "proposals/prints/fase-1/01-home-projetos.png",
+          "mobilePath": "proposals/prints/fase-1/01-home-projetos-mobile.png",
+          "rawPath": "proposals/prints/fase-1/_raw/01-home-projetos.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Card LISTAR PROJETOS abre a lista de projetos"
+            },
+            {
+              "n": 2,
+              "type": "novo",
+              "text": "VALIDAR QRCODE disponível já na home pós-login"
+            }
+          ]
+        },
+        {
+          "id": "02-modal-projetos",
+          "title": "Modal de projetos",
+          "path": "proposals/prints/fase-1/02-modal-projetos.png",
+          "mobilePath": "proposals/prints/fase-1/02-modal-projetos-mobile.png",
+          "rawPath": "proposals/prints/fase-1/_raw/02-modal-projetos.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Card de projeto: código, nome, cliente e status"
+            },
+            {
+              "n": 2,
+              "type": "novo",
+              "text": "Barra de progresso com % de spools concluídos"
+            }
+          ]
+        },
+        {
+          "id": "03-menu-projeto-ativo",
+          "title": "Menu com projeto ativo",
+          "path": "proposals/prints/fase-1/03-menu-projeto-ativo.png",
+          "mobilePath": "proposals/prints/fase-1/03-menu-projeto-ativo-mobile.png",
+          "rawPath": "proposals/prints/fase-1/_raw/03-menu-projeto-ativo.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Bloco PROJETO ATIVO no topo do menu"
+            },
+            {
+              "n": 2,
+              "type": "novo",
+              "text": "Botão Trocar projeto volta à home de projetos"
+            }
+          ]
+        },
+        {
+          "id": "04-menu-sem-validar-qrcode",
+          "title": "Menu sem Validar QRCode",
+          "path": "proposals/prints/fase-1/04-menu-sem-validar-qrcode.png",
+          "mobilePath": "proposals/prints/fase-1/04-menu-sem-validar-qrcode-mobile.png",
+          "rawPath": "proposals/prints/fase-1/_raw/04-menu-sem-validar-qrcode.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "ajustado",
+              "text": "Validar QRCode saiu do menu (foi para a home)"
+            }
+          ]
+        },
+        {
+          "id": "05-drawer-trocar-projeto-mobile",
+          "title": "Menu lateral – Trocar projeto (complemento incluso)",
+          "path": null,
+          "mobilePath": "proposals/prints/fase-1/05-drawer-trocar-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-1/_raw/05-drawer-trocar-projeto-mobile.png",
+          "mobileOnly": true,
+          "legend": [
+            {
+              "n": 1,
+              "type": "incluso",
+              "text": "Projeto ativo exibido no menu lateral"
+            },
+            {
+              "n": 2,
+              "type": "incluso",
+              "text": "Item TROCAR PROJETO no menu lateral"
+            }
+          ]
+        },
+        {
+          "id": "06-drawer-home-trocar-projeto-mobile",
+          "title": "Menu lateral da home – Trocar projeto (complemento incluso)",
+          "path": null,
+          "mobilePath": "proposals/prints/fase-1/06-drawer-home-trocar-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-1/_raw/06-drawer-home-trocar-projeto-mobile.png",
+          "mobileOnly": true,
+          "legend": [
+            {
+              "n": 1,
+              "type": "incluso",
+              "text": "Projeto ativo no menu lateral da home"
+            },
+            {
+              "n": 2,
+              "type": "incluso",
+              "text": "Atalho TROCAR PROJETO no menu da home"
+            }
+          ]
+        }
+      ],
+      "includedItems": [
+        {
+          "title": "Trocar projeto + projeto ativo no menu lateral",
+          "hours": 0,
+          "price": 0,
+          "note": "Complemento da Fase 7 – Seleção de Projetos (incluso, sem cobrança adicional); 0 h, não altera horas/valor das Fases 7–8.",
+          "files": [
+            "header.js",
+            "header.css",
+            "app.js"
+          ],
+          "prints": [
+            "proposals/prints/fase-1/05-drawer-trocar-projeto-mobile.png",
+            "proposals/prints/fase-1/06-drawer-home-trocar-projeto-mobile.png"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vincular-cadastro-projeto",
+      "phase": 9,
+      "status": "new",
+      "title": "Vincular Cadastro ao Projeto",
+      "label": "Fase 9 – Vincular Cadastro ao Projeto",
+      "businessGoal": "Garantir que todo spool/componente cadastrado pertença ao projeto ativo, exibindo o projeto em cards, na leitura de QRCode e na validação, com listas sempre filtradas pelo projeto.",
+      "steps": [
+        "Com o projeto ativo selecionado (Fase 7), o usuário abre o Cadastro.",
+        "A modal de leitura de QRCode exibe no topo o projeto ativo; o spool/componente lido é cadastrado já vinculado a ele.",
+        "O backend envia o código do projeto ao Protheus junto com o cadastro (sem gravação em banco local).",
+        "Os cards de spool/componente exibem um badge com código + nome do projeto; as listas mostram apenas itens do projeto ativo.",
+        "Em Validar QRCode, o sistema mostra o projeto ao qual o spool pertence.",
+        "Sem projeto ativo, o usuário é redirecionado para a seleção de projetos."
+      ],
+      "visuals": [
+        {
+          "type": "screenshot",
+          "caption": "Card de spool com projeto",
+          "annotation": "Destacar badge de projeto (código + nome) no card",
+          "src": "proposals/prints/fase-2/05-lista-filtrada-projeto.png"
+        },
+        {
+          "type": "screenshot",
+          "caption": "Modal de leitura de QRCode no cadastro",
+          "annotation": "Destacar projeto ativo no topo da modal QRCode",
+          "src": "proposals/prints/fase-2/02-modal-qrcode-projeto-ativo.png"
+        },
+        {
+          "type": "screenshot",
+          "caption": "Validar QRCode",
+          "annotation": "Destacar bloco \"Projeto do spool\"",
+          "src": "proposals/prints/fase-2/03-validar-qrcode-projeto-spool.png"
+        },
+        {
+          "type": "diagram",
+          "caption": "Cadastro → Protheus com vínculo de projeto",
+          "annotation": "Destacar envio do código do projeto no payload",
+          "src": null
+        }
+      ],
+      "correlationScenario": "A+B",
+      "correlationNote": "A (reaproveitamento da Fase 7): contexto de projeto ativo, guard, faixa, card/badge de projeto, endpoint /api/v1/project e filtro por projectCode. B (alteração): cadastro (register), modais de QRCode, cards de spool e Validar QRCode.",
+      "dependsOn": [
+        "selecao-projetos"
+      ],
+      "disciplines": [
+        {
+          "discipline": "backend",
+          "label": "Backend (NodeJS)",
+          "reused": [
+            "Sessão/token Protheus e padrão next-connect (pages/api/v1/register)",
+            "Provider infra/provider/api-protheus (handleSend/retry/timeout)",
+            "Filtro por projectCode nos models (Fase 7)",
+            "Endpoint /api/v1/project (Fase 7)"
+          ],
+          "new": [
+            "Validação: cadastro sem projeto ativo é rejeitado (400) em pages/api/v1/register"
+          ],
+          "adjusted": [
+            "models/register.js: payload QrCode passa a enviar o código do projeto ao Protheus",
+            "adapters/api-protheus/response: parse de spool/componente inclui código e nome do projeto",
+            "models/component.js / rota component/[code]: retorna o projeto do spool para Validar QRCode"
+          ],
+          "baseHours": 7,
+          "reusedHours": 3,
+          "adjustmentHours": 2,
+          "hours": 6,
+          "price": 540
+        },
+        {
+          "discipline": "frontend",
+          "label": "Frontend (NextJS/React/Tailwind)",
+          "reused": [
+            "Contexto de projeto ativo, guard e faixa de projeto (Fase 7)",
+            "Card de projeto/badge de status (Fase 7)",
+            "Modais de QRCode existentes (components/ui/modal/qr-code-register, qr-code-flow)",
+            "Cards de spool (components/ui/card-item, card-items-header)"
+          ],
+          "new": [
+            "Badge de projeto (código + nome) nos cards de spool/componente",
+            "Cabeçalho de projeto ativo na modal de leitura de QRCode",
+            "Bloco \"Projeto do spool\" em Validar QRCode"
+          ],
+          "adjusted": [
+            "components/container/process-register: envia o projeto ativo no cadastro",
+            "pages/validates-qrcode: exibe o projeto retornado",
+            "Listas dos módulos filtradas pelo projeto ativo",
+            "Guard sem projeto → redireciona para a seleção"
+          ],
+          "baseHours": 14,
+          "reusedHours": 5,
+          "adjustmentHours": 2,
+          "hours": 11,
+          "price": 990
+        },
+        {
+          "discipline": "designer",
+          "label": "Designer (UI/UX)",
+          "reused": [
+            "Faixa e card de projeto da Fase 7",
+            "Design system, cores de status e modais existentes"
+          ],
+          "new": [
+            "Badge de projeto no card",
+            "Cabeçalho de projeto na modal QRCode"
+          ],
+          "adjusted": [
+            "Validar QRCode com bloco de projeto"
+          ],
+          "baseHours": 4,
+          "reusedHours": 2,
+          "adjustmentHours": 0,
+          "hours": 2,
+          "price": 180
+        },
+        {
+          "discipline": "database",
+          "label": "Database (PostgreSQL)",
+          "reused": [
+            "Tabelas de usuários/sessões"
+          ],
+          "new": [],
+          "adjusted": [
+            "Sem alteração: vínculo spool↔projeto gravado e consultado no Protheus via backend; nenhuma tabela/migration nova."
+          ],
+          "baseHours": 0,
+          "reusedHours": 0,
+          "adjustmentHours": 0,
+          "hours": 0,
+          "price": 0
+        },
+        {
+          "discipline": "tests",
+          "label": "Testes (desenvolvimento)",
+          "reused": [
+            "Mocks Protheus e testes de register/component existentes (tests/integration, tests/unit)",
+            "Mocks de projetos da Fase 7"
+          ],
+          "new": [
+            "Caso de cadastro sem projeto (400)"
+          ],
+          "adjusted": [
+            "tests/**/register/post.test.js e component/[code]/get.test.js passam a validar o projeto; mocks em tests/mocks/api-protheus/http-setup.js"
+          ],
+          "baseHours": 4,
+          "reusedHours": 1,
+          "adjustmentHours": 1,
+          "hours": 4,
+          "price": 360
+        }
+      ],
+      "reuseRatio": 0.38,
+      "development": {
+        "baseHours": 29,
+        "reusedHours": 11,
+        "adjustmentHours": 5,
+        "hours": 23,
+        "price": 2070
+      },
+      "testsAdjustDeploy": {
+        "tests": {
+          "hours": 3,
+          "price": 270
+        },
+        "adjustments": {
+          "hours": 2,
+          "price": 180
+        },
+        "deploy": {
+          "hours": 2,
+          "price": 180
+        },
+        "total": {
+          "hours": 7,
+          "price": 630
+        }
+      },
+      "breakdown": [
+        {
+          "area": "backend",
+          "label": "Backend",
+          "fromScratch": 7,
+          "reused": -3,
+          "adjustments": 2,
+          "hours": 6,
+          "price": 540,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "frontend",
+          "label": "Frontend",
+          "fromScratch": 14,
+          "reused": -5,
+          "adjustments": 2,
+          "hours": 11,
+          "price": 990,
+          "validation": "estimado pelo comercial",
+          "note": "Horas mantidas após ajuste fino com o inventário real do MVP: itens novos (project-tag, guard, faixa na modal, lookup, bloqueio de duplicidade) compensados pelo reaproveitamento de spool-card, process-stage-view, modal, toast e helpers da Fase 7; fora: contadores do menu e cards de transferência."
+        },
+        {
+          "area": "designer",
+          "label": "Designer",
+          "fromScratch": 4,
+          "reused": -2,
+          "adjustments": 0,
+          "hours": 2,
+          "price": 180,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "database",
+          "label": "Database",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "estimado pelo comercial",
+          "note": "Sem persistência: o vínculo é gravado no Protheus no payload de cadastro."
+        },
+        {
+          "area": "tests",
+          "label": "Testes",
+          "fromScratch": 4,
+          "reused": -1,
+          "adjustments": 1,
+          "hours": 4,
+          "price": 360,
+          "validation": "estimado pelo comercial"
+        }
+      ],
+      "breakdownTotal": {
+        "fromScratch": 29,
+        "reused": -11,
+        "adjustments": 5,
+        "hours": 23,
+        "price": 2070
+      },
+      "testsAdjustDeployBreakdown": [
+        {
+          "area": "tests",
+          "label": "Testes (homologação/E2E/regressão do cadastro e módulos)",
+          "fromScratch": 3,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 3,
+          "price": 270,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "adjustments",
+          "label": "Ajustes (pós-homologação)",
+          "fromScratch": 2,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 2,
+          "price": 180,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "deploy",
+          "label": "Deploy para produção",
+          "fromScratch": 2,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 2,
+          "price": 180,
+          "validation": "estimado pelo comercial"
+        }
+      ],
+      "testsAdjustDeployBreakdownTotal": {
+        "fromScratch": 7,
+        "reused": 0,
+        "adjustments": 0,
+        "hours": 7,
+        "price": 630
+      },
+      "hours": 30,
+      "businessDays": 3.75,
+      "price": 2700,
+      "assumptions": [
+        "Estimativa do comercial com base no escopo inicial e no código do repositório real (models/register.js, pages/api/v1/register, components/container/process-register, components/ui/modal/qr-code-*, components/ui/card-item, pages/validates-qrcode).",
+        "O Protheus aceita o código do projeto no payload de cadastro (wsrastreio) e retorna o projeto nas consultas de spool/componente — responsabilidade da Alvenius, fora do escopo.",
+        "Sem persistência em banco local: o vínculo spool↔projeto é gravado e consultado no Protheus.",
+        "Depende da Fase 7 (Seleção de Projetos); horas a ajustar após inventário real do MVP pelo frontend.",
+        "Ajuste fino com inventário real do MVP (frontend): horas mantidas em 30 h / R$ 2.700,00."
+      ],
+      "prints": [
+        {
+          "id": "01-cadastro-tag-projeto",
+          "title": "Cadastro com projeto",
+          "path": "proposals/prints/fase-2/01-cadastro-tag-projeto.png",
+          "mobilePath": "proposals/prints/fase-2/01-cadastro-tag-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-2/_raw/01-cadastro-tag-projeto.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Projeto ativo exibido no topo do cadastro"
+            }
+          ],
+          "note": "Lista de spools do cadastro vazia na demo; a tag nos cards aparece no print 05."
+        },
+        {
+          "id": "02-modal-qrcode-projeto-ativo",
+          "title": "Modal QRCode com projeto",
+          "path": "proposals/prints/fase-2/02-modal-qrcode-projeto-ativo.png",
+          "mobilePath": "proposals/prints/fase-2/02-modal-qrcode-projeto-ativo-mobile.png",
+          "rawPath": "proposals/prints/fase-2/_raw/02-modal-qrcode-projeto-ativo.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Projeto ativo no topo da modal de QRCode"
+            }
+          ],
+          "note": "Recapturado em 2026-11-25 após as Fases 11–12 (somente marcações das Fases 9–10)."
+        },
+        {
+          "id": "03-validar-qrcode-projeto-spool",
+          "title": "Validar QRCode – spool com projeto",
+          "path": "proposals/prints/fase-2/03-validar-qrcode-projeto-spool.png",
+          "mobilePath": "proposals/prints/fase-2/03-validar-qrcode-projeto-spool-mobile.png",
+          "rawPath": "proposals/prints/fase-2/_raw/03-validar-qrcode-projeto-spool.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Projeto do spool lido exibido na validação"
+            }
+          ]
+        },
+        {
+          "id": "04-validar-qrcode-spool-sem-projeto",
+          "title": "Validar QRCode – spool sem projeto",
+          "path": "proposals/prints/fase-2/04-validar-qrcode-spool-sem-projeto.png",
+          "mobilePath": "proposals/prints/fase-2/04-validar-qrcode-spool-sem-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-2/_raw/04-validar-qrcode-spool-sem-projeto.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Aviso quando o spool não tem projeto vinculado"
+            }
+          ]
+        },
+        {
+          "id": "05-lista-filtrada-projeto",
+          "title": "Lista filtrada pelo projeto",
+          "path": "proposals/prints/fase-2/05-lista-filtrada-projeto.png",
+          "mobilePath": "proposals/prints/fase-2/05-lista-filtrada-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-2/_raw/05-lista-filtrada-projeto.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "ajustado",
+              "text": "Lista mostra só spools do projeto ativo"
+            },
+            {
+              "n": 2,
+              "type": "novo",
+              "text": "Tag confirma o projeto de cada spool"
+            }
+          ],
+          "note": "Recapturado em 2026-11-25 após as Fases 11–12 (somente marcações das Fases 9–10)."
+        },
+        {
+          "id": "06-modal-cadastro-leitura-projeto",
+          "title": "Leitura no cadastro",
+          "path": "proposals/prints/fase-2/06-modal-cadastro-leitura-projeto.png",
+          "mobilePath": "proposals/prints/fase-2/06-modal-cadastro-leitura-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-2/_raw/06-modal-cadastro-leitura-projeto.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Projeto ativo que será vinculado ao cadastro"
+            },
+            {
+              "n": 2,
+              "type": "ajustado",
+              "text": "Confirmação no visor: spool lido e componentes"
+            }
+          ]
+        },
+        {
+          "id": "07-validar-leitor-sucesso-projeto",
+          "title": "Validar QRCode – leitor",
+          "path": "proposals/prints/fase-2/07-validar-leitor-sucesso-projeto.png",
+          "mobilePath": "proposals/prints/fase-2/07-validar-leitor-sucesso-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-2/_raw/07-validar-leitor-sucesso-projeto.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "QRCode válido com o projeto do spool no visor"
+            }
+          ]
+        }
+      ],
+      "inventory": {
+        "new": [
+          "components/project-tag.js (badge reutilizado em cards, cadastro, modal QRCode e validação)",
+          "Guard de rotas PROJECT_ROUTES (sem projeto → seleção)",
+          "Faixa \"Projeto ativo\" na modal QRCode + lookup do projeto do spool no Validar QRCode",
+          "Gravação do cadastro com projeto + bloqueio de duplicidade"
+        ],
+        "reused": [
+          "spool-card",
+          "process-stage-view (filtro/busca)",
+          "cards da modal QRCode",
+          "toast",
+          "getActiveProject / getProjectRef (Fase 7)"
+        ],
+        "adjusted": [
+          "spools-mock (projetoId, getSpoolsByProject, addSpool)",
+          "modal-qrcode (payload com projeto)",
+          "process-stage-view (filtro por projeto + empty state)",
+          "CSS (components/modals/views)"
+        ],
+        "outOfScope": [
+          "Contadores do menu por projeto",
+          "Projeto nos cards de transferência"
+        ],
+        "source": "Inventário real do MVP reportado pelo frontend (2026-11-25)"
+      }
+    },
+    {
+      "id": "vincular-etapas-projeto",
+      "phase": 11,
+      "status": "new",
+      "title": "Vincular Etapas ao Projeto",
+      "label": "Fase 11 – Vincular Etapas (Caldeiraria, Revestimento, Pintura) ao Projeto",
+      "businessGoal": "Garantir que as movimentações de Caldeiraria, Revestimento e Pintura ocorram somente para spools do projeto ativo, com contadores por projeto e bloqueio de spools de outro projeto.",
+      "steps": [
+        "Com o projeto ativo (Fase 7), o usuário abre uma etapa (Caldeiraria, Revestimento ou Pintura).",
+        "O topo da etapa exibe a faixa \"Projeto ativo\" e os contadores passam a considerar apenas o projeto.",
+        "Na leitura de QRCode da etapa, a modal mostra o projeto ativo no topo.",
+        "Se o spool lido pertencer a outro projeto, a ação é bloqueada: aviso com o projeto do spool, toast e botão desabilitado.",
+        "Ao avançar o status, a movimentação é enviada ao Protheus com o código do projeto (sem gravação em banco local).",
+        "Sem projeto ativo, a etapa redireciona para a seleção de projetos."
+      ],
+      "visuals": [
+        {
+          "type": "screenshot",
+          "caption": "Etapa com projeto ativo e contadores",
+          "annotation": "Destacar faixa Projeto ativo e contadores por projeto",
+          "src": "proposals/prints/fase-3/01-caldeiraria-projeto.png"
+        },
+        {
+          "type": "screenshot",
+          "caption": "Modal QRCode da etapa – spool de outro projeto",
+          "annotation": "Destacar aviso com o projeto do spool e ação desabilitada",
+          "src": "proposals/prints/fase-3/05-spool-outro-projeto-bloqueado.png"
+        },
+        {
+          "type": "diagram",
+          "caption": "Etapa → Protheus com projeto na movimentação",
+          "annotation": "Destacar validação spool×projeto e envio do projeto",
+          "src": null
+        }
+      ],
+      "correlationScenario": "A+B",
+      "correlationNote": "A (reaproveitamento das Fases 7–10): ProjectTag, helpers de projeto, tag nos cards, getSpoolsByProject, projeto do spool retornado pelo Protheus, ProcessesAccordion, toasts. B (alteração): process-stage-view, modal-qrcode (modo etapa) e models das 3 etapas. As 3 etapas compartilham o mesmo componente e models de mesmo padrão (44 linhas cada), por isso o custo não triplica.",
+      "dependsOn": [
+        "selecao-projetos",
+        "vincular-cadastro-projeto"
+      ],
+      "disciplines": [
+        {
+          "discipline": "backend",
+          "label": "Backend (NodeJS)",
+          "reused": [
+            "Sessão/token Protheus e padrão next-connect (pages/api/v1/boilermaking|coating|painting)",
+            "Provider infra/provider/api-protheus e adapters de resposta",
+            "Projeto do spool retornado pelo Protheus (Fase 9) e filtro por projectCode (Fase 7)"
+          ],
+          "new": [
+            "Validação spool×projeto ativo nas rotas de etapa: spool de outro projeto é rejeitado (409) com o projeto dele na resposta"
+          ],
+          "adjusted": [
+            "models/boilermaking.js, coating.js, painting.js: movimentação envia o código do projeto ao Protheus",
+            "Contadores das etapas por projeto (consulta filtrada por projectCode)"
+          ],
+          "baseHours": 8,
+          "reusedHours": 3,
+          "adjustmentHours": 2,
+          "hours": 7,
+          "price": 630
+        },
+        {
+          "discipline": "frontend",
+          "label": "Frontend (NextJS/React/Tailwind)",
+          "reused": [
+            "ProjectTag e tag de projeto nos cards (Fase 9)",
+            "getProjectRef/getActiveProject, getSpoolsByProject",
+            "ProcessesAccordion",
+            "Toasts"
+          ],
+          "new": [
+            "getCountersByProject (contadores por projeto)",
+            "Faixa \"Projeto ativo\" no topo de cada etapa",
+            "Bloqueio na leitura de QRCode da etapa para spool de outro projeto (aviso com o projeto dele + toast + ação desabilitada) + guard extra em ProcessStageView",
+            "updateSpoolStatus grava o projeto na movimentação"
+          ],
+          "adjusted": [
+            "process-stage-view (contadores + projeto na movimentação)",
+            "modal-qrcode (topo com projeto no modo etapa)",
+            "CSS modals/views"
+          ],
+          "baseHours": 14,
+          "reusedHours": 5,
+          "adjustmentHours": 2,
+          "hours": 11,
+          "price": 990
+        },
+        {
+          "discipline": "designer",
+          "label": "Designer",
+          "reused": [
+            "Faixa e tag de projeto (Fases 7–10)",
+            "Cards e modal QRCode existentes"
+          ],
+          "new": [
+            "Estado de bloqueio \"spool de outro projeto\" na modal da etapa"
+          ],
+          "adjusted": [
+            "Topo das etapas com faixa de projeto e contadores"
+          ],
+          "baseHours": 4,
+          "reusedHours": 2,
+          "adjustmentHours": 1,
+          "hours": 3,
+          "price": 270
+        },
+        {
+          "discipline": "database",
+          "label": "Database (PostgreSQL)",
+          "reused": [
+            "Tabelas de usuários/sessões"
+          ],
+          "new": [],
+          "adjusted": [],
+          "baseHours": 0,
+          "reusedHours": 0,
+          "adjustmentHours": 0,
+          "hours": 0,
+          "price": 0
+        },
+        {
+          "discipline": "tests",
+          "label": "Testes (desenvolvimento)",
+          "reused": [
+            "Testes unit/integration de boilermaking, coating e painting",
+            "Mocks Protheus e de projetos (Fases 7–10)"
+          ],
+          "new": [
+            "Caso spool de outro projeto bloqueado (409)"
+          ],
+          "adjusted": [
+            "Testes das 3 etapas validam projeto na movimentação e contadores"
+          ],
+          "baseHours": 5,
+          "reusedHours": 2,
+          "adjustmentHours": 1,
+          "hours": 4,
+          "price": 360
+        }
+      ],
+      "reuseRatio": 0.39,
+      "development": {
+        "baseHours": 31,
+        "reusedHours": 12,
+        "adjustmentHours": 6,
+        "hours": 25,
+        "price": 2250
+      },
+      "testsAdjustDeploy": {
+        "tests": {
+          "hours": 4,
+          "price": 360
+        },
+        "adjustments": {
+          "hours": 2,
+          "price": 180
+        },
+        "deploy": {
+          "hours": 2,
+          "price": 180
+        },
+        "total": {
+          "hours": 8,
+          "price": 720
+        }
+      },
+      "breakdown": [
+        {
+          "area": "backend",
+          "label": "Backend",
+          "fromScratch": 8,
+          "reused": -3,
+          "adjustments": 2,
+          "hours": 7,
+          "price": 630,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "frontend",
+          "label": "Frontend",
+          "fromScratch": 14,
+          "reused": -5,
+          "adjustments": 2,
+          "hours": 11,
+          "price": 990,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "designer",
+          "label": "Designer",
+          "fromScratch": 4,
+          "reused": -2,
+          "adjustments": 1,
+          "hours": 3,
+          "price": 270,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "database",
+          "label": "Database",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "estimado pelo comercial",
+          "note": "Sem persistência: validação spool×projeto e movimentação com projeto feitas no Protheus via backend."
+        },
+        {
+          "area": "tests",
+          "label": "Testes",
+          "fromScratch": 5,
+          "reused": -2,
+          "adjustments": 1,
+          "hours": 4,
+          "price": 360,
+          "validation": "estimado pelo comercial"
+        }
+      ],
+      "breakdownTotal": {
+        "fromScratch": 31,
+        "reused": -12,
+        "adjustments": 6,
+        "hours": 25,
+        "price": 2250
+      },
+      "testsAdjustDeployBreakdown": [
+        {
+          "area": "tests",
+          "label": "Testes (homologação/E2E/regressão das 3 etapas)",
+          "fromScratch": 4,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 4,
+          "price": 360,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "adjustments",
+          "label": "Ajustes (pós-homologação)",
+          "fromScratch": 2,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 2,
+          "price": 180,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "deploy",
+          "label": "Deploy para produção",
+          "fromScratch": 2,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 2,
+          "price": 180,
+          "validation": "estimado pelo comercial"
+        }
+      ],
+      "testsAdjustDeployBreakdownTotal": {
+        "fromScratch": 8,
+        "reused": 0,
+        "adjustments": 0,
+        "hours": 8,
+        "price": 720
+      },
+      "hours": 33,
+      "businessDays": 4.125,
+      "price": 2970,
+      "inventory": {
+        "new": [
+          "getCountersByProject (contadores por projeto)",
+          "Faixa \"Projeto ativo\" no topo de cada etapa",
+          "Bloqueio na leitura de QRCode da etapa para spool de outro projeto (aviso com o projeto dele + toast + ação desabilitada) + guard extra em ProcessStageView",
+          "updateSpoolStatus grava o projeto na movimentação"
+        ],
+        "reused": [
+          "ProjectTag e tag de projeto nos cards (Fase 9)",
+          "getProjectRef/getActiveProject, getSpoolsByProject",
+          "ProcessesAccordion",
+          "Toasts"
+        ],
+        "adjusted": [
+          "process-stage-view (contadores + projeto na movimentação)",
+          "modal-qrcode (topo com projeto no modo etapa)",
+          "CSS modals/views"
+        ],
+        "outOfScope": [
+          "Projeto nos cards de transferência"
+        ],
+        "source": "Inventário real do frontend (2026-11-25)"
+      },
+      "prints": [
+        {
+          "id": "01-caldeiraria-projeto",
+          "title": "Caldeiraria com projeto",
+          "path": "proposals/prints/fase-3/01-caldeiraria-projeto.png",
+          "mobilePath": "proposals/prints/fase-3/01-caldeiraria-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-3/_raw/01-caldeiraria-projeto.png",
+          "mobilePath2": "proposals/prints/fase-3/01-caldeiraria-projeto-mobile-2.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Faixa Projeto ativo no topo da etapa"
+            },
+            {
+              "n": 2,
+              "type": "ajustado",
+              "text": "Contadores por status só do projeto ativo"
+            },
+            {
+              "n": 3,
+              "type": "ajustado",
+              "text": "Lista de spools filtrada pelo projeto ativo"
+            }
+          ],
+          "note": "Mobile: marcas 1–2 em -mobile.png e marca 3 (lista) em -mobile-2.png."
+        },
+        {
+          "id": "02-revestimento-projeto",
+          "title": "Revestimento com projeto",
+          "path": "proposals/prints/fase-3/02-revestimento-projeto.png",
+          "mobilePath": "proposals/prints/fase-3/02-revestimento-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-3/_raw/02-revestimento-projeto.png",
+          "mobilePath2": "proposals/prints/fase-3/02-revestimento-projeto-mobile-2.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Faixa Projeto ativo no topo da etapa"
+            },
+            {
+              "n": 2,
+              "type": "ajustado",
+              "text": "Contadores por status só do projeto ativo"
+            },
+            {
+              "n": 3,
+              "type": "ajustado",
+              "text": "Lista de spools filtrada pelo projeto ativo"
+            }
+          ],
+          "note": "Mobile: marcas 1–2 em -mobile.png e marca 3 (lista) em -mobile-2.png."
+        },
+        {
+          "id": "03-pintura-projeto",
+          "title": "Pintura com projeto",
+          "path": "proposals/prints/fase-3/03-pintura-projeto.png",
+          "mobilePath": "proposals/prints/fase-3/03-pintura-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-3/_raw/03-pintura-projeto.png",
+          "mobilePath2": "proposals/prints/fase-3/03-pintura-projeto-mobile-2.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Faixa Projeto ativo no topo da etapa"
+            },
+            {
+              "n": 2,
+              "type": "ajustado",
+              "text": "Contadores por status só do projeto ativo"
+            },
+            {
+              "n": 3,
+              "type": "ajustado",
+              "text": "Lista de spools filtrada pelo projeto ativo"
+            }
+          ],
+          "note": "Mobile: marcas 1–2 em -mobile.png e marca 3 (lista) em -mobile-2.png."
+        },
+        {
+          "id": "04-modal-qrcode-etapa-projeto",
+          "title": "Modal QRCode da etapa",
+          "path": "proposals/prints/fase-3/04-modal-qrcode-etapa-projeto.png",
+          "mobilePath": "proposals/prints/fase-3/04-modal-qrcode-etapa-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-3/_raw/04-modal-qrcode-etapa-projeto.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "ajustado",
+              "text": "Modal da etapa mostra o projeto ativo no topo"
+            }
+          ]
+        },
+        {
+          "id": "05-spool-outro-projeto-bloqueado",
+          "title": "Spool de outro projeto bloqueado",
+          "path": "proposals/prints/fase-3/05-spool-outro-projeto-bloqueado.png",
+          "mobilePath": "proposals/prints/fase-3/05-spool-outro-projeto-bloqueado-mobile.png",
+          "rawPath": "proposals/prints/fase-3/_raw/05-spool-outro-projeto-bloqueado.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Aviso no visor: spool pertence a outro projeto"
+            },
+            {
+              "n": 2,
+              "type": "novo",
+              "text": "Movimentação bloqueada para spool de outro projeto"
+            }
+          ]
+        },
+        {
+          "id": "06-leitura-ok-etapa-projeto",
+          "title": "Leitura OK na etapa",
+          "path": "proposals/prints/fase-3/06-leitura-ok-etapa-projeto.png",
+          "mobilePath": "proposals/prints/fase-3/06-leitura-ok-etapa-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-3/_raw/06-leitura-ok-etapa-projeto.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "ajustado",
+              "text": "Confirmação de leitura no visor (spool do projeto ativo)"
+            }
+          ]
+        }
+      ],
+      "assumptions": [
+        "Estimativa do comercial com base no escopo inicial e no código do repositório real (models/boilermaking.js, coating.js, painting.js; pages/api/v1/boilermaking|coating|painting; components/container/process-flow; tests/unit|integration/api/v1/*).",
+        "Validação spool×projeto e movimentação com projeto feitas no Protheus via backend; sem persistência em banco local.",
+        "A Alvenius é responsável por o Protheus aceitar o código do projeto nas movimentações das etapas e retornar o projeto do spool — fora do escopo."
+      ]
+    },
+    {
+      "id": "vincular-transferencia-projeto",
+      "phase": 13,
+      "status": "new",
+      "title": "Vincular Projeto ao Fluxo de Transferência",
+      "label": "Fase 13 – Vincular Projeto ao Fluxo de Transferência",
+      "businessGoal": "Garantir que as transferências sejam registradas e acompanhadas por projeto, com listas e contadores do projeto ativo e bloqueio de itens de outro projeto.",
+      "steps": [
+        "Com o projeto ativo (Fase 7), o usuário abre Transferência.",
+        "As listas exibem a faixa \"Projeto ativo\" e os contadores Em Trânsito / Concluído / Total somente do projeto; sem itens, é exibido o empty state do projeto.",
+        "Na nova transferência, a faixa mostra o projeto ativo e os itens lidos por QRCode recebem o projeto.",
+        "Se o item lido for de outro projeto, a inclusão é bloqueada: alerta (spool/componente) com o projeto dele e toast.",
+        "Ao gravar, a transferência é enviada ao Protheus com o código do projeto e validada (sem gravação em banco local).",
+        "A conclusão (Em Trânsito → Concluído) e o detalhe da transferência seguem na API Protheus ADVPL do cliente."
+      ],
+      "visuals": [
+        {
+          "type": "screenshot",
+          "caption": "Lista de transferências do projeto com contadores",
+          "annotation": "Destacar faixa Projeto ativo e contadores por projeto",
+          "src": "proposals/prints/fase-4/01-transf-componente-projeto.png"
+        },
+        {
+          "type": "screenshot",
+          "caption": "Nova transferência – item de outro projeto",
+          "annotation": "Destacar alerta de bloqueio e faixa do projeto",
+          "src": "proposals/prints/fase-4/07-transf-componente-outro-projeto.png"
+        },
+        {
+          "type": "diagram",
+          "caption": "Transferência → Protheus com projeto",
+          "annotation": "Destacar envio e validação do projeto",
+          "src": null
+        }
+      ],
+      "correlationScenario": "A+B",
+      "correlationNote": "A (reaproveitamento das Fases 7–11): ProjectTag, helpers de projeto, guard PROJECT_ROUTES, visual/toast \"outro projeto\" (Fase 11) e payload com projeto (Fase 9). B (alteração): gravação e listas de transferência (models/transfer.js, process-transfer).",
+      "dependsOn": [
+        "selecao-projetos",
+        "vincular-cadastro-projeto",
+        "vincular-etapas-projeto"
+      ],
+      "disciplines": [
+        {
+          "discipline": "backend",
+          "label": "Backend (NodeJS)",
+          "reused": [
+            "Sessão/token Protheus e next-connect (pages/api/v1/transfer/[process], supplier/[process])",
+            "Provider/adapters Protheus",
+            "Validação item×projeto (padrão da Fase 11) e filtro por projectCode (Fase 7)"
+          ],
+          "new": [
+            "Contadores Em Trânsito/Concluído/Total por projeto",
+            "Validação: item de outro projeto rejeitado (409) na gravação"
+          ],
+          "adjusted": [
+            "models/transfer.js: gravação envia o código do projeto ao Protheus",
+            "models/transfer.js / supplier.js: listas filtradas por projeto"
+          ],
+          "baseHours": 8,
+          "reusedHours": 3,
+          "adjustmentHours": 2,
+          "hours": 7,
+          "price": 630
+        },
+        {
+          "discipline": "frontend",
+          "label": "Frontend (NextJS/React/Tailwind)",
+          "reused": [
+            "ProjectTag",
+            "getActiveProject / getProjectRef",
+            "Guard PROJECT_ROUTES (já cobria transferências)",
+            "Visual/toast \"outro projeto\" (Fase 11)",
+            "Payload da modal com projeto (Fase 9)"
+          ],
+          "new": [
+            "Vínculo do projeto nas transferências",
+            "Filtro por projeto nas listas de transferência",
+            "Contadores Em Trânsito / Concluído / Total por projeto",
+            "Faixa \"Projeto ativo\" + contadores nas listas",
+            "Empty state por projeto",
+            "Faixa \"Projeto ativo\" na nova transferência",
+            "Alerta de item de outro projeto no QRCode de transferência (bloqueio, toast, demo)"
+          ],
+          "adjusted": [
+            "Gravação de transferência envia o projeto + valida",
+            "Itens lidos recebem o projeto",
+            "Limpeza do alerta",
+            "Texto spool/componente no alerta"
+          ],
+          "baseHours": 16,
+          "reusedHours": 6,
+          "adjustmentHours": 2,
+          "hours": 12,
+          "price": 1080
+        },
+        {
+          "discipline": "designer",
+          "label": "Designer",
+          "reused": [
+            "Faixa e tag de projeto (Fases 7–9)",
+            "Alerta \"outro projeto\" (Fase 11)"
+          ],
+          "new": [
+            "Contadores de transferência por projeto",
+            "Empty state por projeto"
+          ],
+          "adjusted": [
+            "Listas e nova transferência com faixa de projeto"
+          ],
+          "baseHours": 4,
+          "reusedHours": 2,
+          "adjustmentHours": 1,
+          "hours": 3,
+          "price": 270
+        },
+        {
+          "discipline": "database",
+          "label": "Database (PostgreSQL)",
+          "reused": [
+            "Tabelas de usuários/sessões"
+          ],
+          "new": [],
+          "adjusted": [],
+          "baseHours": 0,
+          "reusedHours": 0,
+          "adjustmentHours": 0,
+          "hours": 0,
+          "price": 0
+        },
+        {
+          "discipline": "tests",
+          "label": "Testes (desenvolvimento)",
+          "reused": [
+            "Testes integration de transfer/[process] (get/post) e supplier",
+            "Mocks Protheus e de projetos"
+          ],
+          "new": [
+            "Caso item de outro projeto bloqueado (409)"
+          ],
+          "adjusted": [
+            "Testes de transfer validam projeto na gravação, filtro e contadores"
+          ],
+          "baseHours": 5,
+          "reusedHours": 2,
+          "adjustmentHours": 1,
+          "hours": 4,
+          "price": 360
+        }
+      ],
+      "reuseRatio": 0.39,
+      "development": {
+        "baseHours": 33,
+        "reusedHours": 13,
+        "adjustmentHours": 6,
+        "hours": 26,
+        "price": 2340
+      },
+      "testsAdjustDeploy": {
+        "tests": {
+          "hours": 4,
+          "price": 360
+        },
+        "adjustments": {
+          "hours": 2,
+          "price": 180
+        },
+        "deploy": {
+          "hours": 2,
+          "price": 180
+        },
+        "total": {
+          "hours": 8,
+          "price": 720
+        }
+      },
+      "breakdown": [
+        {
+          "area": "backend",
+          "label": "Backend",
+          "fromScratch": 8,
+          "reused": -3,
+          "adjustments": 2,
+          "hours": 7,
+          "price": 630,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "frontend",
+          "label": "Frontend",
+          "fromScratch": 16,
+          "reused": -6,
+          "adjustments": 2,
+          "hours": 12,
+          "price": 1080,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "designer",
+          "label": "Designer",
+          "fromScratch": 4,
+          "reused": -2,
+          "adjustments": 1,
+          "hours": 3,
+          "price": 270,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "database",
+          "label": "Database",
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0,
+          "validation": "estimado pelo comercial",
+          "note": "Sem persistência: vínculo e validação do projeto nas transferências feitos no Protheus via backend."
+        },
+        {
+          "area": "tests",
+          "label": "Testes",
+          "fromScratch": 5,
+          "reused": -2,
+          "adjustments": 1,
+          "hours": 4,
+          "price": 360,
+          "validation": "estimado pelo comercial"
+        }
+      ],
+      "breakdownTotal": {
+        "fromScratch": 33,
+        "reused": -13,
+        "adjustments": 6,
+        "hours": 26,
+        "price": 2340
+      },
+      "testsAdjustDeployBreakdown": [
+        {
+          "area": "tests",
+          "label": "Testes (homologação/E2E/regressão de transferências)",
+          "fromScratch": 4,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 4,
+          "price": 360,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "adjustments",
+          "label": "Ajustes (pós-homologação)",
+          "fromScratch": 2,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 2,
+          "price": 180,
+          "validation": "estimado pelo comercial"
+        },
+        {
+          "area": "deploy",
+          "label": "Deploy para produção",
+          "fromScratch": 2,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 2,
+          "price": 180,
+          "validation": "estimado pelo comercial"
+        }
+      ],
+      "testsAdjustDeployBreakdownTotal": {
+        "fromScratch": 8,
+        "reused": 0,
+        "adjustments": 0,
+        "hours": 8,
+        "price": 720
+      },
+      "hours": 34,
+      "businessDays": 4.25,
+      "price": 3060,
+      "inventory": {
+        "new": [
+          "Vínculo do projeto nas transferências",
+          "Filtro por projeto nas listas de transferência",
+          "Contadores Em Trânsito / Concluído / Total por projeto",
+          "Faixa \"Projeto ativo\" + contadores nas listas",
+          "Empty state por projeto",
+          "Faixa \"Projeto ativo\" na nova transferência",
+          "Alerta de item de outro projeto no QRCode de transferência (bloqueio, toast, demo)"
+        ],
+        "reused": [
+          "ProjectTag",
+          "getActiveProject / getProjectRef",
+          "Guard PROJECT_ROUTES (já cobria transferências)",
+          "Visual/toast \"outro projeto\" (Fase 11)",
+          "Payload da modal com projeto (Fase 9)"
+        ],
+        "adjusted": [
+          "Gravação de transferência envia o projeto + valida",
+          "Itens lidos recebem o projeto",
+          "Limpeza do alerta",
+          "Texto spool/componente no alerta"
+        ],
+        "outOfScope": [
+          "Conclusão da transferência (Em Trânsito → Concluído) e detalhe da transferência — API externa Protheus ADVPL do cliente"
+        ],
+        "source": "Inventário real do frontend (2026-11-25)"
+      },
+      "prints": [
+        {
+          "id": "01-transf-componente-projeto",
+          "title": "Transferência de componentes",
+          "path": "proposals/prints/fase-4/01-transf-componente-projeto.png",
+          "mobilePath": "proposals/prints/fase-4/01-transf-componente-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-4/_raw/01-transf-componente-projeto.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Faixa Projeto ativo na lista de transferências"
+            },
+            {
+              "n": 2,
+              "type": "novo",
+              "text": "Contadores do projeto: Em Trânsito, Concluído, Total"
+            },
+            {
+              "n": 3,
+              "type": "novo",
+              "text": "Tag do projeto em cada transferência"
+            }
+          ]
+        },
+        {
+          "id": "02-transf-spool-projeto",
+          "title": "Transferência de spools",
+          "path": "proposals/prints/fase-4/02-transf-spool-projeto.png",
+          "mobilePath": "proposals/prints/fase-4/02-transf-spool-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-4/_raw/02-transf-spool-projeto.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Faixa Projeto ativo na lista de transferências"
+            },
+            {
+              "n": 2,
+              "type": "novo",
+              "text": "Contadores do projeto: Em Trânsito, Concluído, Total"
+            },
+            {
+              "n": 3,
+              "type": "novo",
+              "text": "Tag do projeto em cada transferência"
+            }
+          ]
+        },
+        {
+          "id": "03-transf-componente-sem-transferencias",
+          "title": "Projeto sem transferências",
+          "path": "proposals/prints/fase-4/03-transf-componente-sem-transferencias.png",
+          "mobilePath": "proposals/prints/fase-4/03-transf-componente-sem-transferencias-mobile.png",
+          "rawPath": "proposals/prints/fase-4/_raw/03-transf-componente-sem-transferencias.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Contadores zerados para o projeto ativo"
+            },
+            {
+              "n": 2,
+              "type": "ajustado",
+              "text": "Aviso: projeto ainda sem transferências"
+            }
+          ]
+        },
+        {
+          "id": "04-nova-transf-componente-projeto",
+          "title": "Nova transferência de componentes",
+          "path": "proposals/prints/fase-4/04-nova-transf-componente-projeto.png",
+          "mobilePath": "proposals/prints/fase-4/04-nova-transf-componente-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-4/_raw/04-nova-transf-componente-projeto.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Projeto ativo no topo da nova transferência"
+            }
+          ]
+        },
+        {
+          "id": "05-nova-transf-spool-projeto",
+          "title": "Nova transferência de spools",
+          "path": "proposals/prints/fase-4/05-nova-transf-spool-projeto.png",
+          "mobilePath": "proposals/prints/fase-4/05-nova-transf-spool-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-4/_raw/05-nova-transf-spool-projeto.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Projeto ativo no topo da nova transferência"
+            }
+          ]
+        },
+        {
+          "id": "06-modal-qrcode-transf-projeto",
+          "title": "Modal QRCode da transferência",
+          "path": "proposals/prints/fase-4/06-modal-qrcode-transf-projeto.png",
+          "mobilePath": "proposals/prints/fase-4/06-modal-qrcode-transf-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-4/_raw/06-modal-qrcode-transf-projeto.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "ajustado",
+              "text": "Modal de leitura mostra o projeto ativo"
+            },
+            {
+              "n": 2,
+              "type": "novo",
+              "text": "Botão DEMO simula item de outro projeto"
+            }
+          ]
+        },
+        {
+          "id": "07-transf-componente-outro-projeto",
+          "title": "Componente de outro projeto",
+          "path": "proposals/prints/fase-4/07-transf-componente-outro-projeto.png",
+          "mobilePath": "proposals/prints/fase-4/07-transf-componente-outro-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-4/_raw/07-transf-componente-outro-projeto.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Aviso no visor: item de outro projeto não adicionado"
+            }
+          ]
+        },
+        {
+          "id": "08-transf-spool-outro-projeto",
+          "title": "Spool de outro projeto",
+          "path": "proposals/prints/fase-4/08-transf-spool-outro-projeto.png",
+          "mobilePath": "proposals/prints/fase-4/08-transf-spool-outro-projeto-mobile.png",
+          "rawPath": "proposals/prints/fase-4/_raw/08-transf-spool-outro-projeto.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "novo",
+              "text": "Aviso no visor: spool de outro projeto não adicionado"
+            }
+          ]
+        },
+        {
+          "id": "09-transf-componente-item-adicionado",
+          "title": "Componente adicionado",
+          "path": "proposals/prints/fase-4/09-transf-componente-item-adicionado.png",
+          "mobilePath": "proposals/prints/fase-4/09-transf-componente-item-adicionado-mobile.png",
+          "rawPath": "proposals/prints/fase-4/_raw/09-transf-componente-item-adicionado.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "ajustado",
+              "text": "Confirmação no visor: item do projeto adicionado"
+            }
+          ]
+        },
+        {
+          "id": "10-transf-spool-item-adicionado",
+          "title": "Spool adicionado",
+          "path": "proposals/prints/fase-4/10-transf-spool-item-adicionado.png",
+          "mobilePath": "proposals/prints/fase-4/10-transf-spool-item-adicionado-mobile.png",
+          "rawPath": "proposals/prints/fase-4/_raw/10-transf-spool-item-adicionado.png",
+          "legend": [
+            {
+              "n": 1,
+              "type": "ajustado",
+              "text": "Confirmação no visor: spool do projeto adicionado"
+            }
+          ]
+        }
+      ],
+      "assumptions": [
+        "Estimativa do comercial com base no escopo inicial e no código do repositório real (models/transfer.js, models/supplier.js, pages/api/v1/transfer/[process], pages/api/v1/supplier/[process], components/container/process-transfer/[params] e create/[params], tests/integration/api/v1/transfer|supplier) e no inventário real do frontend.",
+        "Vínculo e validação do projeto nas transferências feitos no Protheus via backend; sem persistência em banco local.",
+        "A conclusão de transferência (Em Trânsito → Concluído) e o detalhe são responsabilidade da API externa Protheus ADVPL do cliente — fora do escopo.",
+        "A Alvenius é responsável por o Protheus aceitar o código do projeto nas transferências e retorná-lo nas consultas — fora do escopo."
+      ]
     }
   ],
   "investment": {
     "phases": [
-      { "phase": 0, "name": "Descoberta, alinhamento e design das telas", "hours": 24, "businessDays": 3, "price": 2160 },
-      { "phase": 1, "name": "Rastreio por QR Code", "hours": 40, "businessDays": 5, "price": 3600 },
-      { "phase": 2, "name": "Gestão de Spools e Projetos", "hours": 40, "businessDays": 5, "price": 3600 },
-      { "phase": 3, "name": "Controle de Sucata e Retrabalho", "hours": 36, "businessDays": 4.5, "price": 3240 },
-      { "phase": 4, "name": "Painel Gerencial", "hours": 48, "businessDays": 6, "price": 4320 },
-      { "phase": 5, "name": "Integração com ERP", "hours": 36, "businessDays": 4.5, "price": 3240 },
-      { "phase": 6, "name": "Homologação, treinamento e entrada em produção", "hours": 24, "businessDays": 3, "price": 2160 }
+      {
+        "phase": 0,
+        "name": "Descoberta, alinhamento e design das telas (já existente)",
+        "hours": 0,
+        "businessDays": 0,
+        "price": 0,
+        "note": "Funcionalidade já implementada e em operação no sistema atual; não compõe o investimento desta proposta.",
+        "breakdown": [
+          {
+            "area": "backend",
+            "label": "Backend",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "frontend",
+            "label": "Frontend",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "designer",
+            "label": "Designer",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "database",
+            "label": "Database",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "tests",
+            "label": "Testes",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          }
+        ],
+        "breakdownTotal": {
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0
+        }
+      },
+      {
+        "phase": 1,
+        "name": "Rastreio por QR Code (já existente)",
+        "hours": 0,
+        "businessDays": 0,
+        "price": 0,
+        "note": "Funcionalidade já implementada e em operação no sistema atual; não compõe o investimento desta proposta.",
+        "breakdown": [
+          {
+            "area": "backend",
+            "label": "Backend",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "frontend",
+            "label": "Frontend",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "designer",
+            "label": "Designer",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "database",
+            "label": "Database",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "tests",
+            "label": "Testes",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          }
+        ],
+        "breakdownTotal": {
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0
+        }
+      },
+      {
+        "phase": 2,
+        "name": "Gestão de Spools e Projetos (já existente)",
+        "hours": 0,
+        "businessDays": 0,
+        "price": 0,
+        "note": "Funcionalidade já implementada e em operação no sistema atual; não compõe o investimento desta proposta.",
+        "breakdown": [
+          {
+            "area": "backend",
+            "label": "Backend",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "frontend",
+            "label": "Frontend",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "designer",
+            "label": "Designer",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "database",
+            "label": "Database",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "tests",
+            "label": "Testes",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          }
+        ],
+        "breakdownTotal": {
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0
+        }
+      },
+      {
+        "phase": 3,
+        "name": "Controle de Sucata e Retrabalho (já existente)",
+        "hours": 0,
+        "businessDays": 0,
+        "price": 0,
+        "note": "Funcionalidade já implementada e em operação no sistema atual; não compõe o investimento desta proposta.",
+        "breakdown": [
+          {
+            "area": "backend",
+            "label": "Backend",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "frontend",
+            "label": "Frontend",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "designer",
+            "label": "Designer",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "database",
+            "label": "Database",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "tests",
+            "label": "Testes",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          }
+        ],
+        "breakdownTotal": {
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0
+        }
+      },
+      {
+        "phase": 4,
+        "name": "Painel Gerencial (já existente)",
+        "hours": 0,
+        "businessDays": 0,
+        "price": 0,
+        "note": "Funcionalidade já implementada e em operação no sistema atual; não compõe o investimento desta proposta.",
+        "breakdown": [
+          {
+            "area": "backend",
+            "label": "Backend",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "frontend",
+            "label": "Frontend",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "designer",
+            "label": "Designer",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "database",
+            "label": "Database",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "tests",
+            "label": "Testes",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          }
+        ],
+        "breakdownTotal": {
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0
+        }
+      },
+      {
+        "phase": 5,
+        "name": "Integração com ERP (já existente)",
+        "hours": 0,
+        "businessDays": 0,
+        "price": 0,
+        "note": "Funcionalidade já implementada e em operação no sistema atual; não compõe o investimento desta proposta.",
+        "breakdown": [
+          {
+            "area": "backend",
+            "label": "Backend",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "frontend",
+            "label": "Frontend",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "designer",
+            "label": "Designer",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "database",
+            "label": "Database",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "tests",
+            "label": "Testes",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          }
+        ],
+        "breakdownTotal": {
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0
+        }
+      },
+      {
+        "phase": 6,
+        "name": "Homologação, treinamento e entrada em produção (já existente)",
+        "hours": 0,
+        "businessDays": 0,
+        "price": 0,
+        "note": "Funcionalidade já implementada e em operação no sistema atual; não compõe o investimento desta proposta.",
+        "breakdown": [
+          {
+            "area": "backend",
+            "label": "Backend",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "frontend",
+            "label": "Frontend",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "designer",
+            "label": "Designer",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "database",
+            "label": "Database",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          },
+          {
+            "area": "tests",
+            "label": "Testes",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "já existente",
+            "note": "Já existente — implementado e em operação; não compõe o investimento."
+          }
+        ],
+        "breakdownTotal": {
+          "fromScratch": 0,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 0,
+          "price": 0
+        }
+      },
+      {
+        "phase": 7,
+        "name": "Fase 7 – Seleção de Projetos (pós-login) – desenvolvimento",
+        "featureId": "selecao-projetos",
+        "hours": 28,
+        "businessDays": 3.5,
+        "price": 2520,
+        "breakdown": [
+          {
+            "area": "backend",
+            "label": "Backend",
+            "fromScratch": 9,
+            "reused": -3,
+            "adjustments": 2,
+            "hours": 8,
+            "price": 720,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "frontend",
+            "label": "Frontend",
+            "fromScratch": 16,
+            "reused": -5,
+            "adjustments": 2,
+            "hours": 13,
+            "price": 1170,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "designer",
+            "label": "Designer",
+            "fromScratch": 5,
+            "reused": -3,
+            "adjustments": 1,
+            "hours": 3,
+            "price": 270,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "database",
+            "label": "Database",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "estimado pelo comercial",
+            "note": "Sem persistência nesta fase: dados consumidos da API externa via backend."
+          },
+          {
+            "area": "tests",
+            "label": "Testes",
+            "fromScratch": 4,
+            "reused": -1,
+            "adjustments": 1,
+            "hours": 4,
+            "price": 360,
+            "validation": "estimado pelo comercial"
+          }
+        ],
+        "breakdownTotal": {
+          "fromScratch": 34,
+          "reused": -12,
+          "adjustments": 6,
+          "hours": 28,
+          "price": 2520
+        }
+      },
+      {
+        "phase": 8,
+        "name": "Testes, ajustes e deploy para produção (Seleção de Projetos)",
+        "featureId": "selecao-projetos",
+        "hours": 9,
+        "businessDays": 1.125,
+        "price": 810,
+        "breakdown": [
+          {
+            "area": "tests",
+            "label": "Testes (homologação/E2E/regressão)",
+            "fromScratch": 4,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 4,
+            "price": 360,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "adjustments",
+            "label": "Ajustes (pós-homologação)",
+            "fromScratch": 3,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 3,
+            "price": 270,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "deploy",
+            "label": "Deploy para produção",
+            "fromScratch": 2,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 2,
+            "price": 180,
+            "validation": "estimado pelo comercial"
+          }
+        ],
+        "breakdownTotal": {
+          "fromScratch": 9,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 9,
+          "price": 810
+        }
+      },
+      {
+        "phase": 9,
+        "name": "Fase 9 – Vincular Cadastro ao Projeto – desenvolvimento",
+        "featureId": "vincular-cadastro-projeto",
+        "hours": 23,
+        "businessDays": 2.875,
+        "price": 2070,
+        "breakdown": [
+          {
+            "area": "backend",
+            "label": "Backend",
+            "fromScratch": 7,
+            "reused": -3,
+            "adjustments": 2,
+            "hours": 6,
+            "price": 540,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "frontend",
+            "label": "Frontend",
+            "fromScratch": 14,
+            "reused": -5,
+            "adjustments": 2,
+            "hours": 11,
+            "price": 990,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "designer",
+            "label": "Designer",
+            "fromScratch": 4,
+            "reused": -2,
+            "adjustments": 0,
+            "hours": 2,
+            "price": 180,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "database",
+            "label": "Database",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "estimado pelo comercial",
+            "note": "Sem persistência: o vínculo é gravado no Protheus no payload de cadastro."
+          },
+          {
+            "area": "tests",
+            "label": "Testes",
+            "fromScratch": 4,
+            "reused": -1,
+            "adjustments": 1,
+            "hours": 4,
+            "price": 360,
+            "validation": "estimado pelo comercial"
+          }
+        ],
+        "breakdownTotal": {
+          "fromScratch": 29,
+          "reused": -11,
+          "adjustments": 5,
+          "hours": 23,
+          "price": 2070
+        }
+      },
+      {
+        "phase": 10,
+        "name": "Testes, ajustes e deploy para produção (Vincular Cadastro ao Projeto)",
+        "featureId": "vincular-cadastro-projeto",
+        "hours": 7,
+        "businessDays": 0.875,
+        "price": 630,
+        "breakdown": [
+          {
+            "area": "tests",
+            "label": "Testes (homologação/E2E/regressão do cadastro e módulos)",
+            "fromScratch": 3,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 3,
+            "price": 270,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "adjustments",
+            "label": "Ajustes (pós-homologação)",
+            "fromScratch": 2,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 2,
+            "price": 180,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "deploy",
+            "label": "Deploy para produção",
+            "fromScratch": 2,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 2,
+            "price": 180,
+            "validation": "estimado pelo comercial"
+          }
+        ],
+        "breakdownTotal": {
+          "fromScratch": 7,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 7,
+          "price": 630
+        }
+      },
+      {
+        "phase": 11,
+        "name": "Fase 11 – Vincular Etapas ao Projeto – desenvolvimento",
+        "featureId": "vincular-etapas-projeto",
+        "hours": 25,
+        "businessDays": 3.125,
+        "price": 2250,
+        "breakdown": [
+          {
+            "area": "backend",
+            "label": "Backend",
+            "fromScratch": 8,
+            "reused": -3,
+            "adjustments": 2,
+            "hours": 7,
+            "price": 630,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "frontend",
+            "label": "Frontend",
+            "fromScratch": 14,
+            "reused": -5,
+            "adjustments": 2,
+            "hours": 11,
+            "price": 990,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "designer",
+            "label": "Designer",
+            "fromScratch": 4,
+            "reused": -2,
+            "adjustments": 1,
+            "hours": 3,
+            "price": 270,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "database",
+            "label": "Database",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "estimado pelo comercial",
+            "note": "Sem persistência: validação spool×projeto e movimentação com projeto feitas no Protheus via backend."
+          },
+          {
+            "area": "tests",
+            "label": "Testes",
+            "fromScratch": 5,
+            "reused": -2,
+            "adjustments": 1,
+            "hours": 4,
+            "price": 360,
+            "validation": "estimado pelo comercial"
+          }
+        ],
+        "breakdownTotal": {
+          "fromScratch": 31,
+          "reused": -12,
+          "adjustments": 6,
+          "hours": 25,
+          "price": 2250
+        }
+      },
+      {
+        "phase": 12,
+        "name": "Testes, ajustes e deploy para produção (Vincular Etapas ao Projeto)",
+        "featureId": "vincular-etapas-projeto",
+        "hours": 8,
+        "businessDays": 1.0,
+        "price": 720,
+        "breakdown": [
+          {
+            "area": "tests",
+            "label": "Testes (homologação/E2E/regressão das 3 etapas)",
+            "fromScratch": 4,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 4,
+            "price": 360,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "adjustments",
+            "label": "Ajustes (pós-homologação)",
+            "fromScratch": 2,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 2,
+            "price": 180,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "deploy",
+            "label": "Deploy para produção",
+            "fromScratch": 2,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 2,
+            "price": 180,
+            "validation": "estimado pelo comercial"
+          }
+        ],
+        "breakdownTotal": {
+          "fromScratch": 8,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 8,
+          "price": 720
+        }
+      },
+      {
+        "phase": 13,
+        "name": "Fase 13 – Vincular Projeto ao Fluxo de Transferência – desenvolvimento",
+        "featureId": "vincular-transferencia-projeto",
+        "hours": 26,
+        "businessDays": 3.25,
+        "price": 2340,
+        "breakdown": [
+          {
+            "area": "backend",
+            "label": "Backend",
+            "fromScratch": 8,
+            "reused": -3,
+            "adjustments": 2,
+            "hours": 7,
+            "price": 630,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "frontend",
+            "label": "Frontend",
+            "fromScratch": 16,
+            "reused": -6,
+            "adjustments": 2,
+            "hours": 12,
+            "price": 1080,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "designer",
+            "label": "Designer",
+            "fromScratch": 4,
+            "reused": -2,
+            "adjustments": 1,
+            "hours": 3,
+            "price": 270,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "database",
+            "label": "Database",
+            "fromScratch": 0,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 0,
+            "price": 0,
+            "validation": "estimado pelo comercial",
+            "note": "Sem persistência: vínculo e validação do projeto nas transferências feitos no Protheus via backend."
+          },
+          {
+            "area": "tests",
+            "label": "Testes",
+            "fromScratch": 5,
+            "reused": -2,
+            "adjustments": 1,
+            "hours": 4,
+            "price": 360,
+            "validation": "estimado pelo comercial"
+          }
+        ],
+        "breakdownTotal": {
+          "fromScratch": 33,
+          "reused": -13,
+          "adjustments": 6,
+          "hours": 26,
+          "price": 2340
+        }
+      },
+      {
+        "phase": 14,
+        "name": "Testes, ajustes e deploy para produção (Vincular Projeto ao Fluxo de Transferência)",
+        "featureId": "vincular-transferencia-projeto",
+        "hours": 8,
+        "businessDays": 1.0,
+        "price": 720,
+        "breakdown": [
+          {
+            "area": "tests",
+            "label": "Testes (homologação/E2E/regressão de transferências)",
+            "fromScratch": 4,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 4,
+            "price": 360,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "adjustments",
+            "label": "Ajustes (pós-homologação)",
+            "fromScratch": 2,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 2,
+            "price": 180,
+            "validation": "estimado pelo comercial"
+          },
+          {
+            "area": "deploy",
+            "label": "Deploy para produção",
+            "fromScratch": 2,
+            "reused": 0,
+            "adjustments": 0,
+            "hours": 2,
+            "price": 180,
+            "validation": "estimado pelo comercial"
+          }
+        ],
+        "breakdownTotal": {
+          "fromScratch": 8,
+          "reused": 0,
+          "adjustments": 0,
+          "hours": 8,
+          "price": 720
+        }
+      }
     ],
-    "totals": { "hours": 248, "businessDays": 31, "approxWeeks": 6, "price": 22320 },
+    "totals": {
+      "hours": 134,
+      "businessDays": 16.75,
+      "approxWeeks": 4,
+      "price": 12060
+    },
     "sprints": [
-      { "sprint": 1, "phases": [0, 1], "businessDays": 8 },
-      { "sprint": 2, "phases": [2], "businessDays": 5 },
-      { "sprint": 3, "phases": [3, 4], "businessDays": 10.5 },
-      { "sprint": 4, "phases": [5, 6], "businessDays": 7.5 }
+      {
+        "sprint": 1,
+        "phases": [
+          0,
+          1
+        ],
+        "businessDays": 0
+      },
+      {
+        "sprint": 2,
+        "phases": [
+          2
+        ],
+        "businessDays": 0
+      },
+      {
+        "sprint": 3,
+        "phases": [
+          3,
+          4
+        ],
+        "businessDays": 0
+      },
+      {
+        "sprint": 4,
+        "phases": [
+          5,
+          6
+        ],
+        "businessDays": 0
+      },
+      {
+        "sprint": 5,
+        "phases": [
+          7,
+          8
+        ],
+        "businessDays": 4.625,
+        "startDate": "2026-12-01",
+        "endDate": "2026-12-07"
+      },
+      {
+        "sprint": 6,
+        "phases": [
+          9,
+          10
+        ],
+        "businessDays": 3.75,
+        "startDate": "2026-12-07",
+        "endDate": "2026-12-11"
+      },
+      {
+        "sprint": 7,
+        "phases": [
+          11,
+          12
+        ],
+        "businessDays": 4.125,
+        "startDate": "2026-12-11",
+        "endDate": "2026-12-17"
+      },
+      {
+        "sprint": 8,
+        "phases": [
+          13,
+          14
+        ],
+        "businessDays": 4.25,
+        "startDate": "2026-12-17",
+        "endDate": "2026-12-23"
+      }
     ],
     "payment": [
-      { "milestone": "Aprovação da proposta", "percent": 30, "amount": 6696 },
-      { "milestone": "Entrega da Sprint 2", "percent": 40, "amount": 8928 },
-      { "milestone": "Homologação final", "percent": 30, "amount": 6696 }
-    ]
+      {
+        "milestone": "Aprovação da proposta",
+        "percent": 0,
+        "amount": 0,
+        "scope": "existing",
+        "status": "superseded",
+        "note": "Marco da proposta original (projeto do zero); substituído pelos marcos de novas funcionalidades. Aguardando decisão do cliente para remoção."
+      },
+      {
+        "milestone": "Entrega da Sprint 2",
+        "percent": 0,
+        "amount": 0,
+        "scope": "existing",
+        "status": "superseded",
+        "note": "Marco da proposta original (projeto do zero); substituído pelos marcos de novas funcionalidades. Aguardando decisão do cliente para remoção."
+      },
+      {
+        "milestone": "Homologação final",
+        "percent": 0,
+        "amount": 0,
+        "scope": "existing",
+        "status": "superseded",
+        "note": "Marco da proposta original (projeto do zero); substituído pelos marcos de novas funcionalidades. Aguardando decisão do cliente para remoção."
+      },
+      {
+        "milestone": "1ª parcela – na aprovação da proposta (D+0)",
+        "percent": 30,
+        "amount": 3618.0,
+        "scope": "new-features",
+        "dueInDays": 0,
+        "dueDate": "2026-12-01"
+      },
+      {
+        "milestone": "2ª parcela – 15 dias após a aprovação (D+15)",
+        "percent": 40,
+        "amount": 4824.0,
+        "scope": "new-features",
+        "dueInDays": 15,
+        "dueDate": "2026-12-16"
+      },
+      {
+        "milestone": "3ª parcela – 30 dias após a aprovação (D+30)",
+        "percent": 30,
+        "amount": 3618.0,
+        "scope": "new-features",
+        "dueInDays": 30,
+        "dueDate": "2026-12-31"
+      }
+    ],
+    "testsAdjustDeploy": {
+      "tests": {
+        "hours": 15,
+        "price": 1350
+      },
+      "adjustments": {
+        "hours": 9,
+        "price": 810
+      },
+      "deploy": {
+        "hours": 8,
+        "price": 720
+      },
+      "total": {
+        "hours": 32,
+        "price": 2880
+      }
+    }
   },
   "postDelivery": {
     "homologation": {
@@ -195,14 +3476,18 @@
     }
   },
   "assumptions": [
+    "Projeto já existente e funcional (NodeJS + PostgreSQL no backend; NextJS, React, TailwindCSS e leitor de QRCODE no frontend); somente novas funcionalidades são precificadas.",
+    "Dados de negócio vêm de APIs externas tratadas no backend; persistência em banco restrita ao extremamente necessário.",
     "Responsável da Alvenius disponível para dúvidas e homologação.",
     "Dados e acessos fornecidos para a integração.",
-    "Internet e dispositivos (celular/tablet) disponíveis no chão de fábrica."
+    "Internet e dispositivos (celular/tablet) disponíveis no chão de fábrica.",
+    "Endpoint de projetos no Protheus (listagem/consulta via wsrastreio) e filtro por projeto nos endpoints existentes são responsabilidade da Alvenius e devem estar disponíveis antes do desenvolvimento."
   ],
   "outOfScope": [
     "Compra de hardware (impressoras de etiqueta, leitores, tablets)",
     "Hospedagem em nuvem (orçada separadamente)",
     "Customizações não listadas",
-    "Treinamento além do previsto"
+    "Treinamento além do previsto",
+    "Desenvolvimento/ajuste no ERP Protheus (endpoint de projetos e filtro por projeto) — responsabilidade do cliente."
   ]
 }

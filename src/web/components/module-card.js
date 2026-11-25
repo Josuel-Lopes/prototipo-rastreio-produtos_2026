@@ -11,6 +11,7 @@ export const MODULE_ICONS = {
   revestimento: lucide('spray-can', { size: 34, stroke: '#0a2540', strokeWidth: 2, className: 'menu-card-icon-svg' }),
   pintura: lucide('paint-roller', { size: 34, stroke: '#0a2540', strokeWidth: 2, className: 'menu-card-icon-svg' }),
   'validar-qrcode': lucide('qr-code', { size: 34, stroke: '#0a2540', strokeWidth: 2, className: 'menu-card-icon-svg' }),
+  'listar-projetos': lucide('folder-kanban', { size: 34, stroke: '#0a2540', strokeWidth: 2, className: 'menu-card-icon-svg' }),
   transferencia: lucide('truck', { size: 34, stroke: '#0a2540', strokeWidth: 2, className: 'menu-card-icon-svg' }),
   'site-alvenius': lucide('globe', { size: 34, stroke: '#0a2540', strokeWidth: 2, className: 'menu-card-icon-svg' })
 };

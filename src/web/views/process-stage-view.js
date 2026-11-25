@@ -5,7 +5,9 @@
  * histórico de sucata, modais e integração com o leitor de QR Code.
  */
 
-import { getSpools, getCounters, statusDefinitions, getSpoolByCode, updateSpoolStatus } from '../mocks/spools-mock.js';
+import { getSpoolsByProject, getCountersByProject, statusDefinitions, getSpoolByCode, updateSpoolStatus } from '../mocks/spools-mock.js';
+import { getActiveProject, getProjectRef } from '../mocks/projects-mock.js';
+import { ProjectTag } from '../components/project-tag.js';
 import { toast } from '../components/toast.js';
 import { lucide } from '../components/icons.js';
 import { PageContainer } from '../components/page-container.js';
@@ -41,10 +43,15 @@ export class ProcessStageView {
     // Define o título oficial na pill superior
     PageTitle.setTitle(this.stageTitle);
 
-    const countersData = getCounters(this.stageKey);
+    const countersData = getCountersByProject(this.stageKey, getActiveProject()?.id);
     const spools = this.getFilteredSpools();
 
     const content = `
+      <!-- Projeto ativo da etapa -->
+      <div class="project-context-bar stage-project-bar">
+        ${ProjectTag.renderRow(getProjectRef(getActiveProject()), { label: 'Projeto ativo:' })}
+      </div>
+
       <!-- Linha de Busca Rápida + Botão Ler QRCode -->
       <div class="caldeiraria-search-row">
         <div class="caldeiraria-search-box">
@@ -138,7 +145,9 @@ export class ProcessStageView {
       return `
         <div class="caldeiraria-empty-state">
           <p class="empty-state-title">Nenhum spool encontrado</p>
-          <p class="empty-state-subtitle">Tente ajustar o termo da busca ou remover o filtro de status selecionado.</p>
+          <p class="empty-state-subtitle">${this.getProjectSpools().length
+            ? 'Tente ajustar o termo da busca ou remover o filtro de status selecionado.'
+            : 'O projeto ativo ainda não possui spools nesta etapa.'}</p>
         </div>
       `;
     }
@@ -160,8 +169,13 @@ export class ProcessStageView {
     }).join('');
   }
 
+  /** Spools da etapa pertencentes ao projeto ativo */
+  getProjectSpools() {
+    return getSpoolsByProject(this.stageKey, getActiveProject()?.id);
+  }
+
   getFilteredSpools() {
-    let list = getSpools(this.stageKey);
+    let list = this.getProjectSpools();
 
     if (this.selectedStatusFilter) {
       list = list.filter(s => s.status === this.selectedStatusFilter);
@@ -189,7 +203,7 @@ export class ProcessStageView {
       if (found) return found;
     }
 
-    const all = getSpools(this.stageKey);
+    const all = this.getProjectSpools();
     for (const st of priority) {
       const found = all.find(s => s.status === st);
       if (found) return found;
@@ -314,6 +328,14 @@ export class ProcessStageView {
     });
   }
 
+  /** Bloqueia movimentação de spool que não pertence ao projeto ativo */
+  ensureSpoolInProject(spool) {
+    const project = getActiveProject();
+    if (spool && project && spool.projetoId === project.id) return true;
+    toast.warning('Spool de outro projeto', `Spool ${spool?.codigo || ''} pertence ao projeto ${spool?.projetoCodigo || 'não identificado'}.`);
+    return false;
+  }
+
   openStageQrCodeModal(spool) {
     const targetSpool = spool || this.getEligibleSpool();
     if (!targetSpool) return;
@@ -327,8 +349,9 @@ export class ProcessStageView {
       spool: targetSpool,
       isScanned: false,
       onAction: (target, actionConfig) => {
+        if (!this.ensureSpoolInProject(target)) return;
         const nextStatus = actionConfig?.nextStatus || 'execucao';
-        updateSpoolStatus(target.codigo, nextStatus, this.stageTitle);
+        updateSpoolStatus(target.codigo, nextStatus, this.stageTitle, getProjectRef(getActiveProject()));
 
         const title = actionConfig?.toastTitle || this.toastUpdatedTitle;
         const msg = typeof actionConfig?.toastMessage === 'function'
@@ -339,8 +362,9 @@ export class ProcessStageView {
         this.render();
       },
       onStart: (target, actionConfig) => {
+        if (!this.ensureSpoolInProject(target)) return;
         const nextStatus = actionConfig?.nextStatus || 'execucao';
-        updateSpoolStatus(target.codigo, nextStatus, this.stageTitle);
+        updateSpoolStatus(target.codigo, nextStatus, this.stageTitle, getProjectRef(getActiveProject()));
 
         const title = actionConfig?.toastTitle || this.toastStartedTitle;
         const msg = typeof actionConfig?.toastMessage === 'function'

@@ -148,6 +148,90 @@
   grid-column: 1 / -1;
 }
 
+/* Bloco do projeto ativo (MenuView) */
+.active-project-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: -18px 0 22px 0;
+  padding: 10px 14px;
+  background-color: #ffffff;
+  border: 1px solid #71889e;
+  border-left: 4px solid #1956ce;
+}
+
+.active-project-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.active-project-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.active-project-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+}
+
+.active-project-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0a2540;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.active-project-code {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.active-project-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 6px 10px;
+  background: transparent;
+  border: 1px solid #1956ce;
+  border-radius: 4px;
+  color: #1956ce;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.active-project-switch:hover,
+.active-project-switch:focus-visible {
+  background-color: #1956ce;
+  color: #ffffff;
+}
+
+.active-project-switch:focus-visible {
+  outline: 2px solid #1956ce;
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .active-project-bar {
+    flex-wrap: wrap;
+    gap: 8px 10px;
+  }
+  .active-project-switch {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 /* Card de módulo (componente ModuleCard) */
 .menu-card {
   width: 100%;
@@ -1607,3 +1691,50 @@
   text-align: center;
 }
 
+
+/* Projeto ativo no Cadastro (ProjectTag) */
+.cadastro-project-row {
+  margin: 2px 0 4px 0;
+}
+
+/* Faixa de projeto ativo no topo das etapas (Caldeiraria / Revestimento / Pintura) */
+.stage-project-bar {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  background: #f1f5f9;
+  border: 1px solid #dbe3ec;
+  border-radius: 8px;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+/* Transferências: projeto ativo + contadores por status do projeto */
+.transfer-project-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.transfer-project-counters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.transfer-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #dbe3ec;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.transfer-counter strong { font-weight: 800; }
+.transfer-counter.is-transito strong { color: #b45309; }
+.transfer-counter.is-concluido strong { color: #15803d; }
+.transfer-counter.is-total strong { color: #1956ce; }

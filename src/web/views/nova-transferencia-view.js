@@ -9,6 +9,8 @@ import { lucide } from '../components/icons.js';
 import { PageContainer } from '../components/page-container.js';
 import { PageTitle } from '../components/page-title.js';
 import { addTransferComponente, addTransferSpool } from '../mocks/transfers-mock.js';
+import { getActiveProject, getProjectRef } from '../mocks/projects-mock.js';
+import { ProjectTag } from '../components/project-tag.js';
 
 export const MOCK_TRANSFERENCIA_DADOS = {
   origem: {
@@ -91,6 +93,11 @@ export class NovaTransferenciaView {
 
     // Conteúdo principal da seção FORNECEDOR, Terceiro e tabela de componentes
     const content = `
+      <!-- Projeto ativo: toda transferência criada é gravada neste projeto -->
+      <div class="project-context-bar stage-project-bar nova-transfer-project-bar">
+        ${ProjectTag.renderRow(getProjectRef(getActiveProject()), { label: 'Projeto ativo:' })}
+      </div>
+
       <!-- Seção FORNECEDOR (Origem e Destino) -->
       <div class="fornecedor-section">
         <div class="fornecedor-section-title">FORNECEDOR</div>
@@ -262,7 +269,8 @@ export class NovaTransferenciaView {
           item: comp.item || String(idx + 1).padStart(2, '0'),
           codigo: comp.codigo,
           qtd: comp.qtd || '1 UN',
-          desc: comp.desc || ''
+          desc: comp.desc || '',
+          projetoId: comp.projetoId || null
         }))
       : [];
     this.isPreenchido = Boolean(this.origem.codigo && this.componentes.length > 0);
@@ -431,9 +439,21 @@ export class NovaTransferenciaView {
     if (btnGravar && btnGravar.disabled) return;
 
     const isSpool = this.tipo === 'spool';
+    const project = getActiveProject();
+    if (!project) {
+      toast.warning('Projeto', 'Selecione um projeto antes de gravar a transferência.');
+      return;
+    }
+    // Defesa: itens lidos de outro projeto não entram na transferência
+    const foreign = this.componentes.find(comp => comp.projetoId && comp.projetoId !== project.id);
+    if (foreign) {
+      toast.warning('Item de outro projeto', `${foreign.codigo} não pertence ao projeto ${project.codigo}.`);
+      return;
+    }
 
     if (isSpool) {
       addTransferSpool({
+        projetoId: project.id,
         tipo: 'spool',
         processo: this.processo,
         status: 'Em Trânsito',
@@ -449,7 +469,7 @@ export class NovaTransferenciaView {
         }))
       });
 
-      toast.success('Sucesso', 'Transferência de Spool criada com sucesso!');
+      toast.success('Sucesso', `Transferência de Spool criada no projeto ${project.codigo}!`);
 
       if (typeof this.options.onNavigate === 'function') {
         setTimeout(() => {
@@ -458,6 +478,7 @@ export class NovaTransferenciaView {
       }
     } else {
       addTransferComponente({
+        projetoId: project.id,
         tipo: 'componente',
         status: 'Em Trânsito',
         statusCor: '#f59e0b',
@@ -472,7 +493,7 @@ export class NovaTransferenciaView {
         }))
       });
 
-      toast.success('Sucesso', 'Transferência criada com sucesso!');
+      toast.success('Sucesso', `Transferência criada no projeto ${project.codigo}!`);
 
       if (typeof this.options.onNavigate === 'function') {
         setTimeout(() => {

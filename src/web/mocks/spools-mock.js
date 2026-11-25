@@ -3,6 +3,8 @@
  * Dados simulados para o MVP de Rastreio de Produtos
  */
 
+import { getProjectRef } from './projects-mock.js';
+
 export const defaultUserData = {
   username: 'josuellopes',
   name: 'josuellopes',
@@ -90,7 +92,7 @@ export const initialSpoolsCaldeiraria = [
     status: 'romaneio',
     inicio: '20/11/2026 às 08:30',
     finalizado: '22/11/2026 às 16:45',
-    projeto: 'PRJ-VALE-CARAJAS-2026',
+    projetoId: 'prj-0414',
     etapaAtual: 'Romaneio / Expedição',
     historicoSucata: [],
     componentes: [
@@ -108,7 +110,7 @@ export const initialSpoolsCaldeiraria = [
     status: 'execucao',
     inicio: '24/11/2026 às 09:15',
     finalizado: '-- / -- / ---- às -- : --',
-    projeto: 'PRJ-VALE-CARAJAS-2026',
+    projetoId: 'prj-0414',
     etapaAtual: 'Caldeiraria (Ponteamento e Solda)',
     historicoSucata: [
       {
@@ -133,7 +135,7 @@ export const initialSpoolsCaldeiraria = [
     status: 'reservado',
     inicio: '-- / -- / ---- às -- : --',
     finalizado: '-- / -- / ---- às -- : --',
-    projeto: 'PRJ-PETROBRAS-SUBSEA-26',
+    projetoId: 'prj-0427',
     etapaAtual: 'Aguardando Início na Caldeiraria',
     historicoSucata: [],
     componentes: [
@@ -149,7 +151,7 @@ export const initialSpoolsCaldeiraria = [
     status: 'pausado',
     inicio: '23/11/2026 às 14:00',
     finalizado: '-- / -- / ---- às -- : --',
-    projeto: 'PRJ-PETROBRAS-SUBSEA-26',
+    projetoId: 'prj-0427',
     etapaAtual: 'Caldeiraria - Ajuste de Bisel Requerido',
     historicoSucata: [
       {
@@ -174,7 +176,7 @@ export const initialSpoolsCaldeiraria = [
     status: 'finalizado',
     inicio: '18/11/2026 às 07:45',
     finalizado: '21/11/2026 às 11:20',
-    projeto: 'PRJ-SABESP-ETA-GUARA',
+    projetoId: 'prj-0463',
     etapaAtual: 'Inspeção CQ e Teste Hidrostático Concluído',
     historicoSucata: [],
     componentes: [
@@ -192,7 +194,7 @@ export const initialSpoolsCaldeiraria = [
     status: 'sucata',
     inicio: '15/11/2026 às 10:00',
     finalizado: '15/11/2026 às 12:30',
-    projeto: 'PRJ-ANGLO-MINERACAO',
+    projetoId: 'prj-0463',
     etapaAtual: 'Reprovado pelo CQ - Destinado a Sucata',
     historicoSucata: [
       {
@@ -223,7 +225,7 @@ export const initialSpoolsCaldeiraria = [
     status: 'pausado',
     inicio: '05/11/2026 às 08:00',
     finalizado: '-- / -- / ---- às -- : --',
-    projeto: 'PRJ-VALE-CARAJAS-2026',
+    projetoId: 'prj-0414',
     etapaAtual: 'Pausado para Retrabalho de Pintura',
     historicoSucata: [
       {
@@ -261,7 +263,7 @@ export const initialSpoolsCaldeiraria = [
     status: 'reservado',
     inicio: '-- / -- / ---- às -- : --',
     finalizado: '-- / -- / ---- às -- : --',
-    projeto: 'PRJ-PETROBRAS-SUBSEA-26',
+    projetoId: 'prj-0427',
     etapaAtual: 'Aguardando Início na Caldeiraria',
     historicoSucata: [],
     componentes: [
@@ -283,7 +285,7 @@ export const initialSpoolsRevestimento = [
     finalizado: '-- / -- / ---- às -- : --',
     inicioRevestimento: '24/11/2026 às 08:10',
     finalizadoRevestimento: '-- / -- / ---- às -- : --',
-    projeto: 'PRJ-PETROBRAS-FPSO-26',
+    projetoId: 'prj-0414',
     etapaAtual: 'Aplicação de Epóxi Termofusão (FBE) em Cabine Automatizada',
     historicoSucata: [],
     componentes: [
@@ -302,7 +304,7 @@ export const initialSpoolsRevestimento = [
     finalizado: '23/11/2026 às 15:40',
     inicioRevestimento: '21/11/2026 às 09:30',
     finalizadoRevestimento: '23/11/2026 às 15:40',
-    projeto: 'PRJ-VALE-POLIDUTO-26',
+    projetoId: 'prj-0427',
     etapaAtual: 'CQ de Revestimento Aprovado / Holiday Test Concluído sem Poros',
     historicoSucata: [],
     componentes: [
@@ -321,7 +323,7 @@ export const initialSpoolsRevestimento = [
     finalizado: '-- / -- / ---- às -- : --',
     inicioRevestimento: '-- / -- / ---- às -- : --',
     finalizadoRevestimento: '-- / -- / ---- às -- : --',
-    projeto: 'PRJ-SABESP-ADUTORA-LESTE',
+    projetoId: 'prj-0463',
     etapaAtual: 'Fila de Espera Cabine de Pré-Aquecimento e Jateamento',
     historicoSucata: [],
     componentes: [
@@ -339,7 +341,7 @@ export const initialSpoolsRevestimento = [
     finalizado: '22/11/2026 às 17:15',
     inicioRevestimento: '19/11/2026 às 07:00',
     finalizadoRevestimento: '22/11/2026 às 17:15',
-    projeto: 'PRJ-SAMARCO-MINERODUTO',
+    projetoId: 'prj-0414',
     etapaAtual: 'Aprovado pelo CQ de Revestimento - Aguardando Romaneio',
     historicoSucata: [],
     componentes: [
@@ -357,7 +359,7 @@ export const initialSpoolsRevestimento = [
     finalizado: '-- / -- / ---- às -- : --',
     inicioRevestimento: '23/11/2026 às 11:20',
     finalizadoRevestimento: '-- / -- / ---- às -- : --',
-    projeto: 'PRJ-PETROBRAS-FPSO-26',
+    projetoId: 'prj-0414',
     etapaAtual: 'Pausado para Ajuste de Temperatura da Estufa de Cura',
     historicoSucata: [
       {
@@ -383,7 +385,7 @@ export const initialSpoolsRevestimento = [
     finalizado: '-- / -- / ---- às -- : --',
     inicioRevestimento: '22/11/2026 às 13:00',
     finalizadoRevestimento: '-- / -- / ---- às -- : --',
-    projeto: 'PRJ-BRASKEM-QUIMICA',
+    projetoId: 'prj-0427',
     etapaAtual: 'Liberado pelo CQ para Retomada de Expansão Térmica de Liner',
     historicoSucata: [],
     componentes: [
@@ -401,7 +403,7 @@ export const initialSpoolsRevestimento = [
     finalizado: '18/11/2026 às 10:15',
     inicioRevestimento: '17/11/2026 às 08:00',
     finalizadoRevestimento: '18/11/2026 às 10:15',
-    projeto: 'PRJ-VALE-POLIDUTO-26',
+    projetoId: 'prj-0427',
     etapaAtual: 'Reprovado no Teste de Aderência em X (ASTM D4541) - Destinado a Sucata',
     historicoSucata: [
       {
@@ -430,7 +432,7 @@ export const initialSpoolsPintura = [
     finalizado: '24/11/2026 às 14:00',
     inicioPintura: '22/11/2026 às 08:45',
     finalizadoPintura: '24/11/2026 às 14:00',
-    projeto: 'PRJ-PETROBRAS-REPAR-26',
+    projetoId: 'prj-0414',
     etapaAtual: 'Pintura Final Concluída / EPS 240µm Medida e Aprovada conforme N-2137',
     historicoSucata: [],
     componentes: [
@@ -449,7 +451,7 @@ export const initialSpoolsPintura = [
     finalizado: '-- / -- / ---- às -- : --',
     inicioPintura: '24/11/2026 às 10:15',
     finalizadoPintura: '-- / -- / ---- às -- : --',
-    projeto: 'PRJ-PETROBRAS-REPAR-26',
+    projetoId: 'prj-0414',
     etapaAtual: 'Aplicação de Esmalte Epóxi em Cabine de Pintura Airless',
     historicoSucata: [],
     componentes: [
@@ -467,7 +469,7 @@ export const initialSpoolsPintura = [
     finalizado: '-- / -- / ---- às -- : --',
     inicioPintura: '-- / -- / ---- às -- : --',
     finalizadoPintura: '-- / -- / ---- às -- : --',
-    projeto: 'PRJ-VALE-TUBARAO-26',
+    projetoId: 'prj-0427',
     etapaAtual: 'Aguardando Desocupação de Bancada de Pintura Manual',
     historicoSucata: [],
     componentes: [
@@ -485,7 +487,7 @@ export const initialSpoolsPintura = [
     finalizado: '-- / -- / ---- às -- : --',
     inicioPintura: '23/11/2026 às 16:30',
     finalizadoPintura: '-- / -- / ---- às -- : --',
-    projeto: 'PRJ-VALE-TUBARAO-26',
+    projetoId: 'prj-0427',
     etapaAtual: 'Pausado por Condição Ambiental Adversa (Ponto de Orvalho Próximo)',
     historicoSucata: [
       {
@@ -511,7 +513,7 @@ export const initialSpoolsPintura = [
     finalizado: '23/11/2026 às 11:30',
     inicioPintura: '20/11/2026 às 08:00',
     finalizadoPintura: '23/11/2026 às 11:30',
-    projeto: 'PRJ-MODECC-OFFSHORE-26',
+    projetoId: 'prj-0388',
     etapaAtual: 'Ensaio Pull-off Aderência > 12 MPa / Liberado para Romaneio',
     historicoSucata: [],
     componentes: [
@@ -529,7 +531,7 @@ export const initialSpoolsPintura = [
     finalizado: '18/11/2026 às 15:20',
     inicioPintura: '18/11/2026 às 09:00',
     finalizadoPintura: '18/11/2026 às 15:20',
-    projeto: 'PRJ-MODECC-OFFSHORE-26',
+    projetoId: 'prj-0388',
     etapaAtual: 'Película Apresentou Crateras Severas por Óleo de Compressor - Descarte Sucata',
     historicoSucata: [
       {
@@ -582,21 +584,40 @@ export const stageBaseCounters = {
   }
 };
 
+/**
+ * Clona a lista inicial e resolve o vínculo de projeto (projetoId → código/nome de projects-mock.js)
+ */
+function withProjects(list) {
+  return JSON.parse(JSON.stringify(list)).map(spool => ({ ...spool, ...(getProjectRef(spool.projetoId) || {}) }));
+}
+
+function createInitialState() {
+  return {
+    user: null,
+    spoolsCaldeiraria: withProjects(initialSpoolsCaldeiraria),
+    spoolsRevestimento: withProjects(initialSpoolsRevestimento),
+    spoolsPintura: withProjects(initialSpoolsPintura),
+    spools: [],
+    counters: { ...statusDefinitions }
+  };
+}
+
 // Estado reativo em memória no frontend
-let state = {
-  user: null,
-  spoolsCaldeiraria: JSON.parse(JSON.stringify(initialSpoolsCaldeiraria)),
-  spoolsRevestimento: JSON.parse(JSON.stringify(initialSpoolsRevestimento)),
-  spoolsPintura: JSON.parse(JSON.stringify(initialSpoolsPintura)),
-  spools: JSON.parse(JSON.stringify(initialSpoolsCaldeiraria)),
-  counters: { ...statusDefinitions }
-};
+let state = createInitialState();
 
 export function getSpools(stageKey = 'caldeiraria') {
   const key = String(stageKey).toLowerCase();
   if (key === 'revestimento') return state.spoolsRevestimento;
   if (key === 'pintura') return state.spoolsPintura;
   return state.spoolsCaldeiraria;
+}
+
+/**
+ * Spools da etapa filtrados pelo projeto (sem projectId retorna a lista completa)
+ */
+export function getSpoolsByProject(stageKey = 'caldeiraria', projectId = null) {
+  const list = getSpools(stageKey);
+  return projectId ? list.filter(s => s.projetoId === projectId) : list;
 }
 
 export function getSpoolByCode(codigo, stageKey = null) {
@@ -658,8 +679,27 @@ export function getCounters(stageKey = 'caldeiraria') {
   };
 }
 
+/**
+ * Grava um spool cadastrado vinculado ao projeto (entra na Caldeiraria como Reservado)
+ * @param {object} novoSpool - { codigo, descricao, componentes, projetoId }
+ * @returns {object} spool gravado
+ */
+/**
+ * Contadores por status calculados somente com os spools do projeto na etapa
+ * @returns {{items: object, total: number}}
+ */
+export function getCountersByProject(stageKey = 'caldeiraria', projectId = null) {
+  if (!projectId) return getCounters(stageKey);
+  const items = Object.keys(statusDefinitions).reduce((acc, key) => ({ ...acc, [key]: 0 }), {});
+  getSpoolsByProject(stageKey, projectId).forEach(s => {
+    if (items[s.status] !== undefined) items[s.status]++;
+  });
+  const total = Object.values(items).reduce((acc, curr) => acc + curr, 0);
+  return { items, total };
+}
+
 export function addSpool(novoSpool) {
-  const nextSeqNum = state.spools.length + 1;
+  const nextSeqNum = state.spoolsCaldeiraria.length + 1;
   const sequencial = String(nextSeqNum).padStart(4, '0');
   
   const now = new Date();
@@ -673,7 +713,7 @@ export function addSpool(novoSpool) {
     status: novoSpool.status || 'reservado',
     inicio: dataFormatada,
     finalizado: '-- / -- / ---- às -- : --',
-    projeto: novoSpool.projeto || 'PRJ-GERAL-ALVENIUS-2026',
+    ...(getProjectRef(novoSpool.projetoId) || {}),
     etapaAtual: 'Cadastrado / Aguardando Início',
     historicoSucata: [],
     componentes: novoSpool.componentes && novoSpool.componentes.length > 0 
@@ -685,12 +725,18 @@ export function addSpool(novoSpool) {
   };
 
   state.spools.unshift(spool);
+  state.spoolsCaldeiraria.unshift(spool);
   return spool;
 }
 
-export function updateSpoolStatus(codigo, novoStatus, processo = 'Caldeiraria') {
+/**
+ * Movimenta o spool na etapa e registra a movimentação com o projeto
+ * @param {object} [projectRef] - { projetoId, projetoCodigo, projetoNome } do projeto ativo
+ */
+export function updateSpoolStatus(codigo, novoStatus, processo = 'Caldeiraria', projectRef = null) {
   const spool = getSpoolByCode(codigo);
   if (!spool) return null;
+  const projeto = projectRef || getProjectRef(spool.projetoId) || {};
 
   spool.status = novoStatus;
   const now = new Date();
@@ -731,9 +777,19 @@ export function updateSpoolStatus(codigo, novoStatus, processo = 'Caldeiraria') 
       processo: processo,
       motivo: `Spool descartado no processo ${processo} via operação de escaneamento de campo.`,
       usuario: state.user?.username || 'operador',
-      acao: 'Classificado como Sucata'
+      acao: 'Classificado como Sucata',
+      ...projeto
     });
   }
+
+  if (!Array.isArray(spool.movimentacoes)) spool.movimentacoes = [];
+  spool.movimentacoes.push({
+    data: dataFormatada,
+    processo,
+    status: novoStatus,
+    usuario: state.user?.username || 'operador',
+    ...projeto
+  });
 
   return spool;
 }
@@ -762,12 +818,5 @@ export function logoutUser() {
 }
 
 export function resetMockState() {
-  state = {
-    user: null,
-    spoolsCaldeiraria: JSON.parse(JSON.stringify(initialSpoolsCaldeiraria)),
-    spoolsRevestimento: JSON.parse(JSON.stringify(initialSpoolsRevestimento)),
-    spoolsPintura: JSON.parse(JSON.stringify(initialSpoolsPintura)),
-    spools: JSON.parse(JSON.stringify(initialSpoolsCaldeiraria)),
-    counters: { ...statusDefinitions }
-  };
+  state = createInitialState();
 }

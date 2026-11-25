@@ -9,6 +9,9 @@ import { lucide } from '../components/icons.js';
 import { PageContainer } from '../components/page-container.js';
 import { PageTitle } from '../components/page-title.js';
 import { MOCK_SPOOL_CADASTRADO } from '../components/modal-qrcode.js';
+import { ProjectTag } from '../components/project-tag.js';
+import { getActiveProject, getProjectRef } from '../mocks/projects-mock.js';
+import { addSpool, getSpoolByCode } from '../mocks/spools-mock.js';
 
 export class CadastroView {
   constructor(containerId = 'app-view', options = {}) {
@@ -36,6 +39,7 @@ export class CadastroView {
       <!-- Seção de dados do Spool com Código e Descrição -->
       <div class="spool-data-section">
         <div class="spool-section-title">SPOOL</div>
+        ${ProjectTag.renderRow(getProjectRef(getActiveProject()), { className: 'cadastro-project-row' })}
         <div class="spool-meta-row">
           <span class="spool-meta-label">Código &nbsp;:</span>
           <span class="spool-meta-value" id="cadastro-codigo-val">${this.codigo}</span>
@@ -185,8 +189,34 @@ export class CadastroView {
     const btnGravar = this.container.querySelector('#btn-cadastro-gravar');
     if (btnGravar && btnGravar.disabled) return;
 
+    const project = getActiveProject();
+    if (!project) {
+      toast.warning('Projeto não selecionado', 'Selecione um projeto antes de gravar o cadastro.');
+      if (typeof this.options.onNavigate === 'function') this.options.onNavigate('projetos');
+      return;
+    }
+
     const codigo = this.codigo || 'SP-0414-00001-001';
-    toast.success('Sucesso', `Spool ${codigo} gravado com sucesso!`);
+    const existente = getSpoolByCode(codigo);
+    if (existente) {
+      const outroProjeto = existente.projetoId && existente.projetoId !== project.id;
+      toast.warning(
+        'Spool já cadastrado',
+        outroProjeto
+          ? `Spool ${codigo} pertence ao projeto ${existente.projetoCodigo}.`
+          : `Spool ${codigo} já está cadastrado no projeto ${project.codigo}.`
+      );
+      return;
+    }
+
+    addSpool({
+      codigo,
+      descricao: this.descricao,
+      componentes: this.componentes,
+      projetoId: project.id
+    });
+    toast.success('Sucesso', `Spool ${codigo} gravado no projeto ${project.codigo}!`);
+    this.limparFormulario();
   }
 
   bindEvents() {

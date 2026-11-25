@@ -6,11 +6,13 @@
   <meta name="description" content="Alvenius - Rastreio de Produtos e Gerenciamento de Spools por Projeto">
   <title>Rastreio de Produtos | Alvenius</title>
   
-  <link rel="stylesheet" href="styles/main.css?v=2.9.0">
-  <link rel="stylesheet" href="styles/header.css?v=2.9.0">
-  <link rel="stylesheet" href="styles/components.css?v=2.9.0">
-  <link rel="stylesheet" href="styles/views.css?v=2.9.0">
-  <link rel="stylesheet" href="styles/modals.css?v=2.9.0">
+  <link rel="stylesheet" href="styles/main.css?v=3.0.0">
+  <link rel="stylesheet" href="styles/header.css?v=3.0.0">
+  <link rel="stylesheet" href="styles/components.css?v=3.0.0">
+  <link rel="stylesheet" href="styles/views.css?v=3.0.0">
+  <link rel="stylesheet" href="styles/modals.css?v=3.0.0">
+  <link rel="stylesheet" href="styles/proposta.css?v=3.0.0">
+  <link rel="stylesheet" href="styles/demo-environment.css?v=3.0.0">
 </head>
 <body>
   <div id="app">
@@ -20,7 +22,20 @@
     <div id="toast-root"></div>
   </div>
 
-  <script type="module" src="app.js?v=2.9.0"></script>
+  <!-- Sinalização: Ambiente de demonstração (todas as rotas; oculta na impressão) -->
+  <div class="demo-ribbon" role="note"
+       aria-label="Ambiente de demonstração. Proposta comercial PROP-2026-011, MAXCODE42 para Alvenius. Dados fictícios.">
+    <span class="demo-ribbon__dot" aria-hidden="true"></span>
+    <strong class="demo-ribbon__label">Ambiente de demonstração</strong>
+    <span class="demo-ribbon__sep" aria-hidden="true">·</span>
+    <span class="demo-ribbon__id"><span class="demo-ribbon__desk-inline">Proposta comercial </span>PROP-2026-011</span>
+    <span class="demo-ribbon__desk" aria-hidden="true">
+      <span class="demo-ribbon__sep">·</span> MAXCODE42 → Alvenius
+      <span class="demo-ribbon__sep">·</span> Dados fictícios
+    </span>
+  </div>
+
+  <script type="module" src="app.js?v=3.0.0"></script>
 </body>
 </html>
 

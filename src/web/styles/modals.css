@@ -353,6 +353,39 @@
 }
 
 /* ==========================================================================
+   Modal Listar Projetos (reutiliza transfer-modal-*; lista com scroll interno)
+   ========================================================================== */
+.project-modal-dialog {
+  max-width: 520px;
+  overflow: hidden;
+}
+
+.project-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 2px;
+}
+
+.project-modal-body .spool-item-card:last-child {
+  margin-bottom: 0;
+}
+
+.project-modal-empty {
+  margin: 12px 0;
+  text-align: center;
+  font-size: 13px;
+  color: #64748b;
+}
+
+@media (max-width: 400px) {
+  .project-modal-dialog {
+    padding: 16px 14px 14px 14px;
+  }
+}
+
+/* ==========================================================================
    Modal Processo de Transferência (SPOOL) - copilot-image-d865f8.png
    ========================================================================== */
 .modal-process-transfer-options {
@@ -1668,4 +1701,140 @@
 }
 .toast.toast-danger .toast-icon {
   color: var(--action-danger);
+}
+
+/* Contexto do projeto na modal Leitor de QRCode (ProjectTag) */
+.qrcode-project-context {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 10px 0 12px 0;
+  padding: 8px 12px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.qrcode-floating-pill-header + .qrcode-project-context {
+  margin-top: 0;
+}
+
+.qrcode-success-project-row,
+.qrcode-last-read-project-row {
+  margin-top: 8px;
+}
+
+/* ==========================================================================
+   Etapas: validação de projeto na leitura de QRCode
+   ========================================================================== */
+body:not(.is-demo) .demo-only {
+  display: none !important;
+}
+
+.qrcode-btn-demo-foreign {
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: transparent;
+  color: #b45309;
+  border: 1px dashed #f59e0b;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.qrcode-btn-demo-foreign:hover {
+  background: #fffbeb;
+}
+
+.qrcode-foreign-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.qrcode-foreign-alert svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.qrcode-spool-project-row {
+  margin-top: 8px;
+}
+
+.qrcode-transfer-foreign-alert {
+  margin-top: 10px;
+}
+
+/* ==========================================================================
+   Feedback de leitura colado ao leitor (faixa sobre a borda inferior do visor)
+   ========================================================================== */
+.qrcode-camera-viewfinder .qrcode-read-feedback {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  padding: 7px 10px;
+  border: 0;
+  border-top: 2px solid #fcd34d;
+  border-radius: 0;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 12.5px;
+  line-height: 1.35;
+  text-align: left;
+  pointer-events: none;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.25);
+  animation: qrcodeFeedbackIn 0.2s ease-out;
+}
+
+.qrcode-camera-viewfinder .qrcode-read-feedback svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.qrcode-camera-viewfinder .qrcode-read-feedback span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.qrcode-camera-viewfinder .qrcode-read-feedback.is-success {
+  background: #ecfdf3;
+  border-top-color: #12B76A;
+  color: #067647;
+}
+
+.qrcode-camera-viewfinder .qrcode-read-feedback.is-error {
+  background: #fef3f2;
+  border-top-color: #f04438;
+  color: #b42318;
+}
+
+.qrcode-instr-caldeiraria-line2.is-blocked {
+  color: #92400e;
+  font-weight: 600;
+}
+
+@keyframes qrcodeFeedbackIn {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qrcode-camera-viewfinder .qrcode-read-feedback { animation: none; }
 }

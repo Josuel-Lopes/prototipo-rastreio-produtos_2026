@@ -8,10 +8,12 @@ import { toast } from './components/toast.js';
 import { ModalTransferenciaComponent } from './components/modal-transferencia.js';
 import { ModalProcessoTransferenciaComponent } from './components/modal-processo-transferencia.js';
 import { ModalQrCodeComponent } from './components/modal-qrcode.js';
+import { ModalProjetosComponent } from './components/modal-projetos.js';
 import { lucide } from './components/icons.js';
 
 import { LoginView } from './views/login-view.js';
 import { MenuView } from './views/menu-view.js';
+import { ProjetosView } from './views/projetos-view.js';
 import { CadastroView } from './views/cadastro-view.js';
 import { CaldeirariaView } from './views/caldeiraria-view.js';
 import { RevestimentoView } from './views/revestimento-view.js';
@@ -19,9 +21,21 @@ import { PinturaView } from './views/pintura-view.js';
 import { TransferenciaComponenteView } from './views/transferencia-componente-view.js';
 import { TransferenciaSpoolView } from './views/transferencia-spool-view.js';
 import { NovaTransferenciaView } from './views/nova-transferencia-view.js';
+import { PropostaView } from './views/proposta-view.js';
 
 import { getCurrentUser, setCurrentUser, logoutUser, getSpoolByCode } from './mocks/spools-mock.js';
+import { getProjects, getActiveProject, setActiveProject, clearActiveProject, getProjectRef } from './mocks/projects-mock.js';
 import { APP_VERSION } from './version.js';
+
+// Sinalização de "Ambiente de demonstração" (ribbon, selo DEMO e marcas no PDF da proposta)
+const DEMO_MODE = true;
+
+// Rotas que dependem de um projeto ativo (app_active_project)
+const PROJECT_ROUTES = new Set([
+  'menu', 'cadastro', 'caldeiraria', 'revestimento', 'pintura',
+  'transferencia', 'transferencia-componente', 'transferencia-spool',
+  'nova-transferencia', 'nova-transferencia-spool'
+]);
 
 class App {
   constructor() {
@@ -32,22 +46,30 @@ class App {
     // Inicialização dos componentes modais e globais
     this.header = new HeaderComponent('app-header', {
       onNavigate: (route) => this.navigateTo(route),
-      onLogout: () => this.handleLogout()
+      onLogout: () => this.handleLogout(),
+      onSwitchProject: () => this.switchProject()
     });
 
     this.modalTransferencia = new ModalTransferenciaComponent('modal-root');
     this.modalProcessoTransferencia = new ModalProcessoTransferenciaComponent('modal-root');
     this.modalQrCode = new ModalQrCodeComponent('modal-root');
+    this.modalProjetos = new ModalProjetosComponent('modal-root');
 
     // Inicialização das views
     this.views = {
       login: new LoginView('app-view', {
         onLogin: (credentials) => this.handleLogin(credentials)
       }),
+      projetos: new ProjetosView('app-view', {
+        onNavigate: (route) => this.navigateTo(route),
+        onOpenQrCode: (mode) => this.openQrCodeScanner(null, mode || 'validar-qrcode'),
+        onOpenProjects: () => this.openModalProjetos()
+      }),
       menu: new MenuView('app-view', {
         onNavigate: (route) => this.navigateTo(route),
         onOpenQrCode: (mode) => this.openQrCodeScanner(null, mode || 'validar-qrcode'),
-        onOpenTransfer: () => this.openModalTransferencia()
+        onOpenTransfer: () => this.openModalTransferencia(),
+        onSwitchProject: () => this.switchProject()
       }),
       cadastro: new CadastroView('app-view', {
         onNavigate: (route) => this.navigateTo(route),
@@ -81,8 +103,13 @@ class App {
           const actualProcess = processo || this.activeSpoolProcess;
           this.openQrCodeScanner(callback, actualMode, actualProcess);
         }
+      }),
+      proposta: new PropostaView('app-view', {
+        onNavigate: (route, params) => this.navigateTo(route, params)
       })
     };
+
+    window.navigateTo = (route, params) => this.navigateTo(route, params);
   }
 
   init() {
@@ -103,15 +130,35 @@ class App {
       this.activeSpoolProcess = savedProcess;
     }
 
-    const savedRoute = sessionStorage.getItem('app_current_route');
-    if (savedRoute && this.currentUser && this.currentUser.isLoggedIn) {
-      this.navigateTo(savedRoute);
+    // Suporte a acesso direto via URL query parameter (?route=proposta) ou Hash (#proposta)
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryRoute = urlParams.get('route');
+    const hashRoute = window.location.hash.replace(/^#\/?/, '').trim();
+    const isDirectProposta = queryRoute === 'proposta' || hashRoute === 'proposta';
+
+    if (isDirectProposta) {
+      this.navigateTo('proposta');
     } else {
-      this.navigateTo('login');
+      const savedRoute = sessionStorage.getItem('app_current_route');
+      if (savedRoute && this.currentUser && this.currentUser.isLoggedIn) {
+        this.navigateTo(savedRoute);
+      } else {
+        this.navigateTo('login');
+      }
     }
 
+    // Monitoramento de hash para navegação direta (#proposta)
+    window.addEventListener('hashchange', () => {
+      const h = window.location.hash.replace(/^#\/?/, '').trim();
+      if (h === 'proposta') {
+        this.navigateTo('proposta');
+      } else if (h === 'menu' && this.currentUser && this.currentUser.isLoggedIn) {
+        this.navigateTo('menu');
+      }
+    });
+
     const savedScroll = sessionStorage.getItem('app_scroll_y');
-    if (savedScroll) {
+    if (savedScroll && !isDirectProposta) {
       setTimeout(() => {
         window.scrollTo({ top: parseInt(savedScroll, 10), behavior: 'instant' });
       }, 50);
@@ -134,10 +181,11 @@ class App {
     setCurrentUser(updatedUser);
     this.currentUser = getCurrentUser();
     sessionStorage.setItem('app_user', JSON.stringify(this.currentUser));
-    sessionStorage.setItem('app_current_route', 'menu');
+    clearActiveProject();
+    sessionStorage.setItem('app_current_route', 'projetos');
 
     toast.success('Login Realizado', `Bem vindo ao sistema Alvenius, ${this.currentUser?.username || 'josuellopes'}!`);
-    this.navigateTo('menu');
+    this.navigateTo('projetos');
   }
 
   handleLogout() {
@@ -146,12 +194,27 @@ class App {
     sessionStorage.removeItem('app_user');
     sessionStorage.removeItem('app_current_route');
     sessionStorage.removeItem('app_scroll_y');
+    clearActiveProject();
     toast.info('Sessão Encerrada', 'Você saiu do sistema com segurança.');
     this.navigateTo('login');
   }
 
   navigateTo(route, params = {}) {
+    // Permite visualização executiva direta da proposta sem obrigatoriedade de login
+    if (route === 'proposta') {
+      this.currentRoute = 'proposta';
+      this.render();
+      return;
+    }
+
     const isAuthed = !!(this.currentUser && this.currentUser.isLoggedIn);
+
+    // Menu e telas de etapas/cadastro/transferência exigem projeto ativo: sem projeto, volta à home de projetos
+    if (isAuthed && PROJECT_ROUTES.has(route) && !getActiveProject()) {
+      route = 'projetos';
+      params = {};
+    }
+
     if (isAuthed && route !== 'validar-qrcode' && route !== 'transferencia') {
       sessionStorage.setItem('app_current_route', route);
     }
@@ -245,16 +308,31 @@ class App {
   }
 
   render() {
+    // Caso especial: View executiva da Proposta Comercial possui cabeçalho e action bar próprios
+    if (this.currentRoute === 'proposta') {
+      const headerEl = document.getElementById('app-header');
+      if (headerEl) headerEl.style.display = 'none';
+      this.views.proposta.render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    const headerEl = document.getElementById('app-header');
+    if (headerEl) headerEl.style.display = '';
+
     // 1. Atualiza Header
     this.header.render({
       user: this.currentUser,
       activeRoute: this.currentRoute,
-      pillLabel: this.getPillLabel(this.currentRoute)
+      pillLabel: this.getPillLabel(this.currentRoute),
+      project: getProjectRef(getActiveProject())
     });
 
     // 2. Renderiza a View correspondente
     if (this.currentRoute === 'login') {
       this.views.login.render();
+    } else if (this.currentRoute === 'projetos') {
+      this.views.projetos.render();
     } else if (this.currentRoute === 'menu') {
       this.views.menu.render();
     } else if (this.currentRoute === 'cadastro') {
@@ -281,7 +359,8 @@ class App {
     this.header.render({
       user: this.currentUser,
       activeRoute: this.currentRoute,
-      pillLabel: this.getPillLabel(this.currentRoute)
+      pillLabel: this.getPillLabel(this.currentRoute),
+      project: getProjectRef(getActiveProject())
     });
 
     const mainContainer = document.getElementById('app-view');
@@ -347,6 +426,23 @@ class App {
     });
   }
 
+  /** Limpa o projeto ativo e retorna à home de projetos */
+  switchProject() {
+    clearActiveProject();
+    this.navigateTo('projetos');
+  }
+
+  openModalProjetos() {
+    this.modalProjetos.open({
+      projects: getProjects(),
+      onSelect: (project) => {
+        setActiveProject(project);
+        toast.success('Projeto Selecionado', `${project.nome} (${project.codigo})`);
+        this.navigateTo('menu');
+      }
+    });
+  }
+
   openModalTransferencia() {
     this.modalTransferencia.open({
       onSelect: (tipo) => {
@@ -401,6 +497,7 @@ class App {
 
 // Inicializa a aplicação ao carregar o DOM
 document.addEventListener('DOMContentLoaded', () => {
+  if (DEMO_MODE) document.body.classList.add('is-demo');
   const app = new App();
   app.init();
 });

@@ -6,6 +6,9 @@
 
 import { lucide } from './icons.js';
 import { toast } from './toast.js';
+import { ProjectTag } from './project-tag.js';
+import { getActiveProject, getProjectRef, getProjects } from '../mocks/projects-mock.js';
+import { getSpoolByCode, getSpools } from '../mocks/spools-mock.js';
 
 export const MOCK_SPOOL_CADASTRADO = {
   codigo: 'SP-0414-00001-001',
@@ -23,7 +26,8 @@ export const MOCK_VALIDAR_ITEMS = [
     tipoLabel: 'Spool',
     textoModal: 'Spool: SP041500345003 - CARRETEL FS+FF 20POL X 6,35 X 2961MM 150 PSI',
     textoUltimoLido: 'SP041500345003 - CARRETEL FS+FF 20POL X 6,35 X 2961MM 150 PSI',
-    codigo: 'SP041500345003'
+    codigo: 'SP041500345003',
+    projetoId: 'prj-0414'
   },
   {
     tipo: 'componente',
@@ -202,7 +206,8 @@ export class ModalQrCodeComponent {
           itens: [...this.transferData.componentes],
           componentes: [...this.transferData.componentes],
           tipo: isSpool ? 'spool' : 'componente',
-          processo: this.processo
+          processo: this.processo,
+          ...(getProjectRef(getActiveProject()) || {})
         };
       }
 
@@ -220,7 +225,7 @@ export class ModalQrCodeComponent {
     }
 
     if (this.isScanned) {
-      const payload = { ...MOCK_SPOOL_CADASTRADO };
+      const payload = { ...MOCK_SPOOL_CADASTRADO, ...(getProjectRef(getActiveProject()) || {}) };
 
       if (typeof this.onScanCallback === 'function') {
         this.onScanCallback(payload.codigo, payload);
@@ -254,6 +259,65 @@ export class ModalQrCodeComponent {
         this.close();
       }
     }
+  }
+
+  /**
+   * Faixa de contexto com o projeto (do spool em leitura ou o projeto ativo)
+   */
+  renderProjectContext() {
+    const row = ProjectTag.renderRow(getProjectRef(getActiveProject()), { label: 'Projeto ativo:' });
+    return row ? `<div class="project-context-bar qrcode-project-context">${row}</div>` : '';
+  }
+
+  /** Spool lido pertence a outro projeto que não o ativo? (modos de etapa) */
+  isForeignSpool(spool = this.spool) {
+    const project = getActiveProject();
+    return Boolean(spool && project && spool.projetoId && spool.projetoId !== project.id);
+  }
+
+  /** Spool da mesma etapa vinculado a outro projeto (simulação de leitura indevida no DEMO) */
+  findForeignStageSpool() {
+    return getSpools(this.mode).find(s => this.isForeignSpool(s)) || null;
+  }
+
+  warnForeignSpool(spool = this.spool, label = 'Spool') {
+    toast.warning(
+      `${label} de outro projeto`,
+      `${label} ${spool.codigo} pertence ao projeto ${spool.projetoCodigo} · ${spool.projetoNome}. Troque o projeto para movimentá-lo.`
+    );
+  }
+
+  /** Etapa (spools-mock) de origem do processo de transferência de spool */
+  getTransferStageKey() {
+    if (this.processo === 'revestimento-pintura') return 'revestimento';
+    if (this.processo === 'pintura-faturamento') return 'pintura';
+    return 'caldeiraria';
+  }
+
+  /**
+   * DEMO: item lido que pertence a outro projeto (transferência).
+   * Spool: spool real da etapa de origem vinculado a outro projeto; Componente: item do pool em outro projeto.
+   */
+  findForeignTransferItem() {
+    const active = getActiveProject();
+    if (!active) return null;
+    if (this.mode === 'transferencia-spool') {
+      const spool = getSpools(this.getTransferStageKey()).find(s => this.isForeignSpool(s));
+      return spool ? { codigo: spool.codigo, desc: spool.descricao, ...getProjectRef(spool.projetoId) } : null;
+    }
+    const other = getProjects().find(p => p.id !== active.id);
+    const item = MOCK_TRANSFER_POOL[(this.transferData?.scanIndex || 0) % MOCK_TRANSFER_POOL.length];
+    return other && item ? { codigo: item.codigo, desc: item.desc, ...getProjectRef(other.id) } : null;
+  }
+
+  /**
+   * Resolve o projeto do item lido na validação (spool cadastrado no mock ou vínculo do próprio QRCode)
+   */
+  resolveScannedProject(item) {
+    if (!item || item.tipo !== 'spool') return null;
+    const spool = getSpoolByCode(item.codigo);
+    if (spool && spool.projetoId) return getProjectRef(spool.projetoId);
+    return item.projetoId ? getProjectRef(item.projetoId) : null;
   }
 
   getProcessName() {
@@ -395,7 +459,34 @@ export class ModalQrCodeComponent {
     return `<svg width="14" height="14" viewBox="0 0 24 24" fill="${fill}" stroke="${fill}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>`;
   }
 
-  renderViewfinder(includeQrSvg = false) {
+  /**
+   * Feedback de leitura colado ao leitor (faixa sobre a borda inferior do visor), visível sem scroll.
+   * @param {{type: 'success'|'warning'|'error', html: string}|null} feedback
+   */
+  renderReadFeedback(feedback) {
+    if (!feedback || !feedback.html) return '';
+    const icons = {
+      success: lucide('circle-check', { size: 16, stroke: '#067647', strokeWidth: 2.2 }),
+      warning: lucide('circle-alert', { size: 16, stroke: '#b45309', strokeWidth: 2.2 }),
+      error: lucide('circle-x', { size: 16, stroke: '#b42318', strokeWidth: 2.2 })
+    };
+    const type = icons[feedback.type] ? feedback.type : 'warning';
+    const role = type === 'success' ? 'status' : 'alert';
+    return `
+      <div class="qrcode-read-feedback is-${type} ${feedback.className || ''}" id="qrcode-read-feedback" role="${role}" aria-live="${type === 'success' ? 'polite' : 'assertive'}">
+        ${icons[type]}
+        <span>${feedback.html}</span>
+      </div>
+    `;
+  }
+
+  /** Garante que o feedback de leitura esteja visível (sem rolagem manual). */
+  revealReadFeedback() {
+    const el = this.container && this.container.querySelector('#qrcode-read-feedback');
+    if (el && typeof el.scrollIntoView === 'function') el.scrollIntoView({ block: 'nearest' });
+  }
+
+  renderViewfinder(includeQrSvg = false, feedback = null) {
     return `
       <div class="qrcode-camera-viewfinder" id="qrcode-camera-viewfinder" title="${includeQrSvg ? 'QRCode capturado' : 'Clique para ler o QRCode'}" role="button" tabindex="0">
         <!-- Feixe de brilho ciano/azul no topo -->
@@ -412,6 +503,7 @@ export class ModalQrCodeComponent {
           <div class="qrcode-corner bottom-right"></div>
           ${includeQrSvg ? this.renderQrCodeSvg() : ''}
         </div>
+        ${this.renderReadFeedback(feedback)}
       </div>
     `;
   }
@@ -470,9 +562,10 @@ export class ModalQrCodeComponent {
           <div class="qrcode-floating-pill-header">
             <div class="qrcode-floating-pill" id="qrcode-floating-pill-title">Leitor de QRCode</div>
           </div>
+          ${this.renderProjectContext()}
 
           <!-- Card 1: Visor da Câmera (Com desenho SVG do QRCode simulado) -->
-          ${this.renderViewfinder(data.componentes.length > 0)}
+          ${this.renderViewfinder(data.componentes.length > 0, this.getTransferFeedback(data, isSpool))}
 
           <!-- Botão azul para simular leitura "Simula Ler QRCode" -->
           <div class="qrcode-scan-action-wrap">
@@ -484,6 +577,9 @@ export class ModalQrCodeComponent {
             >
               ${lucide('qr-code', { size: 18, stroke: '#ffffff', strokeWidth: 2 })}
               <span>Simula Ler QRCode</span>
+            </button>
+            <button class="qrcode-btn-demo-foreign demo-only" id="btn-modal-demo-foreign-transfer" type="button" title="Simula a leitura de um item que pertence a outro projeto">
+              Simular leitura de ${isSpool ? 'spool' : 'componente'} de outro projeto
             </button>
           </div>
 
@@ -631,6 +727,34 @@ export class ModalQrCodeComponent {
     `;
   }
 
+  getTransferFeedback(data, isSpool) {
+    const label = isSpool ? 'Spool' : 'Componente';
+    if (data.foreignItem) {
+      const f = data.foreignItem;
+      return {
+        type: 'warning',
+        className: 'qrcode-foreign-alert qrcode-transfer-foreign-alert',
+        html: `${label} <strong>${f.codigo}</strong> pertence ao projeto <strong>${f.projetoCodigo}</strong> · ${f.projetoNome}. Não foi adicionado à transferência.`
+      };
+    }
+    if (data.lastAdded) {
+      return { type: 'success', html: `${label} <strong>${data.lastAdded}</strong> adicionado à transferência.` };
+    }
+    return null;
+  }
+
+  getStageFeedback(spool, isForeign) {
+    if (!this.isScanned) return null;
+    if (isForeign) {
+      return {
+        type: 'warning',
+        className: 'qrcode-foreign-alert',
+        html: `Spool <strong>${spool.codigo}</strong> pertence ao projeto <strong>${spool.projetoCodigo || 'não identificado'}</strong>${spool.projetoNome ? ` · ${spool.projetoNome}` : ''}. Movimentação bloqueada.`
+      };
+    }
+    return { type: 'success', html: `Spool <strong>${spool.codigo}</strong> lido com sucesso.` };
+  }
+
   renderCaldeirariaMode() {
     const spool = this.spool || {
       codigo: 'SP-0414-00003-001',
@@ -639,7 +763,10 @@ export class ModalQrCodeComponent {
     };
     const badgeInfo = this.getStatusBadge(spool.status);
     const actionConfig = this.getActionConfig(spool.status, this.getProcessName());
-    const playColor = this.isScanned ? '#ffffff' : '#9ca3af';
+    const isForeign = this.isScanned && this.isForeignSpool(spool);
+    const canAct = this.isScanned && !isForeign;
+    const playColor = canAct ? '#ffffff' : '#9ca3af';
+    const foreignDemoSpool = !this.isScanned ? this.findForeignStageSpool() : null;
 
     this.container.innerHTML = `
       <div class="modal-backdrop qrcode-backdrop-fullscreen" id="qrcode-modal-backdrop">
@@ -649,9 +776,10 @@ export class ModalQrCodeComponent {
           <div class="qrcode-floating-pill-header">
             <div class="qrcode-floating-pill" id="qrcode-floating-pill-title">Leitor de QRCode</div>
           </div>
+          ${this.renderProjectContext()}
 
           <!-- Card 1: Visor da Câmera (Com ou sem desenho SVG do QRCode simulado dependendo de isScanned) -->
-          ${this.renderViewfinder(this.isScanned)}
+          ${this.renderViewfinder(this.isScanned, this.getStageFeedback(spool, isForeign))}
 
           <!-- Botão Azul "Simula Ler QRCode" posicionado logo abaixo do visor da câmera -->
           <div class="qrcode-scan-action-wrap">
@@ -667,6 +795,11 @@ export class ModalQrCodeComponent {
                 : `${lucide('qr-code', { size: 18, stroke: '#ffffff', strokeWidth: 2 })} <span>Simula Ler QRCode</span>`
               }
             </button>
+            ${foreignDemoSpool ? `
+              <button class="qrcode-btn-demo-foreign demo-only" id="btn-modal-demo-foreign" type="button" title="Simula a leitura de um spool que pertence a outro projeto">
+                Simular leitura de spool de outro projeto
+              </button>
+            ` : ''}
           </div>
 
           <!-- Card 2: Instrução e Dados do Spool Clicado -->
@@ -678,7 +811,9 @@ export class ModalQrCodeComponent {
 
             <!-- Textos de Instrução -->
             <div class="qrcode-instr-caldeiraria-line1">Ler o QRCode do Spool.</div>
-            <div class="qrcode-instr-caldeiraria-line2">${actionConfig.instructionHtml}</div>
+            ${isForeign
+              ? `<div class="qrcode-instr-caldeiraria-line2 is-blocked">Movimentação bloqueada: spool de outro projeto.</div>`
+              : `<div class="qrcode-instr-caldeiraria-line2">${actionConfig.instructionHtml}</div>`}
 
             <!-- Linha horizontal azul com degradê luminoso -->
             <div class="qrcode-blue-gradient-line"></div>
@@ -704,6 +839,7 @@ export class ModalQrCodeComponent {
                   }
                 </span>
               </div>
+              ${this.isScanned ? ProjectTag.renderRow(spool, { className: 'qrcode-spool-project-row' }) : ''}
             </div>
           </div>
 
@@ -719,11 +855,11 @@ export class ModalQrCodeComponent {
           <!-- Rodapé de Botões: Grid com 2 botões (Ação dinâmica habilitada após leitura + Fechar em vermelho vivo) -->
           <div class="qrcode-actions-grid">
             <button 
-              class="qrcode-btn-iniciar ${!this.isScanned ? 'is-disabled' : ''}" 
+              class="qrcode-btn-iniciar ${!canAct ? 'is-disabled' : ''}" 
               id="qrcode-btn-iniciar" 
               type="button" 
-              ${!this.isScanned ? 'disabled' : ''}
-              style="${this.isScanned 
+              ${!canAct ? 'disabled' : ''}
+              style="${canAct 
                 ? `background-color: ${actionConfig.buttonColor} !important; border-color: ${actionConfig.buttonColor} !important; color: #ffffff !important;` 
                 : 'background-color: #e5e7eb !important; border-color: #e5e7eb !important; color: #9ca3af !important;'}"
             >
@@ -751,9 +887,10 @@ export class ModalQrCodeComponent {
             <h2 class="qrcode-top-title" id="qrcode-modal-header-title">Leitor de QRCode</h2>
             <div class="qrcode-top-divider"></div>
           </div>
+          ${this.renderProjectContext()}
 
           <!-- Card 1: Visor da Câmera (Com ou sem desenho SVG do QRCode dependendo de isScanned) -->
-          ${this.renderViewfinder(this.isScanned)}
+          ${this.renderViewfinder(this.isScanned, this.isScanned ? { type: 'success', html: `Spool <strong>${MOCK_SPOOL_CADASTRADO.codigo}</strong> lido · ${MOCK_SPOOL_CADASTRADO.componentes.length} componentes.` } : null)}
 
           <!-- Botão Azul "Simula Ler QRCode" posicionado logo abaixo do visor da câmera -->
           <div class="qrcode-scan-action-wrap">
@@ -890,6 +1027,7 @@ export class ModalQrCodeComponent {
             <div class="qrcode-success-data-box">
               <strong class="qrcode-success-data-label">${label}</strong>
               <span class="qrcode-success-data-val">${cleanContent}</span>
+              ${ProjectTag.renderRow(item, { className: 'qrcode-success-project-row', emptyText: isSpool ? 'Spool sem projeto vinculado' : '' })}
             </div>
 
             <!-- Linha divisória horizontal cinza clara -->
@@ -921,7 +1059,7 @@ export class ModalQrCodeComponent {
           </div>
 
           <!-- Card 1: Visor da Câmera (Com ou sem desenho SVG do QRCode dependendo de isScanned) -->
-          ${this.renderViewfinder(this.isScanned)}
+          ${this.renderViewfinder(this.isScanned, item ? { type: 'success', html: `QRCode válido: <strong>${item.codigo}</strong>${item.projetoCodigo ? ` · ${item.projetoCodigo}` : ''}` } : null)}
 
           <!-- Card 2: Instrução e Botão de Leitura -->
           <div class="qrcode-card-validar-instruction">
@@ -946,7 +1084,7 @@ export class ModalQrCodeComponent {
           <div class="qrcode-card-last-read">
             <div class="qrcode-last-read-title">Último QRCode lido:</div>
             ${item 
-              ? `<div class="qrcode-validar-last-read-data">${item.textoUltimoLido}</div>` 
+              ? `<div class="qrcode-validar-last-read-data">${item.textoUltimoLido}</div>${ProjectTag.renderRow(item, { className: 'qrcode-last-read-project-row' })}` 
               : `<div class="qrcode-waiting-text-center">Aguardando leitura...</div>`
             }
           </div>
@@ -963,6 +1101,7 @@ export class ModalQrCodeComponent {
   }
 
   bindEvents() {
+    this.revealReadFeedback();
     const backdrop = this.container.querySelector('#qrcode-modal-backdrop');
     const closeBtnBottom = this.container.querySelector('#qrcode-btn-close-bottom');
     const btnSuccessCloseX = this.container.querySelector('#btn-success-close-x');
@@ -1006,7 +1145,8 @@ export class ModalQrCodeComponent {
     // Ação "Ler QRCode" na modal de Validação: intercala itens e abre a modal de Sucesso
     const handleTriggerScanValidar = (e) => {
       e.stopPropagation();
-      const item = MOCK_VALIDAR_ITEMS[this.validarScanIndex % MOCK_VALIDAR_ITEMS.length];
+      const baseItem = MOCK_VALIDAR_ITEMS[this.validarScanIndex % MOCK_VALIDAR_ITEMS.length];
+      const item = { ...baseItem, ...(this.resolveScannedProject(baseItem) || {}) };
       this.validarScanIndex++;
       this.lastScannedItem = item;
       this.isScanned = true;
@@ -1040,9 +1180,12 @@ export class ModalQrCodeComponent {
           item: nextNum,
           codigo: nextItem.codigo,
           qtd: nextItem.qtd,
-          desc: nextItem.desc
+          desc: nextItem.desc,
+          ...(getProjectRef(getActiveProject()) || {})
         });
         this.transferData.ultimoLido = nextItem.rawQr;
+        this.transferData.foreignItem = null;
+        this.transferData.lastAdded = nextItem.codigo;
         this.isScanned = true;
         this.render();
         return;
@@ -1055,8 +1198,38 @@ export class ModalQrCodeComponent {
           this.renderCadastroMode();
         }
         this.bindEvents();
+        if (this.mode !== 'cadastro' && this.isForeignSpool()) this.warnForeignSpool();
       }
     };
+
+    // DEMO: leitura de item de outro projeto na transferência → bloqueado (não entra na lista)
+    const btnDemoForeignTransfer = this.container.querySelector('#btn-modal-demo-foreign-transfer');
+    if (btnDemoForeignTransfer && this.isTransferMode()) {
+      btnDemoForeignTransfer.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const foreign = this.findForeignTransferItem();
+        if (!foreign) return;
+        this.transferData.foreignItem = foreign;
+        this.transferData.lastAdded = null;
+        this.transferData.ultimoLido = `${this.mode === 'transferencia-spool' ? 'SPOOL' : 'COD_PRODUTO'}: ${foreign.codigo} | PROJ: ${foreign.projetoCodigo}`;
+        this.render();
+        this.warnForeignSpool(foreign, this.mode === 'transferencia-spool' ? 'Spool' : 'Componente');
+      });
+    }
+
+    // DEMO: simula leitura de spool vinculado a outro projeto (validação de projeto na etapa)
+    const btnDemoForeign = this.container.querySelector('#btn-modal-demo-foreign');
+    if (btnDemoForeign) {
+      btnDemoForeign.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const foreign = this.findForeignStageSpool();
+        if (!foreign) return;
+        this.spool = foreign;
+        this.isScanned = true;
+        this.render();
+        this.warnForeignSpool(foreign);
+      });
+    }
 
     if (btnTriggerScan) {
       btnTriggerScan.addEventListener('click', handleTriggerScanGeneral);
@@ -1077,6 +1250,8 @@ export class ModalQrCodeComponent {
           const idx = parseInt(btn.dataset.index, 10);
           if (!isNaN(idx) && this.transferData && this.transferData.componentes[idx]) {
             this.transferData.componentes.splice(idx, 1);
+            this.transferData.lastAdded = null;
+            this.transferData.foreignItem = null;
             this.transferData.componentes.forEach((comp, i) => {
               comp.item = String(i + 1).padStart(2, '0');
             });
@@ -1150,6 +1325,10 @@ export class ModalQrCodeComponent {
         e.stopPropagation();
         if (!this.isScanned) return;
         const currentSpool = this.spool;
+        if (this.isForeignSpool(currentSpool)) {
+          this.warnForeignSpool(currentSpool);
+          return;
+        }
         const actionConfig = this.getActionConfig(currentSpool?.status, this.getProcessName());
         this.closeWithoutCallbacks();
         if (typeof this.onActionCallback === 'function') {

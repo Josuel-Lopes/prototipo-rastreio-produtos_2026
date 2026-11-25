@@ -6,6 +6,7 @@
 
 import { lucide } from './icons.js';
 import { statusDefinitions } from '../mocks/spools-mock.js';
+import { ProjectTag } from './project-tag.js';
 
 /**
  * Extrai e formata estritamente a data no padrão dd/MM/yyyy
@@ -22,6 +23,24 @@ function formatScrapDate(dateStr) {
   if (isoMatch) return `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
 
   return str.split(' ')[0] || str;
+}
+
+/**
+ * Coluna de data (ícone calendário + rótulo + valor) compartilhada por SpoolCard e ProjectCard
+ * @param {string} label - Rótulo (ex: "Início:")
+ * @param {string} value - Valor exibido
+ * @returns {string} HTML da coluna
+ */
+export function renderCardDateCol(label, value) {
+  return `
+    <div class="spool-date-col">
+      <div class="spool-date-header">
+        <span class="spool-date-icon">${lucide('calendar', { size: 14, stroke: '#64748b', strokeWidth: 1.8 })}</span>
+        <span class="spool-date-label">${label}</span>
+      </div>
+      <div class="spool-date-value">${value || '-- / -- / ---- às -- : --'}</div>
+    </div>
+  `;
 }
 
 export class SpoolCard {
@@ -67,25 +86,14 @@ export class SpoolCard {
           <span class="spool-item-code-link spool-item-code-text" data-code="${spool.codigo}">${spool.codigo}</span>
         </div>
 
+        <!-- Linha do Projeto vinculado -->
+        ${ProjectTag.renderRow(spool, { className: 'spool-item-project-row' })}
+
         <!-- Linha de Datas e Horários em Duas Colunas com Divisor Vertical Central -->
         <div class="spool-item-dates-grid">
-          <div class="spool-date-col">
-            <div class="spool-date-header">
-              <span class="spool-date-icon">${lucide('calendar', { size: 14, stroke: '#64748b', strokeWidth: 1.8 })}</span>
-              <span class="spool-date-label">Início:</span>
-            </div>
-            <div class="spool-date-value">${spool.inicio || '-- / -- / ---- às -- : --'}</div>
-          </div>
-
+          ${renderCardDateCol('Início:', spool.inicio)}
           <div class="spool-date-divider" aria-hidden="true"></div>
-
-          <div class="spool-date-col">
-            <div class="spool-date-header">
-              <span class="spool-date-icon">${lucide('calendar', { size: 14, stroke: '#64748b', strokeWidth: 1.8 })}</span>
-              <span class="spool-date-label">Finalizado:</span>
-            </div>
-            <div class="spool-date-value">${spool.finalizado || '-- / -- / ---- às -- : --'}</div>
-          </div>
+          ${renderCardDateCol('Finalizado:', spool.finalizado)}
         </div>
 
         <!-- Linha da Descrição (Abaixo das Datas) -->
