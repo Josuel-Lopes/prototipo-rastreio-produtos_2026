@@ -74,8 +74,13 @@ Estrutura de pastas organizada para segregação clara entre especificações, d
 │       │   ├── header.js               # Header fixo com drawer lateral e navegação
 │       │   ├── icons.js                # Renderizador inline de ícones Lucide SVG
 │       │   ├── modal-qrcode.js         # Modal leitor e validador de QR Code
+│       │   ├── modal-romaneio.js       # Modal industrial de aviso de Romaneio
 │       │   ├── modal-transferencia.js  # Modal para movimentação de setor/etapa
 │       │   ├── module-card.js          # Cartão de módulo para menu principal
+│       │   ├── page-container.js       # Container padronizado de layout
+│       │   ├── page-title.js           # Gerenciador da pill de título no header
+│       │   ├── processes-accordion.js  # Acordeão retrátil de contadores de processos
+│       │   ├── spool-card.js           # Card industrial de spool com datas e status
 │       │   └── toast.js                # Notificações visuais flutuantes
 │       ├── mocks/                      # Repositório de dados em memória client-side
 │       │   └── spools-mock.js
@@ -89,7 +94,10 @@ Estrutura de pastas organizada para segregação clara entre especificações, d
 │           ├── cadastro-view.js
 │           ├── caldeiraria-view.js
 │           ├── login-view.js
-│           └── menu-view.js
+│           ├── menu-view.js
+│           ├── pintura-view.js
+│           ├── process-stage-view.js   # Classe base para etapas produtivas fabris
+│           └── revestimento-view.js
 ├── serve.sh                            # Script executável de inicialização rápida
 ├── package.json
 └── README.md
@@ -244,7 +252,70 @@ jobs:
 
 Este projeto adota as convenções do [Semantic Versioning (SemVer)](https://semver.org/lang/pt-BR/):
 
-- Versão Atual: **`v2.1.0`**
+- Versão Atual: **`v2.9.0`**
+
+##### Histórico Recente
+
+- **`v2.9.0`**:
+  - Implementação da tela **Transferência - Spool** e criação de nova transferência para Spool:
+    - Listagem de transferências de Spool com cards reativos, status chevron e visualização de spools vinculados.
+    - Tela **Criar Nova Transferência** unificada para Componente e Spool com leitor QRCode integrado.
+- **`v2.8.0`**:
+  - Implementação da tela **Criar Nova Transferência** (`copilot-image-3a2fe1.png`):
+    - Acesso direto pelo botão azul "Criar Nova Transferência" na listagem de transferências de componentes.
+    - PageContainer padrão Alvenius com banner informativo "Transferência", subtítulo descritivo com ícone info e separador com degradê luminoso `page-accent-line`.
+    - Seção **FORNECEDOR** com blocos estruturados para Origem e Destino exibindo Código, Loja e Nome em alinhamento preciso e placeholders dinâmicos antes da captura.
+    - Pergunta operacional sobre serviço realizado por terceiro com ícone circular de interrogação `(?)` e resposta reativa "SIM".
+    - Quadro **COMPONENTES** com caixa industrial, barra superior cinza e tabela em 3 colunas (`ITENS`, `CÓDIGOS`, `QTD.`), com placeholder de espera e preenchimento imediato após a leitura.
+    - Rodapé com 3 botões de ação idênticos à tela de Cadastro: "Ler QRCode" (azul ativo), "Limpar" (reativo com alternância para vermelho ativo) e "Gravar" (reativo com alternância para verde ativo).
+    - Integração completa com o leitor óptico `ModalQrCodeComponent` para captura de romaneios de transferência.
+    - Persistência e gravação de novas transferências no mock `transfers-mock.js` com redirecionamento automático para a tela de listagem de componentes e toast de confirmação.
+- **`v2.6.0`**:
+  - Implementação da tela de **Transferência - Componente** (`copilot-image-fc3082.png`, `copilot-image-85fa22.png` e `copilot-image-93dd6b.png`):
+    - Abertura direta a partir da seleção de "COMPONENTE" na Modal de Transferência.
+    - PageTitle "Transferência" e PageContainer padrão Alvenius com banner informativo "Transferência - Componente".
+    - Linha de ação superior com busca em tempo real por código, status, fornecedor ou data e botão azul "Criar Nova Transferência" com ícone circular de adição.
+    - Componente modular e reutilizável `TransferCard`, projetado para suportar tanto transferências de "componente" quanto de "spool".
+    - Expansão e colapso reativo da lista de itens vinculados (`codigo: ...`), com alternância fluida do ícone chevron (`v` e `^`).
+    - Pipeline de progresso de status com 5 etapas encadeadas em formato chevron com clip-path CSS (`Aguardando SC`, `Aguardando PV`, `Aguardando ROM`, `Aguardando NF`, `Nota Emitida`), destacando visualmente a etapa corrente com preenchimento cromático e tipografia dedicada.
+    - Mock de dados de transferências `transfers-mock.js` com múltiplas movimentações industriais e suporte à adição imediata de novos romaneios.
+- **`v2.5.0`**:
+  - Refinamento visual e funcional de alta fidelidade da Modal de Transferência (`copilot-image-d3e025.png`):
+    - Diálogo retangular centralizado com bordas arredondadas (`border-radius: 8px`), sombra suave e botão 'X' vermelho superior direito.
+    - Cabeçalho com título centralizado em duas linhas ("Selecione qual TIPO de TRANSFERÊNCIA") e linhas divisórias finas e sutis.
+    - Card de seleção **COMPONENTE**: ícone geométrico exclusivo de 4 losangos vazados em azul industrial (`#1956ce`), tipografia com peso bold e descrição operacional de próximas etapas.
+    - Card de seleção **SPOOL**: ícone de caixa/pacote em azul industrial (`#1956ce`), tipografia bold e descrição operacional de próximas etapas.
+    - Botão inferior "Fechar" em vermelho (`#dc2626`) em largura total com cantos arredondados (6px), ícone de círculo com X (`circle-x`) e texto em branco.
+    - Suporte completo a navegação via teclado (`Enter`, `Espaço`, `Escape`) e fechamento via backdrop ou botões.
+- **`v2.4.0`**:
+  - Implementação completa da Modal "Validar QRCode" (`copilot-image-bb7df0.png` e `copilot-image-aed5ce.png`):
+    - Leitor de QRCode com visor de câmera, miras azuis fluorescentes, glow beam e animação laser.
+    - Card de instruções com verificação de campos e dados (marcador asterisco vermelho).
+    - Botão azul centralizado "Ler QRCode" com fluxo de simulação em tempo real.
+    - Intercalação automática de dados validados a cada scan: alternância contínua entre Spools e Componentes técnicos rastreáveis.
+    - Modal de Sucesso desacoplada: badge circular com checkmark verde, status de conformidade e validade, exibição dos dados detalhados e fechamento duplo (botão 'X' superior e botão 'Fechar' inferior).
+    - Retorno fluido para o leitor exibindo o QRCode renderizado no visor e preenchimento dinâmico do card "Último QRCode lido".
+    - Fechamento suave do leitor com retorno à tela Home / Menu.
+- **`v2.3.0`**:
+  - Componentização modular avançada:
+    - `ProcessesAccordionComponent`: componente reutilizável do acordeão retrátil com os 8 status e contadores.
+    - `ModalRomaneioComponent`: modal industrial desacoplado para aviso de Romaneio.
+    - `ProcessStageView`: classe base padronizada para etapas de produção (Caldeiraria, Revestimento, Pintura), eliminando duplicação de código.
+  - Diferenciação total e dados aleatorizados entre Caldeiraria, Revestimento e Pintura:
+    - Peças e especificações técnicas exclusivas para cada etapa (corte/solda, FBE/3LPE/liners e poliuretano Petrobras N-1219/Vale).
+    - Status operacionais, históricos de sucata e quantidades em lista independentes e não-idênticos.
+    - Contadores e Totais Gerais fabris totalmente distintos e reativos (Caldeiraria: 1099, Revestimento: 748, Pintura: 524).
+- **`v2.2.0`**:
+  - Tela de Caldeiraria com fidelidade milimétrica a prints
+  - Componente reutilizável SpoolCard com status e datas em 2 colunas
+  - Acordeão expansível de processos com contadores
+  - Histórico de sucata in-line controlado pelo toggle
+  - Modal de leitura de QRCode da Caldeiraria com dados dinâmicos do Spool
+  - Modal customizado para Romaneio
+- **`v2.1.0`**:
+  - Ajustes de conformidade visual, drawer de navegação e componentes modais
+- **`v2.0.0`**:
+  - Nova identidade visual, arquitetura modular e layout mobile-first industrial
 
 <br/>
 

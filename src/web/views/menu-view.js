@@ -49,7 +49,7 @@ export class MenuView {
         const { onNavigate, onOpenQrCode, onOpenTransfer } = this.options;
 
         if (id === 'validar-qrcode') {
-          if (typeof onOpenQrCode === 'function') onOpenQrCode();
+          if (typeof onOpenQrCode === 'function') onOpenQrCode('validar-qrcode');
         } else if (id === 'transferencia') {
           if (typeof onOpenTransfer === 'function') onOpenTransfer();
         } else if (id === 'site-alvenius') {

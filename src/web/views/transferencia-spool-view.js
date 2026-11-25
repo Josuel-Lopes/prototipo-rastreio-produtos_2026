@@ -1,0 +1,216 @@
+/**
+ * Tela de Transferência - SPOOL - Alvenius Spool Management
+ * Responsabilidade Única: Listagem, busca e registro do processo de transferência de spools
+ * Parametrizável para os processos:
+ *   - 'caldeiraria-revestimento' (Pill: Caldeiraria)
+ *   - 'revestimento-pintura' (Pill: Revestimento)
+ *   - 'pintura-faturamento' (Pill: Pintura)
+ * Fidelidade visual absoluta aos layouts copilot-image-554851.png e copilot-image-a134f2.png
+ */
+
+import { getTransfersSpools } from '../mocks/transfers-mock.js';
+import { TransferCard } from '../components/transfer-card.js';
+import { PageContainer } from '../components/page-container.js';
+import { PageTitle } from '../components/page-title.js';
+import { lucide } from '../components/icons.js';
+
+const PROCESSO_PILL_MAP = {
+  'caldeiraria-revestimento': 'Caldeiraria',
+  'revestimento-pintura': 'Revestimento',
+  'pintura-faturamento': 'Pintura'
+};
+
+export class TransferenciaSpoolView {
+  constructor(containerId = 'app-view', options = {}) {
+    this.container = document.getElementById(containerId);
+    this.options = options;
+    this.processo = options.processo || 'caldeiraria-revestimento';
+    this.searchQuery = '';
+    this.expandedCards = new Set(); // Armazena IDs dos cards com spools expandidos
+  }
+
+  setProcesso(processo = 'caldeiraria-revestimento') {
+    this.processo = processo;
+    this.searchQuery = '';
+    this.expandedCards.clear();
+  }
+
+  getFilteredTransfers() {
+    const list = getTransfersSpools(this.processo);
+    const query = this.searchQuery.trim().toLowerCase();
+
+    if (!query) return list;
+
+    return list.filter(item => {
+      const codeMatch = String(item.codigo || '').toLowerCase().includes(query);
+      const seqMatch = String(item.sequencial || '').toLowerCase().includes(query);
+      const statusMatch = String(item.status || '').toLowerCase().includes(query);
+      const originMatch = String(item.fornecedorOrigem || '').toLowerCase().includes(query);
+      const destMatch = String(item.fornecedorDestino || '').toLowerCase().includes(query);
+      const dateMatch = String(item.inicio || '').toLowerCase().includes(query) ||
+                        String(item.finalizado || '').toLowerCase().includes(query);
+
+      const spoolsList = Array.isArray(item.spools) ? item.spools : (Array.isArray(item.itens) ? item.itens : []);
+      const spoolsMatch = spoolsList.some(sp => {
+        const code = (typeof sp === 'object' && sp !== null) ? (sp.codigo || '') : String(sp);
+        return code.toLowerCase().includes(query);
+      });
+
+      return codeMatch || seqMatch || statusMatch || originMatch || destMatch || dateMatch || spoolsMatch;
+    });
+  }
+
+  toggleExpand(transferId) {
+    if (this.expandedCards.has(transferId)) {
+      this.expandedCards.delete(transferId);
+    } else {
+      this.expandedCards.add(transferId);
+    }
+    this.render();
+  }
+
+  handleCreateTransfer() {
+    if (typeof this.options.onNavigate === 'function') {
+      this.options.onNavigate('nova-transferencia-spool', { processo: this.processo });
+    }
+  }
+
+  render() {
+    if (!this.container) return;
+
+    // Define o título oficial na pill do header conforme o processo ativo
+    const pillTitle = PROCESSO_PILL_MAP[this.processo] || 'Caldeiraria';
+    PageTitle.setTitle(pillTitle);
+
+    const transfers = this.getFilteredTransfers();
+
+    // Renderiza a lista de cards de transferência de spool
+    let cardsHtml = '';
+    if (transfers.length === 0) {
+      cardsHtml = `
+        <div class="transfer-empty-state">
+          ${lucide('search', { size: 36, stroke: '#9ca3af', strokeWidth: 1.5 })}
+          <div class="transfer-empty-title">Nenhuma transferência encontrada</div>
+          <div class="transfer-empty-subtitle">Tente outro termo na busca por código, status ou data.</div>
+        </div>
+      `;
+    } else {
+      cardsHtml = transfers.map(item =>
+        TransferCard.render(item, {
+          tipo: 'spool',
+          isExpanded: this.expandedCards.has(item.id)
+        })
+      ).join('');
+    }
+
+    const contentHtml = `
+      <!-- Linha de Ação: Busca + Botão Criar Nova Transferência -->
+      <div class="transfer-action-row">
+        <div class="transfer-search-box">
+          <span class="transfer-search-icon">
+            ${lucide('search', { size: 18, stroke: '#9ca3af', strokeWidth: 2 })}
+          </span>
+          <input 
+            type="text" 
+            id="transfer-search-input" 
+            class="transfer-search-input" 
+            placeholder="Buscar por código, status, data" 
+            value="${this.searchQuery}"
+            autocomplete="off"
+            aria-label="Buscar por código, status ou data"
+          />
+        </div>
+
+        <!-- Botão Azul: Criar Nova Transferência com Ícone Circular de Adição -->
+        <button class="btn-transfer-create" id="btn-create-transfer" type="button" title="Criar Nova Transferência">
+          <span class="btn-transfer-create-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M8 12h8" />
+              <path d="M12 8v8" />
+            </svg>
+          </span>
+          <div class="btn-transfer-create-label">
+            <span>Criar Nova</span>
+            <span>Transferência</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- Container da Lista de Cards de Transferência de Spool -->
+      <div class="transfer-cards-list" id="transfer-cards-list">
+        ${cardsHtml}
+      </div>
+    `;
+
+    // Envelope no PageContainer padrão da Alvenius com título "Transferência - SPOOL"
+    this.container.innerHTML = PageContainer.render({
+      bannerTitle: 'Transferência - SPOOL',
+      bannerDescription: '<span class="banner-line-1" style="white-space: nowrap; display: block;">Lista e criar o registro do processo de transferência.</span>',
+      content: contentHtml,
+      footerActions: '',
+      containerClass: 'view-transferencia-spool-container',
+      cardClass: 'card-transferencia-spool'
+    });
+
+    this.bindEvents();
+  }
+
+  bindEvents() {
+    // 1. Campo de busca em tempo real
+    const searchInput = this.container.querySelector('#transfer-search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        this.searchQuery = e.target.value;
+        const filtered = this.getFilteredTransfers();
+        const listContainer = this.container.querySelector('#transfer-cards-list');
+        if (listContainer) {
+          if (filtered.length === 0) {
+            listContainer.innerHTML = `
+              <div class="transfer-empty-state">
+                ${lucide('search', { size: 36, stroke: '#9ca3af', strokeWidth: 1.5 })}
+                <div class="transfer-empty-title">Nenhuma transferência encontrada</div>
+                <div class="transfer-empty-subtitle">Tente outro termo na busca por código, status ou data.</div>
+              </div>
+            `;
+          } else {
+            listContainer.innerHTML = filtered.map(item =>
+              TransferCard.render(item, {
+                tipo: 'spool',
+                isExpanded: this.expandedCards.has(item.id)
+              })
+            ).join('');
+            this.bindCardEvents(listContainer);
+          }
+        }
+      });
+    }
+
+    // 2. Botão Criar Nova Transferência
+    const btnCreate = this.container.querySelector('#btn-create-transfer');
+    if (btnCreate) {
+      btnCreate.addEventListener('click', () => {
+        this.handleCreateTransfer();
+      });
+    }
+
+    // 3. Delegação de eventos dos cards (expandir/recolher spools)
+    const listContainer = this.container.querySelector('#transfer-cards-list');
+    if (listContainer) {
+      this.bindCardEvents(listContainer);
+    }
+  }
+
+  bindCardEvents(container) {
+    const toggleButtons = container.querySelectorAll('.btn-toggle-transfer-items');
+    toggleButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const transferId = btn.getAttribute('data-toggle-transfer');
+        if (transferId) {
+          this.toggleExpand(transferId);
+        }
+      });
+    });
+  }
+}

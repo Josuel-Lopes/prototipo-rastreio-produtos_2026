@@ -108,7 +108,8 @@
 
 .header-center-pill .floating-pill,
 .header-center-pill #header-pill-label {
-  width: 200px !important;
+  width: auto !important;
+  min-width: 200px !important;
   max-width: calc(100vw - 32px) !important;
   height: 48px !important;
   min-height: 48px !important;
@@ -126,6 +127,7 @@
   text-align: center;
   box-sizing: border-box !important;
   line-height: 1 !important;
+  white-space: nowrap !important;
 }
 
 .header-center-pill .floating-pill span,
@@ -141,6 +143,7 @@
   font-weight: 700 !important;
   font-size: 18px !important;
   text-align: center !important;
+  white-space: nowrap !important;
 }
 
 /* Tabs Inline Horizontais (Desktop Modo Work) */
@@ -644,7 +647,8 @@
 
   .header-center-pill .floating-pill,
   .header-center-pill #header-pill-label {
-    width: 200px !important;
+    width: auto !important;
+    min-width: 200px !important;
     max-width: calc(100vw - 32px) !important;
     height: 48px !important;
     min-height: 48px !important;
@@ -660,6 +664,7 @@
     justify-content: center !important;
     box-sizing: border-box !important;
     line-height: 1 !important;
+    white-space: nowrap !important;
   }
 
   .header-center-pill .floating-pill span,
@@ -671,6 +676,7 @@
     margin: 0 !important;
     padding: 0 !important;
     font-size: 18px !important;
+    white-space: nowrap !important;
   }
 
   .header-drawer-panel {

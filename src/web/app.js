@@ -6,6 +6,7 @@
 import { HeaderComponent } from './components/header.js';
 import { toast } from './components/toast.js';
 import { ModalTransferenciaComponent } from './components/modal-transferencia.js';
+import { ModalProcessoTransferenciaComponent } from './components/modal-processo-transferencia.js';
 import { ModalQrCodeComponent } from './components/modal-qrcode.js';
 import { lucide } from './components/icons.js';
 
@@ -13,13 +14,20 @@ import { LoginView } from './views/login-view.js';
 import { MenuView } from './views/menu-view.js';
 import { CadastroView } from './views/cadastro-view.js';
 import { CaldeirariaView } from './views/caldeiraria-view.js';
+import { RevestimentoView } from './views/revestimento-view.js';
+import { PinturaView } from './views/pintura-view.js';
+import { TransferenciaComponenteView } from './views/transferencia-componente-view.js';
+import { TransferenciaSpoolView } from './views/transferencia-spool-view.js';
+import { NovaTransferenciaView } from './views/nova-transferencia-view.js';
 
 import { getCurrentUser, setCurrentUser, logoutUser, getSpoolByCode } from './mocks/spools-mock.js';
+import { APP_VERSION } from './version.js';
 
 class App {
   constructor() {
     this.currentUser = getCurrentUser();
     this.currentRoute = 'login'; // Inicia na tela de login conforme wireframe
+    this.activeSpoolProcess = 'caldeiraria-revestimento'; // Processo ativo de spool
     
     // Inicialização dos componentes modais e globais
     this.header = new HeaderComponent('app-header', {
@@ -28,6 +36,7 @@ class App {
     });
 
     this.modalTransferencia = new ModalTransferenciaComponent('modal-root');
+    this.modalProcessoTransferencia = new ModalProcessoTransferenciaComponent('modal-root');
     this.modalQrCode = new ModalQrCodeComponent('modal-root');
 
     // Inicialização das views
@@ -37,7 +46,7 @@ class App {
       }),
       menu: new MenuView('app-view', {
         onNavigate: (route) => this.navigateTo(route),
-        onOpenQrCode: () => this.openQrCodeScanner(),
+        onOpenQrCode: (mode) => this.openQrCodeScanner(null, mode || 'validar-qrcode'),
         onOpenTransfer: () => this.openModalTransferencia()
       }),
       cadastro: new CadastroView('app-view', {
@@ -48,12 +57,36 @@ class App {
         onNavigate: (route) => this.navigateTo(route),
         onOpenQrCode: (callback) => this.openQrCodeScanner(callback),
         onSpoolSelected: (code) => this.handleSpoolSelected(code)
+      }),
+      revestimento: new RevestimentoView('app-view', {
+        onNavigate: (route) => this.navigateTo(route),
+        onOpenQrCode: (callback) => this.openQrCodeScanner(callback),
+        onSpoolSelected: (code) => this.handleSpoolSelected(code)
+      }),
+      pintura: new PinturaView('app-view', {
+        onNavigate: (route) => this.navigateTo(route),
+        onOpenQrCode: (callback) => this.openQrCodeScanner(callback),
+        onSpoolSelected: (code) => this.handleSpoolSelected(code)
+      }),
+      transferenciaComponente: new TransferenciaComponenteView('app-view', {
+        onNavigate: (route, params) => this.navigateTo(route, params)
+      }),
+      transferenciaSpool: new TransferenciaSpoolView('app-view', {
+        onNavigate: (route, params) => this.navigateTo(route, params)
+      }),
+      novaTransferencia: new NovaTransferenciaView('app-view', {
+        onNavigate: (route, params) => this.navigateTo(route, params),
+        onOpenQrCode: (callback, mode, processo) => {
+          const actualMode = mode || (this.views?.novaTransferencia?.tipo === 'spool' ? 'transferencia-spool' : 'transferencia-componente');
+          const actualProcess = processo || this.activeSpoolProcess;
+          this.openQrCodeScanner(callback, actualMode, actualProcess);
+        }
       })
     };
   }
 
   init() {
-    console.log('Alvenius Spool Management v2.1.0 iniciado.');
+    console.log(`Alvenius Spool Management ${APP_VERSION} iniciado.`);
     
     const savedUser = sessionStorage.getItem('app_user');
     if (savedUser) {
@@ -63,6 +96,11 @@ class App {
       } catch (e) {
         this.currentUser = null;
       }
+    }
+
+    const savedProcess = sessionStorage.getItem('app_spool_process');
+    if (savedProcess) {
+      this.activeSpoolProcess = savedProcess;
     }
 
     const savedRoute = sessionStorage.getItem('app_current_route');
@@ -112,7 +150,7 @@ class App {
     this.navigateTo('login');
   }
 
-  navigateTo(route) {
+  navigateTo(route, params = {}) {
     const isAuthed = !!(this.currentUser && this.currentUser.isLoggedIn);
     if (isAuthed && route !== 'validar-qrcode' && route !== 'transferencia') {
       sessionStorage.setItem('app_current_route', route);
@@ -123,9 +161,14 @@ class App {
       return;
     }
 
+    if (params && params.processo) {
+      this.activeSpoolProcess = params.processo;
+      sessionStorage.setItem('app_spool_process', this.activeSpoolProcess);
+    }
+
     // Rotas de modais diretos
     if (route === 'validar-qrcode') {
-      this.openQrCodeScanner();
+      this.openQrCodeScanner(null, 'validar-qrcode');
       return;
     }
 
@@ -136,13 +179,41 @@ class App {
 
     if (route === 'revestimento') {
       this.currentRoute = 'revestimento';
-      this.renderGenericStageView('REVESTIMENTO', 'Ler QRCode Spool revestimento / próximas etapas processo');
+      this.render();
       return;
     }
 
     if (route === 'pintura') {
       this.currentRoute = 'pintura';
-      this.renderGenericStageView('PINTURA', 'Ler QRCode Spool pintura / próximas etapas processo');
+      this.render();
+      return;
+    }
+
+    if (route === 'transferencia-componente') {
+      this.currentRoute = 'transferencia-componente';
+      this.render();
+      return;
+    }
+
+    if (route === 'transferencia-spool') {
+      this.currentRoute = 'transferencia-spool';
+      this.views.transferenciaSpool.setProcesso(this.activeSpoolProcess);
+      this.render();
+      return;
+    }
+
+    if (route === 'nova-transferencia-spool') {
+      this.currentRoute = 'nova-transferencia-spool';
+      this.views.novaTransferencia.setTipo('spool');
+      this.views.novaTransferencia.setProcesso(this.activeSpoolProcess);
+      this.render();
+      return;
+    }
+
+    if (route === 'nova-transferencia') {
+      this.currentRoute = 'nova-transferencia';
+      this.views.novaTransferencia.setTipo('componente');
+      this.render();
       return;
     }
 
@@ -151,12 +222,23 @@ class App {
   }
 
   getPillLabel(route) {
+    const SPOOL_PILL_MAP = {
+      'caldeiraria-revestimento': 'Caldeiraria',
+      'revestimento-pintura': 'Revestimento',
+      'pintura-faturamento': 'Pintura'
+    };
+
     switch (route) {
       case 'cadastro': return 'Cadastro';
       case 'caldeiraria': return 'Caldeiraria';
       case 'revestimento': return 'Revestimento';
       case 'pintura': return 'Pintura';
-      case 'transferencia': return 'Transferência';
+      case 'transferencia':
+      case 'transferencia-componente':
+      case 'nova-transferencia': return 'Transferência';
+      case 'nova-transferencia-spool':
+      case 'transferencia-spool':
+        return SPOOL_PILL_MAP[this.activeSpoolProcess] || 'Caldeiraria';
       case 'validar-qrcode': return 'Validar QRCode';
       default: return 'Rastreio de produtos';
     }
@@ -179,6 +261,16 @@ class App {
       this.views.cadastro.render();
     } else if (this.currentRoute === 'caldeiraria') {
       this.views.caldeiraria.render();
+    } else if (this.currentRoute === 'revestimento') {
+      this.views.revestimento.render();
+    } else if (this.currentRoute === 'pintura') {
+      this.views.pintura.render();
+    } else if (this.currentRoute === 'transferencia-componente') {
+      this.views.transferenciaComponente.render();
+    } else if (this.currentRoute === 'transferencia-spool') {
+      this.views.transferenciaSpool.render();
+    } else if (this.currentRoute === 'nova-transferencia' || this.currentRoute === 'nova-transferencia-spool') {
+      this.views.novaTransferencia.render();
     }
 
     // Scroll para o topo
@@ -215,9 +307,6 @@ class App {
                 ${lucide('qr-code', { size: 20, strokeWidth: 2 })}
                 <span>Ler QRCode de Spool</span>
               </button>
-              <button class="btn btn-outline btn-lg" id="btn-stage-back-menu">
-                <span>Voltar ao Menu</span>
-              </button>
             </div>
           </div>
         </div>
@@ -225,7 +314,6 @@ class App {
     `;
 
     const btnScan = mainContainer.querySelector('#btn-stage-scan-qrcode');
-    const btnBack = mainContainer.querySelector('#btn-stage-back-menu');
 
     if (btnScan) {
       btnScan.addEventListener('click', () => {
@@ -237,19 +325,23 @@ class App {
         });
       });
     }
-
-    if (btnBack) {
-      btnBack.addEventListener('click', () => {
-        this.navigateTo('menu');
-      });
-    }
   }
 
-  openQrCodeScanner(onScanSuccess) {
+  openQrCodeScanner(onScanSuccess, mode = 'cadastro', processo = null) {
+    const actualProcesso = processo || this.activeSpoolProcess;
     this.modalQrCode.open({
-      onScan: (code, spool) => {
+      mode,
+      processo: actualProcesso,
+      onScan: (codeOrData, extra) => {
         if (typeof onScanSuccess === 'function') {
-          onScanSuccess(code, spool);
+          onScanSuccess(codeOrData, extra);
+        }
+      },
+      onClose: (data) => {
+        if ((mode === 'transferencia-componente' || mode === 'transferencia-spool' || mode === 'transferencia') && data) {
+          if (typeof onScanSuccess === 'function') {
+            onScanSuccess(data);
+          }
         }
       }
     });
@@ -258,20 +350,23 @@ class App {
   openModalTransferencia() {
     this.modalTransferencia.open({
       onSelect: (tipo) => {
-        const tipoLabel = tipo === 'componente' ? 'COMPONENTE' : 'SPOOL';
-        toast.info(
-          'Transferência Selecionada',
-          `Fluxo de transferência de ${tipoLabel} iniciado. Aponte o leitor para escanear a etiqueta de romaneio.`
-        );
-        // Em seguida abre o leitor de QR Code para continuar o processo
-        setTimeout(() => {
-          this.openQrCodeScanner((code) => {
-            toast.success(
-              'Transferência Concluída',
-              `Registro de movimentação do ${tipoLabel} (${code}) gerado para a expedição.`
-            );
-          });
-        }, 400);
+        if (tipo === 'componente') {
+          this.navigateTo('transferencia-componente');
+          return;
+        }
+
+        if (tipo === 'spool') {
+          setTimeout(() => {
+            this.modalProcessoTransferencia.open({
+              onSelect: (processo) => {
+                this.activeSpoolProcess = processo || 'caldeiraria-revestimento';
+                sessionStorage.setItem('app_spool_process', this.activeSpoolProcess);
+                this.navigateTo('transferencia-spool', { processo: this.activeSpoolProcess });
+              }
+            });
+          }, 150);
+          return;
+        }
       }
     });
   }
@@ -282,12 +377,22 @@ class App {
 
     this.modalTransferencia.open({
       onSelect: (tipo) => {
-        toast.success(
-          'Avanço de Processo',
-          `Spool ${spool.codigo} avançou para a próxima etapa via transferência de ${tipo.toUpperCase()}.`
-        );
-        if (this.currentRoute === 'caldeiraria') {
-          this.views.caldeiraria.render();
+        if (tipo === 'componente') {
+          this.navigateTo('transferencia-componente');
+          return;
+        }
+
+        if (tipo === 'spool') {
+          setTimeout(() => {
+            this.modalProcessoTransferencia.open({
+              onSelect: (processo) => {
+                this.activeSpoolProcess = processo || 'caldeiraria-revestimento';
+                sessionStorage.setItem('app_spool_process', this.activeSpoolProcess);
+                this.navigateTo('transferencia-spool', { processo: this.activeSpoolProcess });
+              }
+            });
+          }, 150);
+          return;
         }
       }
     });

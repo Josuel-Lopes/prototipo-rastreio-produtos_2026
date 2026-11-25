@@ -144,7 +144,7 @@ export class CadastroView {
 
   preencherDadosSpool(dados = MOCK_SPOOL_CADASTRADO) {
     const spool = dados || MOCK_SPOOL_CADASTRADO;
-    this.codigo = spool.codigo || 'SPL-2024-001';
+    this.codigo = spool.codigo || 'SP-0414-00001-001';
     this.descricao = spool.descricao || 'Tubo Condução Aço Carbono 4" Sch 40';
     this.componentes = spool.componentes && spool.componentes.length > 0 
       ? [...spool.componentes] 
@@ -185,7 +185,7 @@ export class CadastroView {
     const btnGravar = this.container.querySelector('#btn-cadastro-gravar');
     if (btnGravar && btnGravar.disabled) return;
 
-    const codigo = this.codigo || 'SPL-2024-001';
+    const codigo = this.codigo || 'SP-0414-00001-001';
     toast.success('Sucesso', `Spool ${codigo} gravado com sucesso!`);
   }
 
