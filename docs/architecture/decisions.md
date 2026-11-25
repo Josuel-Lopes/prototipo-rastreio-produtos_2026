@@ -23,3 +23,9 @@
   3. **Viewport Fixo de Validação:** Adoção de resolução mobile alvo fixa (ex.: 360x740) e comparação visual do preview lado a lado com a imagem de referência antes de cada entrega para aceite.
   4. **Regra de Ouro em Caso de Dúvidas:** Diante de qualquer dúvida, inconsistência ou ambiguidade visual de layout, NUNCA adivinhar: SEMPRE parar e perguntar ao usuário antes de implementar.
 - **Consequências:** Eliminação de retrabalho por suposições visuais, garantia de alta fidelidade visual (pixel precision), documentação viva de design tokens e clareza no alinhamento de expectativas com o usuário. Detalhes completos em `docs/architecture/diretrizes-fidelidade-prints.md`.
+
+## ADR 005: Proibição de Merge Local na Branch Main (Git Workflow via Pull Request)
+- **Contexto:** Determinação expressa do usuário ("não fazer merger local na main") para garantir governança, rastreabilidade, prevenção de regressões acidentais e revisão formal antes de qualquer código integrar a branch principal.
+- **Decisão:** É expressamente proibido realizar qualquer operação de `merge` ou integração diretamente na branch `main` no ambiente local. Toda e qualquer integração de código originada de branches de features/ajustes deve ocorrer exclusivamente via Pull Request no GitHub, após entrega de diff/evidências e aprovação explícita do usuário. A branch `main` local serve estritamente para leitura e sincronização via `pull`/`fetch`, nunca para consolidação manual ou merge local.
+- **Consequências:** Eliminação de riscos de contaminação acidental da branch principal localmente, garantia de histórico auditável via GitHub PRs e cumprimento rigoroso do rito de validação e aceite prévio pelo usuário.
+

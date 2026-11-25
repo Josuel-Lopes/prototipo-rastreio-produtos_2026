@@ -52,4 +52,13 @@ Cada diretório e tipo de artefato possui um único agente responsável ("Owner"
 2. **Planejamento:** O orquestrador analisa o contexto (apenas leitura) e planeja a tarefa.
 3. **Registro da Tarefa:** O orquestrador solicita ao `alvenius-task-board` a criação e registro da tarefa na API externa e atualização arquitetural pertinente.
 4. **Execução:** O orquestrador aciona o agente especialista correspondente (`alvenius-frontend`, `alvenius-designer`, etc.) via branch dedicada no padrão `tipo/JOB-YYYYMMDD-NNN-descricao-kebab`.
-5. **Revisão e Aceite:** O especialista entrega o diff ao orquestrador, que apresenta as evidências ao usuário para aprovação explícita antes de qualquer merge ou finalização.
+5. **Revisão e Aceite:** O especialista entrega o diff ao orquestrador, que apresenta as evidências ao usuário para aprovação explícita antes de qualquer integração ou finalização.
+
+---
+
+## 5. Política de Git Workflow: Proibição de Merge Local na Main
+
+- **Proibição de Merge Local na Main:** É expressamente proibido realizar qualquer operação de `merge` ou integração diretamente na branch `main` no ambiente local.
+- **Integração Exclusiva via Pull Request:** Toda e qualquer integração de código de branches de features/ajustes deve ser realizada exclusivamente via Pull Request no GitHub, após entrega de diff/evidências e aprovação explícita do usuário.
+- **Função da Branch `main` Local:** A branch `main` local serve estritamente para leitura e sincronização via `pull`/`fetch`, nunca para consolidação manual ou merge local.
+
