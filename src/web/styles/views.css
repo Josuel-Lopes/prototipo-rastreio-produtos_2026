@@ -692,7 +692,9 @@
 /* ==========================================================================
    4. Tela de Caldeiraria - Fidelidade Definitiva copilot-image-177404.png
    ========================================================================== */
-.view-caldeiraria-container {
+.view-caldeiraria-container,
+.view-revestimento-container,
+.view-pintura-container {
   width: 100%;
   display: flex;
   justify-content: center;
@@ -702,7 +704,9 @@
   box-sizing: border-box;
 }
 
-.card-caldeiraria {
+.card-caldeiraria,
+.card-revestimento,
+.card-pintura {
   width: calc(100% - 24px) !important;
   max-width: 330px !important;
   min-height: auto !important;
@@ -719,8 +723,10 @@
   padding: 18px 12px 14px 12px !important;
 }
 
-/* Banner Informativo em Linha Única na Caldeiraria */
-.card-caldeiraria .page-info-banner-title {
+/* Banner Informativo em Linha Única na Caldeiraria, Revestimento e Pintura */
+.card-caldeiraria .page-info-banner-title,
+.card-revestimento .page-info-banner-title,
+.card-pintura .page-info-banner-title {
   text-transform: none !important;
   font-size: 14px !important;
   font-weight: 700 !important;
@@ -729,7 +735,9 @@
   letter-spacing: 0.2px !important;
 }
 
-.card-caldeiraria .page-info-banner-desc {
+.card-caldeiraria .page-info-banner-desc,
+.card-revestimento .page-info-banner-desc,
+.card-pintura .page-info-banner-desc {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -739,19 +747,25 @@
   white-space: nowrap !important;
 }
 
-.card-caldeiraria .page-info-banner-desc-text {
+.card-caldeiraria .page-info-banner-desc-text,
+.card-revestimento .page-info-banner-desc-text,
+.card-pintura .page-info-banner-desc-text {
   display: inline-flex !important;
   flex-direction: row !important;
   align-items: center !important;
   white-space: nowrap !important;
 }
 
-.card-caldeiraria .page-info-banner-desc .info-icon {
+.card-caldeiraria .page-info-banner-desc .info-icon,
+.card-revestimento .page-info-banner-desc .info-icon,
+.card-pintura .page-info-banner-desc .info-icon {
   margin-top: 0 !important;
   align-self: center !important;
 }
 
-.card-caldeiraria .caldeiraria-banner-text {
+.card-caldeiraria .caldeiraria-banner-text,
+.card-revestimento .caldeiraria-banner-text,
+.card-pintura .caldeiraria-banner-text {
   font-size: 9.5px !important;
   color: #111827 !important;
   white-space: nowrap !important;

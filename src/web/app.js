@@ -13,6 +13,8 @@ import { LoginView } from './views/login-view.js';
 import { MenuView } from './views/menu-view.js';
 import { CadastroView } from './views/cadastro-view.js';
 import { CaldeirariaView } from './views/caldeiraria-view.js';
+import { RevestimentoView } from './views/revestimento-view.js';
+import { PinturaView } from './views/pintura-view.js';
 
 import { getCurrentUser, setCurrentUser, logoutUser, getSpoolByCode } from './mocks/spools-mock.js';
 
@@ -48,12 +50,22 @@ class App {
         onNavigate: (route) => this.navigateTo(route),
         onOpenQrCode: (callback) => this.openQrCodeScanner(callback),
         onSpoolSelected: (code) => this.handleSpoolSelected(code)
+      }),
+      revestimento: new RevestimentoView('app-view', {
+        onNavigate: (route) => this.navigateTo(route),
+        onOpenQrCode: (callback) => this.openQrCodeScanner(callback),
+        onSpoolSelected: (code) => this.handleSpoolSelected(code)
+      }),
+      pintura: new PinturaView('app-view', {
+        onNavigate: (route) => this.navigateTo(route),
+        onOpenQrCode: (callback) => this.openQrCodeScanner(callback),
+        onSpoolSelected: (code) => this.handleSpoolSelected(code)
       })
     };
   }
 
   init() {
-    console.log('Alvenius Spool Management v2.2.0 iniciado.');
+    console.log('Alvenius Spool Management v2.3.0 iniciado.');
     
     const savedUser = sessionStorage.getItem('app_user');
     if (savedUser) {
@@ -136,13 +148,13 @@ class App {
 
     if (route === 'revestimento') {
       this.currentRoute = 'revestimento';
-      this.renderGenericStageView('REVESTIMENTO', 'Ler QRCode Spool revestimento / próximas etapas processo');
+      this.render();
       return;
     }
 
     if (route === 'pintura') {
       this.currentRoute = 'pintura';
-      this.renderGenericStageView('PINTURA', 'Ler QRCode Spool pintura / próximas etapas processo');
+      this.render();
       return;
     }
 
@@ -179,6 +191,10 @@ class App {
       this.views.cadastro.render();
     } else if (this.currentRoute === 'caldeiraria') {
       this.views.caldeiraria.render();
+    } else if (this.currentRoute === 'revestimento') {
+      this.views.revestimento.render();
+    } else if (this.currentRoute === 'pintura') {
+      this.views.pintura.render();
     }
 
     // Scroll para o topo

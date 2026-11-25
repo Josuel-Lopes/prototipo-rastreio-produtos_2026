@@ -74,8 +74,13 @@ Estrutura de pastas organizada para segregação clara entre especificações, d
 │       │   ├── header.js               # Header fixo com drawer lateral e navegação
 │       │   ├── icons.js                # Renderizador inline de ícones Lucide SVG
 │       │   ├── modal-qrcode.js         # Modal leitor e validador de QR Code
+│       │   ├── modal-romaneio.js       # Modal industrial de aviso de Romaneio
 │       │   ├── modal-transferencia.js  # Modal para movimentação de setor/etapa
 │       │   ├── module-card.js          # Cartão de módulo para menu principal
+│       │   ├── page-container.js       # Container padronizado de layout
+│       │   ├── page-title.js           # Gerenciador da pill de título no header
+│       │   ├── processes-accordion.js  # Acordeão retrátil de contadores de processos
+│       │   ├── spool-card.js           # Card industrial de spool com datas e status
 │       │   └── toast.js                # Notificações visuais flutuantes
 │       ├── mocks/                      # Repositório de dados em memória client-side
 │       │   └── spools-mock.js
@@ -89,7 +94,10 @@ Estrutura de pastas organizada para segregação clara entre especificações, d
 │           ├── cadastro-view.js
 │           ├── caldeiraria-view.js
 │           ├── login-view.js
-│           └── menu-view.js
+│           ├── menu-view.js
+│           ├── pintura-view.js
+│           ├── process-stage-view.js   # Classe base para etapas produtivas fabris
+│           └── revestimento-view.js
 ├── serve.sh                            # Script executável de inicialização rápida
 ├── package.json
 └── README.md
@@ -244,10 +252,19 @@ jobs:
 
 Este projeto adota as convenções do [Semantic Versioning (SemVer)](https://semver.org/lang/pt-BR/):
 
-- Versão Atual: **`v2.2.0`**
+- Versão Atual: **`v2.3.0`**
 
 ##### Histórico Recente
 
+- **`v2.3.0`**:
+  - Componentização modular avançada:
+    - `ProcessesAccordionComponent`: componente reutilizável do acordeão retrátil com os 8 status e contadores.
+    - `ModalRomaneioComponent`: modal industrial desacoplado para aviso de Romaneio.
+    - `ProcessStageView`: classe base padronizada para etapas de produção (Caldeiraria, Revestimento, Pintura), eliminando duplicação de código.
+  - Diferenciação total e dados aleatorizados entre Caldeiraria, Revestimento e Pintura:
+    - Peças e especificações técnicas exclusivas para cada etapa (corte/solda, FBE/3LPE/liners e poliuretano Petrobras N-1219/Vale).
+    - Status operacionais, históricos de sucata e quantidades em lista independentes e não-idênticos.
+    - Contadores e Totais Gerais fabris totalmente distintos e reativos (Caldeiraria: 1099, Revestimento: 748, Pintura: 524).
 - **`v2.2.0`**:
   - Tela de Caldeiraria com fidelidade milimétrica a prints
   - Componente reutilizável SpoolCard com status e datas em 2 colunas

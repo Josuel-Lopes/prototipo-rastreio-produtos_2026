@@ -64,7 +64,7 @@ export class LoginView {
 
           <!-- Rodapé Interno do Card -->
           <div class="login-card-footer">
-            &reg; 2026 - Alvenius Tubos e Conexões - v2.2.0
+            &reg; 2026 - Alvenius Tubos e Conexões - v2.3.0
           </div>
         </div>
 

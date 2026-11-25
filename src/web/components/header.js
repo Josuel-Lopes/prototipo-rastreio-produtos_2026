@@ -1,5 +1,5 @@
 /**
- * Componente Header Global & Navbar - Alvenius (v2.2.0)
+ * Componente Header Global & Navbar - Alvenius (v2.3.0)
  * Responsabilidade Única: Identidade da marca, status de autenticação, pill e rotas de topo
  * Arquitetura Unificada e Condicional sem recriação destrutiva no expandir/colapsar.
  */
@@ -76,13 +76,13 @@ export class HeaderComponent {
           <div class="header-brand-section">
             <div class="header-brand-block" id="header-brand-block" title="Alvenius">
               <img src="assets/logo-alvenius-rings-clean.png" alt="Alvenius" class="brand-logo-img">
-              <span class="brand-version-sub" id="header-brand-version">v2.2.0</span>
+              <span class="brand-version-sub" id="header-brand-version">v2.3.0</span>
             </div>
             
             <div class="header-brand-inline" id="header-brand-work" title="Voltar ao Início" data-nav="menu">
               <div class="header-brand-logo-col">
                 <img src="assets/logo-alvenius-rings-clean.png" alt="Alvenius" class="brand-logo-img">
-                <span class="brand-version-sub">v2.2.0</span>
+                <span class="brand-version-sub">v2.3.0</span>
               </div>
               <span class="header-brand-title">RASTREIO DE PRODUTOS</span>
             </div>
@@ -289,7 +289,7 @@ export class HeaderComponent {
 
     if (isLoginPage) {
       // 1. ESTADO LOGIN:
-      // Exibe: Logo 3 anéis + v2.2.0 à esquerda e pill "Rastreio de produtos" no centro.
+      // Exibe: Logo 3 anéis + v2.3.0 à esquerda e pill "Rastreio de produtos" no centro.
       // NÃO exibe: Usuário, Sair, hambúrguer, nem menu expandido.
       innerHeader.classList.add('mode-login');
       return;
@@ -297,7 +297,7 @@ export class HeaderComponent {
 
     if (isHome) {
       // 2. ESTADO HOME:
-      // Exibe: Logo 3 anéis + v2.2.0 à esquerda, pill "Rastreio de produtos" no centro.
+      // Exibe: Logo 3 anéis + v2.3.0 à esquerda, pill "Rastreio de produtos" no centro.
       // Desktop: | 👤 Bem vindo, {user} | 🚪 Sair.
       // Mobile: Botão hambúrguer no topo direito.
       // Menu expandido da Home: Exibe APENAS 👤 Bem vindo, {user} + divisor + botão retangular [-> Sair.

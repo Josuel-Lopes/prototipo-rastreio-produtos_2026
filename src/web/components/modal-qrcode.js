@@ -7,7 +7,7 @@
 import { lucide } from './icons.js';
 
 export const MOCK_SPOOL_CADASTRADO = {
-  codigo: 'SPL-2024-001',
+  codigo: 'SP-0414-00001-001',
   descricao: 'Tubo Condução Aço Carbono 4" Sch 40',
   componentes: [
     { item: '1', descricao: 'Tubo Condução Aço Carbono 4" Sch 40 x 6000mm', qtd: '1 UN' },
@@ -52,7 +52,7 @@ export class ModalQrCodeComponent {
     }
     document.removeEventListener('keydown', this.handleKeyDown);
 
-    if (this.mode === 'caldeiraria') {
+    if (this.mode !== 'cadastro') {
       if (typeof this.onCloseCallback === 'function') {
         this.onCloseCallback();
       }
@@ -91,8 +91,15 @@ export class ModalQrCodeComponent {
     }
   }
 
-  getActionConfig(status) {
+  getProcessName() {
+    if (this.mode === 'revestimento') return 'Revestimento';
+    if (this.mode === 'pintura') return 'Pintura';
+    return 'Caldeiraria';
+  }
+
+  getActionConfig(status, processName = null) {
     const key = (status || 'reservado').toLowerCase();
+    const proc = processName || this.getProcessName();
 
     switch (key) {
       case 'reservado':
@@ -101,7 +108,7 @@ export class ModalQrCodeComponent {
           buttonLabel: 'Iniciar',
           buttonColor: '#f59e0b',
           nextStatus: 'execucao',
-          toastTitle: 'Processo Iniciado',
+          toastTitle: `${proc} Iniciado`,
           toastMessage: (codigo) => `Spool ${codigo} iniciado com sucesso! Status: Execução.`
         };
       case 'execucao':
@@ -110,7 +117,7 @@ export class ModalQrCodeComponent {
           buttonLabel: 'Finalizar',
           buttonColor: '#22c55e',
           nextStatus: 'finalizado',
-          toastTitle: 'Processo Finalizado',
+          toastTitle: `${proc} Finalizado`,
           toastMessage: (codigo) => `Spool ${codigo} finalizado com sucesso! Status: Finalizado.`
         };
       case 'pausado':
@@ -119,7 +126,7 @@ export class ModalQrCodeComponent {
           buttonLabel: 'Continuar',
           buttonColor: '#f97316',
           nextStatus: 'execucao',
-          toastTitle: 'Processo Retomado',
+          toastTitle: `${proc} Retomado`,
           toastMessage: (codigo) => `Spool ${codigo} retomado com sucesso! Status: Execução.`
         };
       case 'continua':
@@ -128,7 +135,7 @@ export class ModalQrCodeComponent {
           buttonLabel: 'Executar',
           buttonColor: '#00bcd4',
           nextStatus: 'execucao',
-          toastTitle: 'Processo em Execução',
+          toastTitle: `${proc} em Execução`,
           toastMessage: (codigo) => `Spool ${codigo} colocado em execução! Status: Execução.`
         };
       case 'finalizado':
@@ -146,7 +153,7 @@ export class ModalQrCodeComponent {
           buttonLabel: 'Reiniciar',
           buttonColor: '#84cc16',
           nextStatus: 'execucao',
-          toastTitle: 'Processo Reiniciado',
+          toastTitle: `${proc} Reiniciado`,
           toastMessage: (codigo) => `Spool ${codigo} reiniciado com sucesso! Status: Execução.`
         };
       default:
@@ -155,7 +162,7 @@ export class ModalQrCodeComponent {
           buttonLabel: 'Iniciar',
           buttonColor: '#f59e0b',
           nextStatus: 'execucao',
-          toastTitle: 'Processo Atualizado',
+          toastTitle: `${proc} Atualizado`,
           toastMessage: (codigo) => `Spool ${codigo} iniciado com sucesso!`
         };
     }
@@ -249,7 +256,7 @@ export class ModalQrCodeComponent {
 
     this.container.classList.add('has-modal');
 
-    if (this.mode === 'caldeiraria') {
+    if (this.mode !== 'cadastro') {
       this.renderCaldeirariaMode();
     } else {
       this.renderCadastroMode();
@@ -265,7 +272,7 @@ export class ModalQrCodeComponent {
       status: 'reservado'
     };
     const badgeInfo = this.getStatusBadge(spool.status);
-    const actionConfig = this.getActionConfig(spool.status);
+    const actionConfig = this.getActionConfig(spool.status, this.getProcessName());
     const playColor = this.isScanned ? '#ffffff' : '#9ca3af';
 
     this.container.innerHTML = `
@@ -463,7 +470,7 @@ export class ModalQrCodeComponent {
           <div class="qrcode-card-last-read">
             <div class="qrcode-last-read-title">Último QRCode lido:</div>
             ${this.isScanned 
-              ? `<div class="qrcode-last-read-inline-data">SPL-2024-001 | Tubo Condução Aço Carbono 4" Sch 40 | 3 componentes</div>` 
+              ? `<div class="qrcode-last-read-inline-data">SP-0414-00001-001 | Tubo Condução Aço Carbono 4" Sch 40 | 3 componentes</div>` 
               : `<div class="qrcode-waiting-text">Aguardando leitura...</div>`
             }
           </div>
@@ -506,7 +513,7 @@ export class ModalQrCodeComponent {
       e.stopPropagation();
       if (!this.isScanned) {
         this.isScanned = true;
-        if (this.mode === 'caldeiraria') {
+        if (this.mode !== 'cadastro') {
           this.renderCaldeirariaMode();
         } else {
           this.renderCadastroMode();
@@ -528,7 +535,7 @@ export class ModalQrCodeComponent {
         e.stopPropagation();
         if (!this.isScanned) return;
         const currentSpool = this.spool;
-        const actionConfig = this.getActionConfig(currentSpool?.status);
+        const actionConfig = this.getActionConfig(currentSpool?.status, this.getProcessName());
         this.closeWithoutCallbacks();
         if (typeof this.onActionCallback === 'function') {
           this.onActionCallback(currentSpool, actionConfig);
