@@ -252,10 +252,18 @@ jobs:
 
 Este projeto adota as convenções do [Semantic Versioning (SemVer)](https://semver.org/lang/pt-BR/):
 
-- Versão Atual: **`v2.4.0`**
+- Versão Atual: **`v2.5.0`**
 
 ##### Histórico Recente
 
+- **`v2.5.0`**:
+  - Refinamento visual e funcional de alta fidelidade da Modal de Transferência (`copilot-image-d3e025.png`):
+    - Diálogo retangular centralizado com bordas arredondadas (`border-radius: 8px`), sombra suave e botão 'X' vermelho superior direito.
+    - Cabeçalho com título centralizado em duas linhas ("Selecione qual TIPO de TRANSFERÊNCIA") e linhas divisórias finas e sutis.
+    - Card de seleção **COMPONENTE**: ícone geométrico exclusivo de 4 losangos vazados em azul industrial (`#1956ce`), tipografia com peso bold e descrição operacional de próximas etapas.
+    - Card de seleção **SPOOL**: ícone de caixa/pacote em azul industrial (`#1956ce`), tipografia bold e descrição operacional de próximas etapas.
+    - Botão inferior "Fechar" em vermelho (`#dc2626`) em largura total com cantos arredondados (6px), ícone de círculo com X (`circle-x`) e texto em branco.
+    - Suporte completo a navegação via teclado (`Enter`, `Espaço`, `Escape`) e fechamento via backdrop ou botões.
 - **`v2.4.0`**:
   - Implementação completa da Modal "Validar QRCode" (`copilot-image-bb7df0.png` e `copilot-image-aed5ce.png`):
     - Leitor de QRCode com visor de câmera, miras azuis fluorescentes, glow beam e animação laser.
