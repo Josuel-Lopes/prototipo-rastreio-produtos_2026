@@ -172,6 +172,7 @@ const validationInfo = (value) => {
   if (value === false) return { label: 'Pendente', tone: 'pending' };
   const text = String(value);
   const key = text.toLowerCase();
+  if (/^\s*estimad[oa] pelo comercial\s*$/.test(key)) return { label: 'Validado', tone: 'ok' };
   if (/(^|\b)(validated|validado|aprovado|approved|ok|confirmado|confirmed)/.test(key)) return { label: text, tone: 'ok' };
   if (/(pending|pendente|aguardando|estimated|estimado|em valida|review|revis)/.test(key)) return { label: text, tone: 'pending' };
   if (/(rejected|reprovado|divergente|blocked|bloqueado)/.test(key)) return { label: text, tone: 'error' };
@@ -238,6 +239,14 @@ export class PropostaView {
     };
     document.addEventListener('visibilitychange', refresh);
     window.addEventListener('focus', refresh);
+    window.addEventListener('popstate', () => {
+      if (!this.isMounted() || !this.data) return;
+      const mode = this.getViewMode();
+      const shown = this.container.querySelector('.view-proposta-wrapper')?.classList.contains('is-summary') ? 'resumido' : 'detalhado';
+      if (mode === shown) return;
+      this.container.innerHTML = this.renderShell(this.data, this.renderBody(this.data));
+      this.bindEvents();
+    });
   }
 
   async refresh() {
@@ -249,7 +258,7 @@ export class PropostaView {
       const scrollY = window.scrollY;
       this.data = data;
       this.dataSignature = signature;
-      this.container.innerHTML = this.renderShell(data, this.renderSheet(data));
+      this.container.innerHTML = this.renderShell(data, this.renderBody(data));
       this.bindEvents();
       window.scrollTo(0, scrollY);
     } catch (err) {
@@ -272,13 +281,23 @@ export class PropostaView {
       if (token !== this.renderToken) return;
       this.data = data;
       this.dataSignature = signature;
-      this.container.innerHTML = this.renderShell(data, this.renderSheet(data));
+      this.container.innerHTML = this.renderShell(data, this.renderBody(data));
     } catch (err) {
       if (token !== this.renderToken) return;
       console.error('[proposta] Falha ao carregar dados da proposta:', err);
       this.container.innerHTML = this.renderShell(null, this.renderError());
     }
     this.bindEvents();
+  }
+
+  /** Exibe a versão (meta.version) na barra fixa do rodapé enquanto a rota é a proposta. */
+  updateRibbonVersion(data) {
+    const wrap = document.querySelector('[data-ribbon-version]');
+    const text = document.querySelector('[data-ribbon-version-text]');
+    if (!wrap || !text) return;
+    const v = data?.meta?.version;
+    text.textContent = v ? `Versão ${v}` : '';
+    wrap.hidden = !v;
   }
 
   async loadData() {
@@ -288,28 +307,72 @@ export class PropostaView {
     const signature = await res.text();
     const data = JSON.parse(signature);
     if (!data || typeof data !== 'object' || !data.meta) throw new Error('JSON da proposta inválido');
+    this.updateRibbonVersion(data);
     return { data, signature };
   }
 
   /* ----------------------------- Estrutura geral ---------------------------- */
 
+  /** Modo de visualização atual: lido da URL (?view=resumido|detalhado); padrão resumido (detalhado se não houver summaryView). */
+  getViewMode(data = this.data) {
+    if (!data?.summaryView || data.summaryView.enabled === false) return 'detalhado';
+    const v = String(new URLSearchParams(window.location.search).get('view') || '').toLowerCase();
+    return v === 'detalhado' ? 'detalhado' : 'resumido';
+  }
+
+  /** Conteúdo da folha conforme a visão selecionada. */
+  renderBody(data) {
+    return this.getViewMode(data) === 'resumido' ? this.renderSummary(data) : this.renderSheet(data);
+  }
+
+  /** Atualiza a URL preservando os demais parâmetros (route, etc.). */
+  writeViewToUrl(mode) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('view', mode);
+    url.searchParams.delete('topico');
+    history.replaceState(history.state, '', url.toString());
+  }
+
+  setViewMode(mode) {
+    if (!this.data || mode === this.getViewMode()) return;
+    this.writeViewToUrl(mode);
+    this.closePrintLightbox?.();
+    this.container.innerHTML = this.renderShell(this.data, this.renderBody(this.data));
+    this.bindEvents();
+    window.scrollTo(0, 0);
+  }
+
+  renderViewSwitch(data) {
+    const sv = data?.summaryView;
+    if (!sv || sv.enabled === false) return '';
+    const mode = this.getViewMode(data);
+    const opt = (key, label, icon) => `<button type="button" class="view-switch-btn" data-view-mode="${key}" aria-pressed="${mode === key ? 'true' : 'false'}" aria-label="${t(label)}" title="${t(label)}"><span class="view-switch-icon" aria-hidden="true">${lucide(icon, { size: 16, strokeWidth: 2.2 })}</span><span class="view-switch-text">${t(label)}</span></button>`;
+    return `<div class="view-switch" role="group" aria-label="Modo de visualização da proposta">${opt('resumido', sv.label || 'Resumido', 'layout-list')}${opt('detalhado', sv.detailedLabel || 'Detalhado', 'file-text')}</div>`;
+  }
+
   renderShell(data, content) {
     const id = data?.meta?.id ? t(data.meta.id) : '';
     const tag = id ? `Proposta Comercial ${id} · Alvenius` : 'Proposta Comercial · Alvenius';
+    const summary = data ? this.getViewMode(data) === 'resumido' : false;
     return `
-      <div class="view-proposta-wrapper">
+      <div class="view-proposta-wrapper ${summary ? 'is-summary' : ''}">
         <header class="proposal-action-bar no-print" role="region" aria-label="Ações Rápidas da Proposta">
           <div class="proposal-bar-left">
-            <button class="btn-bar-nav" id="btn-back-menu" title="Voltar ao Menu Principal">
-              ${lucide('arrow-left', { size: 16, strokeWidth: 2 })}
-              <span>Voltar</span>
-            </button>
+            <a class="proposal-bar-logo" href="./" data-bar-home title="Acessar demo app" aria-label="MaxCode42 - Acessar demo app">
+              <picture>
+                <source media="(max-width: 767px)" srcset="assets/icon-maxcode42.png" width="180" height="180">
+                <img src="assets/logo-maxcode42-horizontal.png" alt="MaxCode42" class="proposal-bar-logo-img" width="800" height="227" decoding="async">
+              </picture>
+            </a>
+            <span class="proposal-bar-divider" aria-hidden="true"></span>
             <span class="proposal-bar-tag" title="${tag}">
               ${lucide('file-text', { size: 14, strokeWidth: 2 })}
               <span class="proposal-bar-tag-text">${tag}</span>
             </span>
           </div>
           <div class="proposal-bar-right">
+            <a class="proposal-bar-link" id="btn-back-menu" href="./" data-bar-home title="Acessar demo app" aria-label="Acessar demo app"><span class="proposal-bar-link-text">Acessar demo app</span><span class="proposal-bar-link-icon" aria-hidden="true">${lucide('external-link', { size: 16, strokeWidth: 2.2 })}</span></a>
+            ${this.renderViewSwitch(data)}
             <button class="btn-save-pdf" id="btn-save-pdf" title="Gerar e salvar proposta em formato PDF A4" aria-label="Salvar Proposta em PDF" ${data ? '' : 'disabled'}>
               ${lucide('printer', { size: 18, strokeWidth: 2 })}
               <span class="btn-label-full">Salvar Proposta em PDF</span>
@@ -318,16 +381,16 @@ export class PropostaView {
           </div>
         </header>
 
-        ${data ? '<nav class="proposal-toc-bar no-print" aria-label="Tópicos da proposta" data-toc-slot="bar"></nav>' : ''}
+        ${data && !summary ? '<nav class="proposal-toc-bar no-print" aria-label="Tópicos da proposta" data-toc-slot="bar"></nav>' : ''}
 
         <div class="proposal-layout">
-          ${data ? '<nav class="proposal-toc no-print" aria-label="Tópicos da proposta" data-toc-slot="side"></nav>' : ''}
+          ${data && !summary ? '<nav class="proposal-toc no-print" aria-label="Tópicos da proposta" data-toc-slot="side"></nav>' : ''}
           <main class="proposal-container">
             ${content}
           </main>
         </div>
 
-        ${data ? '<div class="proposal-toc-overlays no-print" data-toc-slot="overlays"></div>' : ''}
+        ${data && !summary ? '<div class="proposal-toc-overlays no-print" data-toc-slot="overlays"></div>' : ''}
 
         ${data ? `
           <div class="demo-print-watermark print-only" aria-hidden="true">
@@ -361,6 +424,328 @@ export class PropostaView {
     `;
   }
 
+  /* --------------------------- Visão Resumida (summaryView) --------------------------- */
+
+  /** Visão objetiva para decisão: seções de `summaryView.sections[]` (ordem do JSON), valores derivados dos campos referenciados. */
+  renderSummary(d) {
+    const sv = d.summaryView || {};
+    const meta = d.meta || {};
+    const client = d.client || {};
+    const ctx = {
+      d, meta,
+      inv: d.investment || {},
+      phases: (Array.isArray(d.investment?.phases) ? d.investment.phases : []).filter(p => !isSuperseded(p))
+    };
+    const sections = [...(Array.isArray(sv.sections) ? sv.sections : [])].sort((a, b) => toNumber(a.order) - toNumber(b.order));
+    const body = sections.map((s, i) => {
+      const fn = this[`renderSum_${s.id}`];
+      const html = typeof fn === 'function' ? fn.call(this, s, ctx) : '';
+      if (!html) return '';
+      return `
+        <section class="proposal-section sum-section sum-section--${t(s.id)}" id="resumo-${t(s.id)}" aria-labelledby="resumo-${t(s.id)}-title">
+          <div class="proposal-section-header">
+            <span class="proposal-section-num">${i + 1}</span>
+            <h2 id="resumo-${t(s.id)}-title">${t(s.title)}</h2>
+          </div>
+          ${html}
+        </section>
+      `;
+    }).join('');
+
+    return `
+      <article class="proposal-sheet proposal-sheet--summary">
+        <header class="sum-hero">
+          <span class="sum-hero-kicker">${t(sv.label || 'Resumido')} · Proposta Comercial</span>
+          <h1 tabindex="-1">${t(meta.title)}</h1>
+          <p class="sum-hero-meta">
+            ${client.name ? `<span>${t(client.name)}</span>` : ''}
+            ${meta.id ? `<span>${t(meta.id)}${meta.version ? ` · v${t(meta.version)}` : ''}</span>` : ''}
+            ${meta.issuedAt ? `<span>Emitida em ${formatDate(meta.issuedAt)}</span>` : ''}
+          </p>
+        </header>
+        <aside class="sum-callout" role="note" aria-label="Sobre a versão resumida">
+          <span class="sum-callout-icon" aria-hidden="true">${lucide('info', { size: 18, strokeWidth: 2 })}</span>
+          <p class="sum-callout-text">Esta é a versão resumida da proposta. Consulte a versão Detalhada para ver o escopo por funcionalidade, horas, cálculo do investimento, planilhas e cronograma completos.</p>
+          <button type="button" class="sum-callout-btn no-print" data-view-mode="detalhado">${lucide('file-text', { size: 15, strokeWidth: 2 })}<span>Ver versão detalhada</span></button>
+        </aside>
+        ${body}
+        ${this.renderSummaryFooter(d)}
+      </article>
+    `;
+  }
+
+  /** Iniciais (até 2 letras) para o avatar de fallback. */
+  initialsOf(name = '') {
+    const parts = String(name).replace(/[^\p{L}\s]/gu, ' ').split(/\s+/).filter(Boolean);
+    if (!parts.length) return '?';
+    return ((parts[0][0] || '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+  }
+
+  /** Avatar circular: usa `photo` (URL/caminho do JSON) se existir; senão, iniciais. */
+  renderPersonAvatar(name, photo) {
+    const safe = t(name);
+    return `
+      <span class="sum-avatar" role="img" aria-label="${photo ? `Foto de ${safe}` : safe}">
+        <span class="sum-avatar-fallback" aria-hidden="true">${t(this.initialsOf(name))}</span>
+        ${photo ? `<img class="sum-avatar-img" src="${t(photo)}" alt="" referrerpolicy="no-referrer" decoding="async">` : ''}
+      </span>
+    `;
+  }
+
+  /** Rodapé da visão Resumida: logo MaxCode42 + cartões do desenvolvedor e do cliente (dados do JSON). */
+  renderSummaryFooter(d) {
+    const proponent = d.proponent || {};
+    const resp = proponent.responsible || {};
+    const client = d.client || {};
+    const clientPerson = client.responsible || client.contact || {};
+    const link = (url, label) => (url ? `<a href="${t(url)}" target="_blank" rel="noopener noreferrer">${t(label)}</a>` : t(label));
+    const contact = (o = {}) => [
+      o.email ? `<a href="mailto:${t(o.email)}">${t(o.email)}</a>` : '',
+      o.phone ? `<a href="tel:${t(String(o.phone).replace(/[^\d+]/g, ''))}">${t(o.phone)}</a>` : ''
+    ].filter(Boolean).join('');
+    const devName = resp.name || proponent.name;
+    const devContact = contact(resp) + contact(proponent);
+    const clientPhoto = clientPerson.photo || client.photo || '';
+    const clientContact = contact(clientPerson) + contact(client);
+
+    return `
+      <footer class="sum-footer" aria-label="MaxCode42 e contatos">
+        <div class="sum-footer-brand">
+          <img src="assets/logo-maxcode42-horizontal.png" alt="MaxCode42" class="sum-footer-logo" width="800" height="227" decoding="async">
+          ${proponent.slogan ? `<p class="sum-footer-slogan">${t(proponent.slogan)}</p>` : ''}
+        </div>
+        <div class="sum-footer-cards">
+          ${devName ? `
+            <section class="sum-person-card" aria-label="Desenvolvedor">
+              <span class="sum-person-kicker">Desenvolvedor</span>
+              <div class="sum-person-main">
+                ${this.renderDevAvatar(devName, 'dev-avatar--lg')}
+                <div class="sum-person-info">
+                  <strong class="sum-person-name">${link(resp.url, devName)}</strong>
+                  ${resp.role ? `<span class="sum-person-role">${t(resp.role)}</span>` : ''}
+                  ${proponent.name ? `<span class="sum-person-org">${link(proponent.url, proponent.name)}</span>` : ''}
+                  ${devContact ? `<span class="sum-person-contact">${devContact}</span>` : ''}
+                </div>
+              </div>
+            </section>` : ''}
+          ${client.name ? `
+            <section class="sum-person-card" aria-label="Cliente">
+              <span class="sum-person-kicker">Cliente</span>
+              <div class="sum-person-main">
+                <img src="assets/logo-alvenius-rings-clean.png" alt="" class="sum-client-logo" width="56" height="56" decoding="async">
+                <div class="sum-person-info">
+                  <strong class="sum-person-name">${link(client.url, client.name)}</strong>
+                  ${clientPerson.name ? `
+                    <span class="sum-person-contact-person">
+                      ${this.renderPersonAvatar(clientPerson.name, clientPhoto)}
+                      <span><strong>${t(clientPerson.name)}</strong>${clientPerson.role ? `<br>${t(clientPerson.role)}` : ''}</span>
+                    </span>` : ''}
+                  ${clientContact ? `<span class="sum-person-contact">${clientContact}</span>` : ''}
+                </div>
+              </div>
+            </section>` : ''}
+        </div>
+      </footer>
+    `;
+  }
+
+  renderSum_valueProposition(s) {
+    if (!s.headline && !s.text) return '';
+    return `
+      <div class="sum-value">
+        ${s.headline ? `<p class="sum-headline">${t(s.headline)}</p>` : ''}
+        ${s.text ? `<p class="sum-text">${t(s.text)}</p>` : ''}
+      </div>
+    `;
+  }
+
+  renderSum_deliverables(s, ctx) {
+    const items = Array.isArray(s.items) ? s.items : [];
+    if (!items.length) return '';
+    return `
+      <ul class="sum-deliverables">
+        ${items.map(it => {
+          const p = ctx.phases.find(x => toNumber(x.phase) === toNumber(it.phase));
+          return `
+            <li class="sum-deliverable">
+              <span class="sum-phase">Fase ${t(it.phase)}</span>
+              <span class="sum-deliverable-text">${t(it.text || p?.name || '')}</span>
+              ${p ? `<span class="prop-badge prop-badge--hours"><span class="sr-only-inline">Horas: </span>${num(p.hours)} h</span><span class="prop-badge price prop-badge--price"><span class="sr-only-inline">Valor: </span>${brl(p.price)}</span>` : ''}
+            </li>
+          `;
+        }).join('')}
+      </ul>
+    `;
+  }
+
+  renderSum_investment(s, ctx) {
+    const totals = ctx.inv.totals;
+    if (!totals) return '';
+    return `
+      <div class="sum-invest">
+        ${ctx.meta.hourlyRate ? `
+          <div class="sum-invest-rate">
+            <span class="sum-invest-label">Valor/hora</span>
+            <strong class="sum-invest-rate-value">${brl(ctx.meta.hourlyRate)}</strong>
+          </div>` : ''}
+        <div class="sum-invest-cols">
+          <div class="sum-invest-col sum-invest-col--hours">
+            <span class="sum-invest-label">Horas</span>
+            <strong class="sum-invest-value">${num(totals.hours)} h</strong>
+          </div>
+          <div class="sum-invest-col sum-invest-col--price">
+            <span class="sum-invest-label">Valor total</span>
+            <strong class="sum-invest-value">${brl(totals.price)}</strong>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  renderSum_schedule(s, ctx) {
+    const totals = ctx.inv.totals || {};
+    const sprints = (Array.isArray(ctx.inv.sprints) ? ctx.inv.sprints : [])
+      .filter(sp => sp.startDate && sp.endDate && toNumber(sp.businessDays) > 0)
+      .sort((a, b) => toNumber(a.sprint) - toNumber(b.sprint));
+    const start = ctx.meta.startDate || sprints[0]?.startDate;
+    const end = sprints.length ? sprints[sprints.length - 1].endDate : '';
+    if (!start && !end) return '';
+    const weeks = toNumber(totals.approxWeeks);
+    return `
+      <p class="sum-schedule-line">
+        <strong>${formatDate(start)}</strong>${end ? ` <span aria-hidden="true">→</span><span class="sr-only-inline"> até </span> <strong>${formatDate(end)}</strong>` : ''}
+        ${totals.businessDays ? `<span class="sum-schedule-sub">${num(totals.businessDays)} dias úteis${weeks ? ` (~${num(weeks)} semana${weeks > 1 ? 's' : ''})` : ''}</span>` : ''}
+      </p>
+      ${sprints.length ? `
+        <h3 class="sum-subhead">A entregar</h3>
+        <ol class="sum-timeline" aria-label="Linha do tempo das sprints a entregar">
+          ${sprints.map(sp => `
+            <li class="sum-timeline-item">
+              <span class="sum-timeline-name">Sprint ${t(sp.sprint)}</span>
+              <span class="sum-timeline-phase">${t(joinPhases(sp.phases || []))}</span>
+              <span class="sum-timeline-date">${formatShortRange(sp.startDate, sp.endDate)}</span>
+            </li>
+          `).join('')}
+        </ol>
+      ` : ''}
+      ${this.renderSumDeliveredSprints(ctx)}
+    `;
+  }
+
+  /** Sprints já entregues (sem esforço/datas e só com fases existentes): derivadas dos dados de sprints e fases. */
+  renderSumDeliveredSprints(ctx) {
+    const done = (Array.isArray(ctx.inv.sprints) ? ctx.inv.sprints : [])
+      .filter(sp => !(sp.startDate && sp.endDate && toNumber(sp.businessDays) > 0))
+      .map(sp => {
+        const ps = (sp.phases || []).map(n => ctx.phases.find(p => toNumber(p.phase) === toNumber(n))).filter(Boolean);
+        return { sp, ps };
+      })
+      .filter(({ sp, ps }) => !toNumber(sp.businessDays) && ps.length && ps.every(p => isExisting(p)))
+      .sort((a, b) => toNumber(a.sp.sprint) - toNumber(b.sp.sprint));
+    if (!done.length) return '';
+    return `
+      <h3 class="sum-subhead sum-subhead--done">${lucide('circle-check', { size: 14, strokeWidth: 2.4 })}Já entregues</h3>
+      <ul class="sum-done-list" aria-label="Sprints já entregues">
+        ${done.map(({ sp, ps }) => {
+          const hours = ps.reduce((a, p) => a + toNumber(p.hours), 0);
+          const price = ps.reduce((a, p) => a + toNumber(p.price), 0);
+          return `
+            <li class="sum-done-item">
+              <span class="sum-done-icon" aria-hidden="true">${lucide('circle-check', { size: 16, strokeWidth: 2.4 })}</span>
+              <span class="sum-done-text">
+                <strong>Sprint ${t(sp.sprint)}</strong>
+                <span>${t(joinPhases(sp.phases || []))}</span>
+                <span class="sum-done-status">Concluída · ${num(hours)} h / ${brl(price)}</span>
+              </span>
+            </li>
+          `;
+        }).join('')}
+      </ul>
+    `;
+  }
+
+  renderSum_payment(s, ctx) {
+    const list = (Array.isArray(ctx.inv.payment) ? ctx.inv.payment : [])
+      .filter(p => p.scope === 'new-features' && !isSuperseded(p));
+    if (!list.length) return '';
+    return `
+      <div class="sum-payment-grid">
+        ${list.map(p => `
+          <div class="sum-payment-card">
+            <span class="sum-payment-percent">${num(p.percent)}%</span>
+            <span class="sum-payment-name">${t(p.milestone)}</span>
+            <strong class="sum-payment-amount">${brl(p.amount)}</strong>
+            <span class="sum-payment-due">${p.dueDate ? `Vencimento: ${formatDate(p.dueDate)}` : (p.dueInDays !== undefined ? dueLabel(p.dueInDays) : '')}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  renderSum_reuse(s, ctx) {
+    const base = ctx.phases.filter(p => toNumber(p.phase) <= 6);
+    const nums = base.map(p => toNumber(p.phase));
+    const range = nums.length ? (Math.min(...nums) === Math.max(...nums) ? `Fase ${Math.min(...nums)}` : `Fases ${Math.min(...nums)}-${Math.max(...nums)}`) : '';
+    const hours = base.reduce((a, p) => a + toNumber(p.hours), 0);
+    const price = base.reduce((a, p) => a + toNumber(p.price), 0);
+    return `
+      ${s.text ? `<p class="sum-text">${t(s.text)}</p>` : ''}
+      ${range ? `<p class="sum-seal"><span class="feature-delivered-badge">${lucide('circle-check', { size: 12, strokeWidth: 2.4 })}${t(range)}: ${num(hours)} h / ${brl(price)}</span></p>` : ''}
+      ${ctx.meta.pricingNote ? `<p class="sum-note">${t(ctx.meta.pricingNote)}</p>` : ''}
+    `;
+  }
+
+  renderSum_assumptions(s, ctx) {
+    const all = Array.isArray(ctx.d.assumptions) ? ctx.d.assumptions : [];
+    const picked = (Array.isArray(s.include) ? s.include : all.map((_, i) => i)).map(i => all[i]).filter(Boolean);
+    if (!picked.length) return '';
+    return `<ul class="sum-list">${picked.map(a => `<li>${t(a)}</li>`).join('')}</ul>`;
+  }
+
+  renderSum_outOfScope(s, ctx) {
+    const notice = ctx.d.outOfScopeNotice || {};
+    const list = Array.isArray(ctx.d.outOfScope) ? ctx.d.outOfScope : [];
+    if (!notice.label && !notice.text && !list.length) return '';
+    return `
+      <div class="sum-oos">
+        ${notice.label ? `<p class="sum-oos-label">${t(notice.label)}</p>` : ''}
+        ${notice.text ? `<p class="sum-text">${t(notice.text)}</p>` : ''}
+        ${list.length ? `<ul class="sum-list sum-list--oos">${list.map(i => `<li>${t(i)}</li>`).join('')}</ul>` : ''}
+      </div>
+    `;
+  }
+
+  renderSum_warranty(s, ctx) {
+    const w = ctx.d.postDelivery?.warranty;
+    if (!w) return '';
+    const rate = ctx.d.postDelivery?.newRequests?.hourlyRate;
+    return `
+      <p class="sum-text">
+        <strong>${num(w.days)} dias</strong> de garantia${w.coverage ? `: ${t(w.coverage).replace(/\.$/, '')}.` : '.'}
+        ${rate ? ` Novas solicitações a <strong>${brl(rate)}/h</strong>, com aprovação prévia.` : ''}
+      </p>
+    `;
+  }
+
+  renderSum_nextSteps(s, ctx) {
+    const items = Array.isArray(s.items) ? s.items : [];
+    const meta = ctx.meta;
+    const proponent = ctx.d.proponent || {};
+    const resp = proponent.responsible || {};
+    const validUntil = addDays(meta.issuedAt, meta.validityDays);
+    const link = (url, label) => (url ? `<a href="${t(url)}" target="_blank" rel="noopener noreferrer">${t(label)}</a>` : t(label));
+    return `
+      ${items.length ? `<ol class="sum-steps">${items.map(i => `<li>${t(i)}</li>`).join('')}</ol>` : ''}
+      ${meta.validityDays ? `<p class="sum-validity">Proposta válida por <strong>${num(meta.validityDays)} dias</strong>${meta.issuedAt ? ` (emitida em ${formatDate(meta.issuedAt)}${validUntil ? `, até ${formatDate(validUntil)}` : ''})` : ''}.</p>` : ''}
+      ${resp.name || proponent.name ? `
+        <p class="sum-contact">
+          ${resp.name ? `<span><strong>${link(resp.url, resp.name)}</strong>${resp.role ? ` · ${t(resp.role)}` : ''}</span>` : ''}
+          ${proponent.name ? `<span>${link(proponent.url, proponent.name)}</span>` : ''}
+        </p>
+      ` : ''}
+    `;
+  }
+
   renderSheet(d) {
     const meta = d.meta || {};
     const proponent = d.proponent || {};
@@ -368,14 +753,22 @@ export class PropostaView {
     const client = d.client || {};
     const summary = d.executiveSummary || {};
     const features = Array.isArray(d.features) ? d.features : [];
+    this.deliveryPhase = this.resolveDeliveryPhase(d);
     const validUntil = addDays(meta.issuedAt, meta.validityDays);
     const withAreas = features.find(f => Array.isArray(f.breakdown) || Array.isArray(f.disciplines));
     this.areaNames = withAreas
       ? getBreakdownRows(withAreas, meta.hourlyRate).map(r => r.area)
       : DEFAULT_AREAS;
     const issuedYear = /^(\d{4})/.exec(String(meta.issuedAt || ''))?.[1] || '';
-    const phaseNums = features.map(f => f.phase).filter(p => p !== undefined);
-    const phaseRange = phaseNums.length ? ` (Fases ${Math.min(...phaseNums)} a ${Math.max(...phaseNums)})` : '';
+    // Intervalo das fases desta proposta (novas): funcionalidades novas + fases de investimento não existentes.
+    const invPhaseList = (Array.isArray(d.investment?.phases) ? d.investment.phases : []).filter(p => !isSuperseded(p));
+    const phaseNums = [
+      ...features.filter(f => !isExisting(f)).map(f => f.phase),
+      ...invPhaseList.filter(p => !isExisting(p)).map(p => p.phase)
+    ].map(Number).filter(n => Number.isFinite(n));
+    const phaseRange = phaseNums.length
+      ? ` (${Math.min(...phaseNums) === Math.max(...phaseNums) ? `Fase ${Math.min(...phaseNums)}` : `Fases ${Math.min(...phaseNums)} a ${Math.max(...phaseNums)}`})`
+      : '';
 
     return `
       <article class="proposal-sheet">
@@ -522,13 +915,48 @@ export class PropostaView {
             ${meta.pricingNote ? `<p class="methodology-note">${lucide('info', { size: 14, strokeWidth: 2 })}<span>${t(meta.pricingNote)}</span></p>` : ''}
           </div>
 
+          <section class="calc-legend" id="legenda-calculo" aria-labelledby="legenda-calculo-titulo">
+            <h4 id="legenda-calculo-titulo">Como calculamos horas e valor</h4>
+            <p class="calc-legend-intro">O sistema atual (fases 1 a 6) já está pronto e funcional. Cobramos <strong>apenas o que é novo</strong>, reaproveitando o que já existe.</p>
+            <div class="calc-legend-formula" role="group" aria-label="Fórmulas de cálculo">
+              <p><span class="calc-chip">Horas</span> = Do zero − Reaproveitado + Ajustes</p>
+              <p><span class="calc-chip">Valor R$</span> = Horas × ${brl(meta.hourlyRate)} <small>(valor/hora)</small></p>
+            </div>
+            <dl class="calc-legend-terms">
+              <div><dt>Do zero</dt><dd>Horas que a área levaria para construir a entrega sem nenhuma base existente.</dd></div>
+              <div><dt>Reaproveitado (−)</dt><dd>Horas economizadas por já existirem telas, componentes, rotas, login e padrões no sistema atual.</dd></div>
+              <div><dt>Ajustes (+)</dt><dd>Horas para adaptar o que foi reaproveitado ao novo caso.</dd></div>
+              <div><dt>Testes</dt><dd>Limitados a 1 h por fase (smoke test), conforme aviso FORA DO ESCOPO.</dd></div>
+              <div><dt>Validado</dt><dd>Estimativa conferida pelo comercial com apoio dos times técnicos.</dd></div>
+            </dl>
+            <p class="calc-legend-example"><strong>Exemplo (Backend, Fase 7):</strong> 9 h − 3 h + 2 h = <strong>8 h</strong> → 8 × ${brl(meta.hourlyRate)} = <strong>${brl(8 * (Number(meta.hourlyRate) || 0))}</strong></p>
+          </section>
+
+          <p class="validation-legend" id="legenda-validacao">
+            <span class="validation-badge validation-badge--ok">Validado</span>
+            <span><strong>Validação:</strong> Validado = estimativa de horas e valor validada pelo comercial com o apoio dos times de backend, frontend e designer.</span>
+          </p>
+
           ${this.renderEstimationMethod(d)}
 
           <div data-collapsible-scope>
           ${this.renderCollapseToolbar('Expandir ou recolher funcionalidades')}
 
           <div class="features-list" data-collapsible-list>
-            ${features.map(f => this.renderFeatureCard(f, meta)).join('')}
+            ${(() => {
+              const done = features.filter(f => isExisting(f));
+              const fresh = features.filter(f => !isExisting(f));
+              const nums = [...done.map(f => f.phase), ...((d.investment?.phases || []).filter(isExisting).map(p => p.phase))];
+              const group = done.length ? `
+                <div class="delivered-group ${this.deliveredExpanded ? '' : 'is-group-collapsed'}" data-delivered-group>
+                  ${this.renderDeliveredToggle('delivered-features-body', this.deliveredGroupLabel(nums), { price: brl(0), range: this.deliveredRange(nums) })}
+                  <div class="delivered-group-body" id="delivered-features-body" data-delivered-body>
+                    ${done.map(f => this.renderFeatureCard(f, meta)).join('')}
+                  </div>
+                </div>` : '';
+              return group + fresh.map(f => this.renderFeatureCard(f, meta)).join('');
+            })()}
+            ${this.renderDeliveryPhaseCard(d)}
           </div>
           </div>
         </section>
@@ -640,7 +1068,7 @@ export class PropostaView {
     ];
 
     return `
-      <article class="proposal-feature-card ${existing ? 'is-existing' : 'is-new'} ${expanded ? '' : 'is-collapsed'}" id="card-${fid}" tabindex="-1" data-feature-card="${fid}">
+      <article class="proposal-feature-card ${existing ? 'is-existing' : 'is-new'} ${expanded ? '' : 'is-collapsed'}" id="card-${fid}" ${existing ? 'aria-disabled="true"' : ''} tabindex="-1" data-feature-card="${fid}">
         <header class="feature-card-header" data-feature-toggle-area>
           <div class="feature-header-left">
             <span class="feature-phase-badge">Fase ${t(feature.phase)}</span>
@@ -649,12 +1077,12 @@ export class PropostaView {
           </div>
           <div class="feature-metrics-badges">
             ${existing ? `
-              <span class="prop-badge">${lucide('calendar', { size: 14, strokeWidth: 2 })}${num(feature.hours)} h</span>
-              <span class="prop-badge existing">Sem custo</span>
+              <span class="prop-badge prop-badge--hours">${lucide('calendar', { size: 14, strokeWidth: 2 })}0 h</span>
+              <span class="prop-badge price prop-badge--price">${brl(0)}</span>
             ` : `
-              <span class="prop-badge">${lucide('calendar', { size: 14, strokeWidth: 2 })}${num(feature.hours)} h</span>
-              <span class="prop-badge">${num(feature.businessDays)} dias úteis</span>
-              <span class="prop-badge price">${brl(feature.price)}</span>
+              <span class="prop-badge prop-badge--hours">${lucide('calendar', { size: 14, strokeWidth: 2 })}${num(feature.hours)} h</span>
+              <span class="prop-badge prop-badge--days">${num(feature.businessDays)} dias úteis</span>
+              <span class="prop-badge price prop-badge--price">${brl(feature.price)}</span>
             `}
           </div>
           ${this.renderCollapseToggle(fid, expanded)}
@@ -692,9 +1120,9 @@ export class PropostaView {
 
           ${Array.isArray(feature.disciplines) && feature.disciplines.length ? this.renderDisciplines(feature) : ''}
 
-          ${feature.testsAdjustDeploy ? this.renderTestsAdjustDeploy(feature.testsAdjustDeploy, 'Testes / Ajustes / Deploy', `tad-${feature.id}`) : ''}
+          ${!existing && feature.deliveryNote ? this.renderDeliveryNote(feature) : ''}
 
-          ${!existing && (feature.development || feature.testsAdjustDeploy) ? `
+          ${!existing && feature.development ? `
             <div class="feature-total-box" role="group" aria-label="Total da funcionalidade">
               <span class="feature-total-label">Total da funcionalidade</span>
               <span class="feature-total-values">
@@ -798,6 +1226,18 @@ export class PropostaView {
           </table>
         </div>
         ${sourceNote ? `<p class="area-sheet-note">${sourceNote}</p>` : ''}
+        ${this.renderOutOfScopeNotice(item.outOfScopeNotice)}
+      </div>
+    `;
+  }
+
+  /** Aviso "FORA DO ESCOPO" ({label, text}); só renderiza quando o campo existe. */
+  renderOutOfScopeNotice(n, { id = '' } = {}) {
+    if (!n || typeof n !== 'object' || !(n.label || n.text)) return '';
+    return `
+      <div class="out-of-scope-notice" role="note"${id ? ` id="${t(id)}" tabindex="-1"` : ''}>
+        ${n.label ? `<span class="out-of-scope-notice-label">${lucide('circle-alert', { size: 13, strokeWidth: 2.4 })}${t(n.label)}</span>` : ''}
+        ${n.text ? `<p class="out-of-scope-notice-text">${t(n.text)}</p>` : ''}
       </div>
     `;
   }
@@ -948,7 +1388,7 @@ export class PropostaView {
     `;
   }
 
-  renderTestsAdjustDeploy(tad, title, idPrefix = 'tad') {
+  renderTestsAdjustDeploy(tad, title, idPrefix = 'tad', notice = tad?.outOfScopeNotice) {
     const rows = [
       { key: 'tests', label: 'Testes' },
       { key: 'adjustments', label: 'Ajustes' },
@@ -989,7 +1429,93 @@ export class PropostaView {
             </tfoot>
           </table>
         </div>
+        ${this.renderOutOfScopeNotice(notice)}
       </div>
+    `;
+  }
+
+  /** Nota discreta (mesmo padrão do deliveredNote): testes/ajustes/deploy cobrados na fase de entrega final. */
+  renderDeliveryNote(feature) {
+    const delivery = this.deliveryPhase?.phase;
+    const seal = delivery ? `Entrega final · Fase ${t(delivery.phase)}` : 'Entrega final';
+    return `
+      <div class="feature-delivered-note is-delivery" role="note" id="entrega-${t(feature.id)}">
+        <span class="feature-delivered-seal">${lucide('calendar', { size: 14, strokeWidth: 2.4 })}${seal}</span>
+        <span class="feature-delivered-text">${t(feature.deliveryNote)}</span>
+      </div>
+    `;
+  }
+
+  /**
+   * Fase de entrega final (testes/ajustes/deploy cobrados uma única vez): fase de investimento nova,
+   * sem funcionalidade vinculada (featureId null), preferindo a indicada em investment.testsAdjustDeploy.phase.
+   */
+  resolveDeliveryPhase(d = {}) {
+    const inv = d.investment || {};
+    const phases = (Array.isArray(inv.phases) ? inv.phases : []).filter(p => !isSuperseded(p));
+    const featurePhases = new Set((d.features || []).map(f => f.phase));
+    const tad = inv.testsAdjustDeploy && typeof inv.testsAdjustDeploy === 'object' ? inv.testsAdjustDeploy : null;
+    const candidates = phases.filter(p => !isExisting(p) && !featurePhases.has(p.phase) && !p.featureId);
+    const phase = (tad && tad.phase !== undefined ? phases.find(p => p.phase === tad.phase) : null)
+      || candidates.find(p => /teste|ajuste|deploy/i.test(p.name || ''))
+      || null;
+    if (!phase && !tad) return null;
+    return { phase, tad };
+  }
+
+  /** Card destacado da fase de entrega final (Fase 11): breakdown testes + ajustes + deploy. */
+  renderDeliveryPhaseCard(d = {}) {
+    const info = this.deliveryPhase;
+    if (!info) return '';
+    const { phase = {}, tad } = { phase: info.phase || {}, tad: info.tad };
+    const key = 'entrega-final';
+    const expanded = this.isCollapsibleExpanded(key, false);
+    const num_ = phase.phase ?? tad?.phase;
+    const name = String(phase.name || 'Testes, ajustes e deploy para produção (entrega final)').replace(/^\s*Fase\s+\d+\s*[–-]\s*/i, '');
+    const hours = phase.hours ?? tad?.total?.hours;
+    const price = phase.price ?? tad?.total?.price;
+    const covered = (d.features || []).filter(f => !isExisting(f)).map(f => f.phase).filter(n => n !== undefined);
+    const coveredLabel = covered.length ? (covered.length === 1 ? `Fase ${covered[0]}` : `Fases ${Math.min(...covered)} a ${Math.max(...covered)}`) : '';
+    // Breakdown: investment.testsAdjustDeploy; fallback para phase.breakdown (tests/adjustments/deploy)
+    let breakdown = tad;
+    if (!breakdown && Array.isArray(phase.breakdown)) {
+      breakdown = {};
+      phase.breakdown.forEach(r => { if (['tests', 'adjustments', 'deploy'].includes(r.area)) breakdown[r.area] = { hours: r.hours, price: r.price }; });
+    }
+    const composition = (Array.isArray(phase.breakdown) ? phase.breakdown : []).filter(r => r.note);
+    const tableTitle = `Fase ${t(num_)} – Testes, ajustes e deploy (entrega final, cobrança única)`;
+    return `
+      <article class="proposal-feature-card is-new is-delivery-phase ${expanded ? '' : 'is-collapsed'}" id="card-${key}" tabindex="-1" data-feature-card="${key}">
+        <header class="feature-card-header" data-feature-toggle-area>
+          <div class="feature-header-left">
+            <span class="feature-phase-badge">Fase ${t(num_)}</span>
+            <span class="feature-delivery-badge">${lucide('calendar', { size: 12, strokeWidth: 2.4 })}Entrega final</span>
+            <h3 class="feature-title" id="feature-title-${key}">${t(name)}</h3>
+          </div>
+          <div class="feature-metrics-badges">
+            <span class="prop-badge prop-badge--hours">${lucide('calendar', { size: 14, strokeWidth: 2 })}${num(hours)} h</span>
+            ${phase.businessDays !== undefined ? `<span class="prop-badge prop-badge--days">${num(phase.businessDays)} dias úteis</span>` : ''}
+            <span class="prop-badge price prop-badge--price">${brl(price)}</span>
+          </div>
+          ${this.renderCollapseToggle(key, expanded)}
+        </header>
+        <div class="feature-card-collapse" id="feature-body-${key}" role="region" aria-labelledby="feature-title-${key}" ${expanded ? '' : 'inert'}>
+          <div class="feature-card-body">
+            <div class="delivery-phase-intro">
+              ${lucide('info', { size: 16, strokeWidth: 2 })}
+              <p>${(phase.note || tad?.note)
+                ? t(phase.note || tad.note)
+                : `<strong>Cobrança única${coveredLabel ? ` cobrindo as ${coveredLabel}` : ''}.</strong>`}</p>
+            </div>
+            ${breakdown ? this.renderTestsAdjustDeploy(breakdown, tableTitle, 'tad-entrega-final', breakdown.outOfScopeNotice || phase.outOfScopeNotice) : ''}
+            ${composition.length ? `
+              <ul class="delivery-phase-composition" aria-label="Composição das horas">
+                ${composition.map(r => `<li><strong>${t(r.label || r.area)}:</strong> ${t(r.note)}</li>`).join('')}
+              </ul>
+            ` : ''}
+          </div>
+        </div>
+      </article>
     `;
   }
 
@@ -1295,10 +1821,18 @@ export class PropostaView {
               </tr>
             </thead>
             <tbody>
-              ${phases.filter(p => !isSuperseded(p)).map(item => {
+              ${phases.filter(p => !isSuperseded(p)).map((item, idx, arr) => {
                 const existing = isExisting(item);
-                return `
-                  <tr class="${existing ? 'row-existing' : ''}">
+                const groupRow = existing && arr.findIndex(isExisting) === idx ? `
+                  <tr class="row-group" data-delivered-row>
+                    <td class="text-center cell-group" data-label="Fase">${this.renderDeliveredRowToggle(arr.filter(isExisting).map(p => `delivered-row-${t(p.phase)}`).join(' '), this.deliveredRange(arr.filter(isExisting).map(p => p.phase)))}</td>
+                    <td class="cell-group cell-group-name" data-label="Etapa / Módulo"><span class="delivered-group-icon" aria-hidden="true">${lucide('circle-check', { size: 16, strokeWidth: 2.4 })}</span>${this.deliveredGroupLabel(arr.filter(isExisting).map(p => p.phase))}</td>
+                    <td class="text-center cell-group-num" data-label="Horas">0 h</td>
+                    <td class="text-center cell-group-num" data-label="Prazo (dias úteis)">—</td>
+                    <td class="text-right cell-group-num" data-label="Valor (R$)">${brl(0)}</td>
+                  </tr>` : '';
+                return `${groupRow}
+                  <tr class="${existing ? `row-existing ${this.deliveredExpanded ? '' : 'is-group-collapsed'}` : ''}" ${existing ? `data-delivered-body id="delivered-row-${t(item.phase)}"` : ''}>
                     <td class="text-center cell-phase" data-label="Fase"><strong>${t(item.phase)}</strong></td>
                     <td class="cell-name" data-label="Etapa / Módulo">
                       <span>${t(existing ? stripExistingSuffix(item.name) : item.name)}</span>
@@ -1327,7 +1861,8 @@ export class PropostaView {
         </div>
 
         ${(() => {
-          const others = phases.filter(p => !isSuperseded(p) && !featurePhases.has(p.phase));
+          const deliveryNum = this.deliveryPhase?.phase?.phase;
+          const others = phases.filter(p => !isSuperseded(p) && !featurePhases.has(p.phase) && p.phase !== deliveryNum);
           if (!others.length) return '';
           return `
             <div class="area-sheets-group" id="topico-planilhas-fases" tabindex="-1" data-collapsible-scope>
@@ -1342,7 +1877,7 @@ export class PropostaView {
           `;
         })()}
 
-        ${inv.testsAdjustDeploy ? this.renderTestsAdjustDeploy(inv.testsAdjustDeploy, 'Consolidado de Testes / Ajustes / Deploy (novas funcionalidades)', 'tad-consolidado') : ''}
+        ${inv.testsAdjustDeploy && !this.deliveryPhase ? this.renderTestsAdjustDeploy(inv.testsAdjustDeploy, 'Testes, ajustes e deploy (entrega final, cobrança única)', 'tad-consolidado') : ''}
 
         ${sprints.length ? this.renderSprints(sprints, phases) : ''}
 
@@ -1422,13 +1957,15 @@ export class PropostaView {
                   ${g.list.map(({ sp, sPhases, existing, hours: h, price: pr }) => {
                     const deliverables = sPhases.map(n => stripExistingSuffix(phaseOf(n).name)).filter(Boolean);
                     return `
-                      <div class="sprint-card ${existing ? 'is-existing' : ''}">
+                      <div class="sprint-card ${existing ? 'is-existing' : ''} ${sp.note ? 'has-note' : ''}">
+                        ${sp.note ? `<button type="button" class="sprint-note-toggle" aria-expanded="false" aria-controls="sprint-note-${t(sp.sprint)}" aria-label="Mostrar observação da Sprint ${t(sp.sprint)}">${lucide('info', { size: 14, strokeWidth: 2 })}</button>` : ''}
                         <div class="sprint-tag">Sprint ${t(sp.sprint)}</div>
                         <div class="sprint-phases">${sPhases.length ? joinPhases(sPhases) : t(sp.phases)}</div>
                         <div class="sprint-days">${existing ? existingBadge() : `${num(sp.businessDays)} dias úteis · ${num(h)} h`}</div>
                         ${!existing ? `<div class="sprint-price">${brl(pr)}</div>` : ''}
                         ${sp.startDate || sp.endDate ? `<div class="sprint-dates">${formatShortRange(sp.startDate, sp.endDate)}</div>` : ''}
                         ${sp.deliverables || deliverables.length ? `<div class="sprint-deliverables">${t(sp.deliverables || deliverables.join('; '))}</div>` : ''}
+                        ${sp.note ? `<div class="sprint-note" id="sprint-note-${t(sp.sprint)}">${lucide('info', { size: 13, strokeWidth: 2, className: 'sprint-note-icon' })}<span class="sprint-note-text">${t(sp.note)}</span></div>` : ''}
                       </div>
                     `;
                   }).join('')}
@@ -1504,6 +2041,7 @@ export class PropostaView {
             <ul>${(d.outOfScope || []).map((o, i) => `<li${i === (d.outOfScope || []).findIndex(x => CLIENT_ERP_RE.test(x)) ? ' id="topico-fora-escopo-erp" tabindex="-1" class="out-of-scope-erp"' : ''}>${t(o)}</li>`).join('')}</ul>
           </div>
         </div>
+        ${this.renderOutOfScopeNotice(d.outOfScopeNotice, { id: 'topico-fora-escopo-testes' })}
       </section>
     `;
   }
@@ -1556,7 +2094,6 @@ export class PropostaView {
     const features = Array.isArray(d.features) ? d.features : [];
     const inv = d.investment || {};
     const invPhases = (Array.isArray(inv.phases) ? inv.phases : []).filter(p => !isSuperseded(p));
-    const featurePhases = new Set(features.map(f => f.phase));
     const exists = (id) => Boolean(id && this.container.querySelector(`#${CSS.escape(id)}`));
     const item = (id, label, extra = {}) => (exists(id) ? { id, label, ...extra } : null);
     const clean = (list) => list.filter(Boolean);
@@ -1565,19 +2102,13 @@ export class PropostaView {
       if (!list.length) return '';
       return list.length === 1 ? `Fase ${list[0]}` : `Fases ${list[0]}–${list[list.length - 1]}`;
     };
-    const plainName = (name) => t(stripExistingSuffix(name)).replace(/\s*\([^)]*\)\s*$/, '');
 
     const existingFeatures = features.filter(f => isExisting(f));
     const newFeatures = features.filter(f => !isExisting(f));
     const existingPhaseNums = invPhases.filter(p => isExisting(p)).map(p => p.phase);
     const existingRange = phaseRangeLabel(existingPhaseNums.length ? existingPhaseNums : existingFeatures.map(f => f.phase));
-    const newPhases = newFeatures.map(f => f.phase).filter(n => n !== undefined);
-
-    /** Fase de testes/ajustes/deploy vinculada à feature (próxima fase sem feature própria). */
-    const tadPhaseOf = (f) => invPhases
-      .filter(p => toNumber(p.phase) > toNumber(f.phase) && !featurePhases.has(p.phase))
-      .sort((a, b) => a.phase - b.phase)
-      .find(p => /teste|ajuste|deploy/i.test(p.name || '') && (p.featureId ? p.featureId === f.id : true));
+    const deliveryNum = this.deliveryPhase?.phase?.phase ?? this.deliveryPhase?.tad?.phase;
+    const newPhases = [...newFeatures.map(f => f.phase), deliveryNum].filter(n => n !== undefined && n !== null);
 
     const erpItem = (d.outOfScope || []).find(o => CLIENT_ERP_RE.test(o));
 
@@ -1611,19 +2142,20 @@ export class PropostaView {
         key: 'novas',
         label: `Novas funcionalidades${newPhases.length ? ` (Fases ${newPhases.join(', ')})` : ''}`,
         chip: 'Novas funcionalidades',
-        items: clean(newFeatures.map(f => {
-          const tad = tadPhaseOf(f);
+        items: clean([...newFeatures.map(f => {
           const printsCount = this.container.querySelectorAll(`#prints-${CSS.escape(f.id)} .print-item`).length;
           return item(`card-${f.id}`, t(f.label || f.title), {
             dot: 'new',
             prefix: f.label ? '' : (f.phase !== undefined ? `F${t(f.phase)}` : ''),
             children: clean([
-              tad ? item(`tad-${f.id}`, `Fase ${t(tad.phase)} – ${plainName(tad.name)}`) : null,
               item(`prints-${f.id}`, `Prints anotados${printsCount ? ` (${printsCount})` : ''}`),
               item(`incluso-${f.id}`, 'Inclusos sem custo')
             ])
           });
-        }))
+        }), item('card-entrega-final', deliveryNum !== undefined ? `Fase ${t(deliveryNum)} – Testes, ajustes e deploy (entrega final)` : 'Testes, ajustes e deploy (entrega final)', {
+          dot: 'new',
+          children: clean([item('tad-entrega-final', 'Breakdown testes / ajustes / deploy')])
+        })])
       },
       {
         key: 'investimento', label: 'Investimento', chip: 'Investimento',
@@ -1992,11 +2524,83 @@ export class PropostaView {
     `;
   }
 
+  /** Rótulo do grupo "Já entregues" (ex.: "Já entregues (Fases 0 a 6) · R$ 0,00"). */
+  deliveredGroupLabel(nums) {
+    const list = nums.filter(n => n !== undefined && n !== null).map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+    const range = !list.length ? '' : list.length === 1 ? ` (Fase ${list[0]})` : ` (Fases ${list[0]} a ${list[list.length - 1]})`;
+    return `Já entregues${range}`;
+  }
+
+  /** Intervalo de fases já entregues a partir dos dados (ex.: "0 a 6"; "6" se única). */
+  deliveredRange(nums = []) {
+    const list = nums.filter(n => n !== undefined && n !== null).map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+    if (!list.length) return '';
+    return list.length === 1 ? `${list[0]}` : `${list[0]} a ${list[list.length - 1]}`;
+  }
+
+  /** Texto do tooltip conforme o estado (title, aria-label e data-tooltip). */
+  deliveredTip(open, range) {
+    const r = range ? ` (${range})` : '';
+    return open
+      ? `Recolher: ocultar as fases já entregues${r}`
+      : `Expandir: exibir as fases já entregues${r}, sem custo nesta proposta`;
+  }
+
+  /** Atributos comuns dos botões do grupo (tooltip + estado). */
+  deliveredToggleAttrs(id, range) {
+    const open = this.deliveredExpanded === true;
+    const tip = t(this.deliveredTip(open, range));
+    return `data-delivered-toggle data-range="${t(range)}" aria-expanded="${open ? 'true' : 'false'}" aria-controls="${id}" title="${tip}" aria-label="${tip}" data-tooltip="${tip}"`;
+  }
+
+  /** Botão de expandir/recolher do grupo "Já entregues" (iniciando colapsado). Com `price`, exibe o valor à direita (cards). */
+  renderDeliveredToggle(id, label, { cls = '', price = null, range = '' } = {}) {
+    const open = this.deliveredExpanded === true;
+    return `
+      <button type="button" class="delivered-group-toggle ${cls}" ${this.deliveredToggleAttrs(id, range)}>
+        <span class="delivered-group-icon" aria-hidden="true">${lucide('circle-check', { size: 16, strokeWidth: 2.4 })}</span>
+        <span class="delivered-group-label">${label}</span>
+        ${price !== null ? `<span class="prop-badge price prop-badge--price delivered-group-price">${price}</span>` : ''}
+        <span class="delivered-group-pill feature-toggle" aria-hidden="true">
+          <span class="delivered-group-action">${open ? 'Recolher' : 'Expandir'}</span>
+          <span class="delivered-group-chevron">${lucide('chevron-down', { size: 18, strokeWidth: 2.4 })}</span>
+        </span>
+      </button>
+    `;
+  }
+
+  /** Botão compacto (só chevron) da linha de grupo na tabela, na coluna "Fase". */
+  renderDeliveredRowToggle(id, range = '') {
+    const open = this.deliveredExpanded === true;
+    return `
+      <button type="button" class="delivered-row-toggle" ${this.deliveredToggleAttrs(id, range)}>
+        <span class="delivered-group-action sr-only">${open ? 'Recolher' : 'Expandir'}</span>
+        <span class="delivered-group-chevron" aria-hidden="true">${lucide('chevron-down', { size: 18, strokeWidth: 2.4 })}</span>
+        <span class="sr-only">fases já entregues</span>
+      </button>
+    `;
+  }
+
+  setDeliveredExpanded(open) {
+    this.deliveredExpanded = !!open;
+    this.container.querySelectorAll('[data-delivered-toggle]').forEach(btn => {
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      const tip = this.deliveredTip(!!open, btn.dataset.range || '');
+      btn.setAttribute('title', tip);
+      btn.setAttribute('aria-label', tip);
+      btn.setAttribute('data-tooltip', tip);
+      const a = btn.querySelector('.delivered-group-action');
+      if (a) a.textContent = open ? 'Recolher' : 'Expandir';
+    });
+    this.container.querySelectorAll('[data-delivered-body]').forEach(el => el.classList.toggle('is-group-collapsed', !open));
+    this.container.querySelectorAll('[data-delivered-group]').forEach(el => el.classList.toggle('is-group-collapsed', !open));
+    this.syncToggleAll();
+  }
+
   renderCollapseToolbar(label) {
     return `
       <div class="features-toolbar" role="group" aria-label="${t(label)}">
-        <button type="button" class="features-toolbar-btn" data-features-all="expand">${lucide('chevrons-up-down', { size: 15, strokeWidth: 2.2 })}Expandir todas</button>
-        <button type="button" class="features-toolbar-btn" data-features-all="collapse">${lucide('chevrons-down-up', { size: 15, strokeWidth: 2.2 })}Recolher todas</button>
+        <button type="button" class="features-toolbar-btn" data-features-toggle-all data-mode="expand" aria-expanded="false" title="Expandir todas" aria-label="Expandir todas">${lucide('chevrons-up-down', { size: 15, strokeWidth: 2.2 })}<span class="features-toolbar-label">Expandir todas</span></button>
       </div>
     `;
   }
@@ -2008,7 +2612,7 @@ export class PropostaView {
     const expanded = this.isCollapsibleExpanded(key, existing);
     const title = t(existing ? stripExistingSuffix(p.name) : p.name);
     return `
-      <article class="proposal-feature-card phase-sheet-card ${existing ? 'is-existing' : 'is-new'} ${expanded ? '' : 'is-collapsed'}" id="${key}" tabindex="-1" data-feature-card="${key}">
+      <article class="proposal-feature-card phase-sheet-card ${existing ? 'is-existing' : 'is-new'} ${expanded ? '' : 'is-collapsed'}" id="${key}" ${existing ? 'aria-disabled="true"' : ''} tabindex="-1" data-feature-card="${key}">
         <header class="feature-card-header" data-feature-toggle-area>
           <div class="feature-header-left">
             <span class="feature-phase-badge">Fase ${t(p.phase)}</span>
@@ -2016,8 +2620,8 @@ export class PropostaView {
             <h4 class="feature-title" id="feature-title-${key}">${title}</h4>
           </div>
           <div class="feature-metrics-badges">
-            <span class="prop-badge">${lucide('calendar', { size: 14, strokeWidth: 2 })}${num(p.hours)} h</span>
-            ${existing ? '<span class="prop-badge existing">Sem custo</span>' : `<span class="prop-badge price">${brl(p.price)}</span>`}
+            <span class="prop-badge prop-badge--hours">${lucide('calendar', { size: 14, strokeWidth: 2 })}${existing ? 0 : num(p.hours)} h</span>
+            <span class="prop-badge price prop-badge--price">${brl(existing ? 0 : p.price)}</span>
           </div>
           ${this.renderCollapseToggle(key, expanded)}
         </header>
@@ -2028,6 +2632,26 @@ export class PropostaView {
         </div>
       </article>
     `;
+  }
+
+  /** Atualiza o botão único "Expandir/Recolher todas" do escopo (ou de todos, sem argumento). */
+  syncToggleAll(scope = null) {
+    const scopes = scope ? [scope] : [...this.container.querySelectorAll('[data-collapsible-scope]')];
+    scopes.forEach(sc => {
+      const btn = sc.querySelector('[data-features-toggle-all]');
+      if (!btn) return;
+      const cards = [...sc.querySelectorAll('[data-feature-card]')];
+      const groups = [...sc.querySelectorAll('[data-delivered-group]')];
+      const allOpen = (cards.length || groups.length)
+        && cards.every(c => !c.classList.contains('is-collapsed'))
+        && groups.every(g => !g.classList.contains('is-group-collapsed'));
+      const label = allOpen ? 'Recolher todas' : 'Expandir todas';
+      btn.dataset.mode = allOpen ? 'collapse' : 'expand';
+      btn.setAttribute('aria-expanded', allOpen ? 'true' : 'false');
+      btn.setAttribute('aria-label', label);
+      btn.setAttribute('title', label);
+      btn.innerHTML = `${lucide(allOpen ? 'chevrons-down-up' : 'chevrons-up-down', { size: 15, strokeWidth: 2.2 })}<span class="features-toolbar-label">${label}</span>`;
+    });
   }
 
   /** Expande/recolhe um card de funcionalidade (a11y + transição; sem animação quando animate=false). */
@@ -2043,6 +2667,7 @@ export class PropostaView {
     card.classList.toggle('no-anim', !animate || reduce);
     card.classList.add('is-animating');
     card.classList.toggle('is-collapsed', !expanded);
+    this.syncToggleAll(card.closest('[data-collapsible-scope]'));
     btn?.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     const label = card.querySelector('.feature-toggle-label');
     if (label) label.textContent = expanded ? 'Recolher' : 'Expandir';
@@ -2059,9 +2684,13 @@ export class PropostaView {
   revealFeatureTarget(el) {
     const card = el?.closest?.('[data-feature-card]');
     if (card && card.classList.contains('is-collapsed')) this.setFeatureExpanded(card, true, { animate: false });
+    if (el?.closest?.('[data-delivered-group]') && !this.deliveredExpanded) this.setDeliveredExpanded(true);
   }
 
   bindFeatureToggles() {
+    this.container.querySelectorAll('[data-delivered-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => this.setDeliveredExpanded(!this.deliveredExpanded));
+    });
     this.container.querySelectorAll('[data-collapsible-list]').forEach(list => {
       list.addEventListener('click', (e) => {
         const area = e.target.closest('[data-feature-toggle-area]');
@@ -2071,20 +2700,23 @@ export class PropostaView {
         this.setFeatureExpanded(card, card.classList.contains('is-collapsed'));
       });
     });
-    this.container.querySelectorAll('[data-features-all]').forEach(btn => {
+    this.container.querySelectorAll('[data-features-toggle-all]').forEach(btn => {
       btn.addEventListener('click', () => {
-        const expand = btn.dataset.featuresAll === 'expand';
+        const expand = btn.dataset.mode !== 'collapse';
         const scope = btn.closest('[data-collapsible-scope]') || this.container;
+        if (scope.querySelector('[data-delivered-group]')) this.setDeliveredExpanded(expand);
         scope.querySelectorAll('[data-feature-card]').forEach(card => this.setFeatureExpanded(card, expand));
+        this.syncToggleAll(scope);
       });
     });
+    this.syncToggleAll();
   }
 
   /* --------------------------------- Eventos -------------------------------- */
 
   bindEvents() {
     // 0. Fallback de iniciais "JL" caso a foto do GitHub não carregue
-    this.container.querySelectorAll('.dev-avatar-img').forEach(img => {
+    this.container.querySelectorAll('.dev-avatar-img, .sum-avatar-img').forEach(img => {
       const fallback = () => img.remove();
       if (img.complete && img.naturalWidth === 0) {
         fallback();
@@ -2093,10 +2725,50 @@ export class PropostaView {
       }
     });
 
+    // 0. Notas de sprint: ícone de info abre/fecha a observação (na impressão ficam sempre visíveis via CSS)
+    const setSprintNote = (btn, open) => {
+      btn.setAttribute('aria-expanded', String(open));
+      btn.closest('.sprint-card')?.classList.toggle('is-note-open', open);
+    };
+    const closeSprintNotes = (except) => {
+      this.container.querySelectorAll('.sprint-note-toggle[aria-expanded="true"]').forEach(b => {
+        if (b !== except) setSprintNote(b, false);
+      });
+    };
+    this.container.querySelectorAll('.sprint-note-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const open = btn.getAttribute('aria-expanded') !== 'true';
+        closeSprintNotes(btn);
+        setSprintNote(btn, open);
+      });
+    });
+    // Fecha ao clicar fora ou com Esc (listeners no document; substituídos a cada render)
+    if (this._sprintNoteOutside) document.removeEventListener('click', this._sprintNoteOutside);
+    if (this._sprintNoteEsc) document.removeEventListener('keydown', this._sprintNoteEsc);
+    this._sprintNoteOutside = (e) => {
+      if (!e.target.closest?.('.sprint-card.has-note')) closeSprintNotes();
+      else if (!e.target.closest('.sprint-note-toggle, .sprint-note')) closeSprintNotes();
+    };
+    this._sprintNoteEsc = (e) => {
+      if (e.key !== 'Escape') return;
+      const open = this.container.querySelector('.sprint-note-toggle[aria-expanded="true"]');
+      if (!open) return;
+      closeSprintNotes();
+      open.focus();
+    };
+    document.addEventListener('click', this._sprintNoteOutside);
+    document.addEventListener('keydown', this._sprintNoteEsc);
+
     // 1. Salvar em PDF (diálogo nativo de impressão)
     const btnPdf = this.container.querySelector('#btn-save-pdf');
     if (btnPdf && this.data) {
       btnPdf.addEventListener('click', async () => {
+        // Garante que o DOM reflete a visão ativa (?view=) antes de imprimir
+        const rendered = this.container.querySelector('.view-proposta-wrapper')?.classList.contains('is-summary') ? 'resumido' : 'detalhado';
+        if (rendered !== this.getViewMode()) {
+          this.container.innerHTML = this.renderShell(this.data, this.renderBody(this.data));
+          this.bindEvents();
+        }
         this.closePrintLightbox();
         await this.loadPrintImages();
         const previousTitle = document.title;
@@ -2132,20 +2804,26 @@ export class PropostaView {
       btnRetry.addEventListener('click', () => this.render());
     }
 
-    // 3. Voltar ao Menu ou Login
-    const btnBack = this.container.querySelector('#btn-back-menu');
-    if (btnBack) {
-      btnBack.addEventListener('click', () => {
+    // 3. Demo App (logo e link): mesmo destino do antigo "Voltar" (menu se logado, senão login)
+    this.container.querySelectorAll('[data-bar-home]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+        e.preventDefault();
         if (typeof this.options.onNavigate === 'function') {
           const savedUser = sessionStorage.getItem('app_user');
           let hasUser = false;
           try {
             hasUser = savedUser && JSON.parse(savedUser)?.isLoggedIn;
-          } catch (e) {}
+          } catch (err) {}
           this.options.onNavigate(hasUser ? 'menu' : 'login');
         }
       });
-    }
+    });
+
+    // 3.0 Seletor Detalhado/Resumido (persistido em ?view=)
+    this.container.querySelectorAll('[data-view-mode]').forEach(btn => {
+      btn.addEventListener('click', () => this.setViewMode(btn.dataset.viewMode));
+    });
 
     // 3.1 Expandir/recolher cards de funcionalidades
     this.bindFeatureToggles();

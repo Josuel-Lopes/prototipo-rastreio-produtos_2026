@@ -17,7 +17,7 @@ const VIEWPORTS = {
 const FREEZE_CSS = `#toast-root{display:none!important}
 *,*::before,*::after{animation-duration:0s!important;animation-delay:0s!important;animation-iteration-count:1!important;transition:none!important;caret-color:transparent!important}`;
 // Rótulos visíveis usam a numeração oficial da proposta (pastas fase-1..3 mantidas).
-const PHASES = { 'fase-1': 'Fase 7 – Seleção de Projetos', 'fase-2': 'Fase 9 – Vincular Cadastro ao Projeto', 'fase-3': 'Fase 11 – Vincular etapas ao projeto', 'fase-4': 'Fase 13 – Vincular Projeto ao Fluxo de Transferência' };
+const PHASES = { 'fase-1': 'Fase 7 – Seleção de Projetos', 'fase-2': 'Fase 8 – Vincular Cadastro ao Projeto', 'fase-3': 'Fase 9 – Vincular etapas ao projeto', 'fase-4': 'Fase 10 – Vincular Projeto ao Fluxo de Transferência' };
 const INCLUSO_LABEL = 'Fase 7 – complemento (incluso, sem custo)';
 
 const freeze = p => p.addStyleTag({ content: FREEZE_CSS });

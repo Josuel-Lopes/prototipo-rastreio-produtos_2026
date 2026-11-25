@@ -95,7 +95,7 @@ A cada nova funcionalidade adicionada, avalia-se tecnicamente a relação com o 
 | **Horas por área** | **Do zero − Reaproveitado + Ajustes** |
 | **Valor** | Horas × **R$ 90,00** |
 | **Prazo** | Horas ÷ **8 h por dia útil** |
-| **Testes / Ajustes / Deploy** | Estimados e apresentados **em separado**, com total próprio, somados ao total da funcionalidade |
+| **Testes / Ajustes / Deploy** | Cobrados **uma única vez, na entrega final (Fase 11)**: Testes = **soma** dos testes de homologação/E2E/regressão de cada funcionalidade; Ajustes e Deploy = **média** das funcionalidades (arredondada). Os testes de desenvolvimento permanecem na planilha de cada fase |
 
 - **Do zero:** horas para construir a entrega da área como se nada existisse.
 - **Reaproveitado:** horas economizadas pelo reúso de componentes, endpoints, layouts e estruturas existentes (subtraídas).
@@ -112,7 +112,7 @@ A cada nova funcionalidade adicionada, avalia-se tecnicamente a relação com o 
 | Testes | estimado pelo comercial |
 | Testes / Ajustes / Deploy | estimado pelo comercial |
 
-> Horas validadas apenas pelo escopo inicial e pelo código do repositório real. O levantamento ampliado por área (incluindo referências opcionais de mercado) está registrado nesta proposta. Mantém-se a estimativa inicial de 37 h para a Seleção de Projetos. Com base nas solicitações e no levantamento realizados em reunião com o cliente em 24/11/2026, foram adicionadas as demais fases e etapas do desenvolvimento, com a participação do desenvolvedor e do cliente. Qualquer alteração de valor só será aplicada mediante aprovação prévia e aceite do cliente Alvenius.
+> Horas validadas apenas pelo escopo inicial e pelo código do repositório real. O levantamento ampliado por área (incluindo referências opcionais de mercado) está registrado nesta proposta. Mantém-se a estimativa inicial de 37 h para a Seleção de Projetos (28 h de desenvolvimento na Fase 7 + parcela de testes, ajustes e deploy consolidada na Fase 11 de entrega final, onde esses itens são cobrados uma única vez). Com base nas solicitações e no levantamento realizados em reunião com o cliente em 24/11/2026, foram adicionadas as demais fases e etapas do desenvolvimento, com a participação do desenvolvedor e do cliente. Qualquer alteração de valor só será aplicada mediante aprovação prévia e aceite do cliente Alvenius.
 
 > **Base de precificação — projeto existente:** todas as funcionalidades das seções 4.1 a 4.5 e as fases 0 a 6 **já estão implementadas e em operação no sistema atual**; não compõem o investimento desta proposta e constam com **0 h / R$ 0,00**. Somente o que for **adicionado, criado ou ajustado** é precificado (ver 4.6 e 4.7).
 > Stack real: **Backend** NodeJS + PostgreSQL (login gravado em banco; demais dados via APIs externas tratadas no backend); **Frontend** NextJS, React, TailwindCSS e bibliotecas de leitura de QRCODE.
@@ -347,24 +347,17 @@ Contextualizar toda a operação por projeto: o usuário escolhe o projeto logo 
 
 *Índice de reaproveitamento: 35% (12 h de 34 h base).*
 
-**Testes, Ajustes e Deploy para produção (em separado)**
-
-| Item | Horas | Valor (R$) | Validação |
-|---|---:|---:|---|
-| Testes (homologação, E2E e regressão dos módulos) | 4 h | 360,00 | estimado pelo comercial |
-| Ajustes (correções pós-homologação) | 3 h | 270,00 | estimado pelo comercial |
-| Deploy para produção (backend e frontend) | 2 h | 180,00 | estimado pelo comercial |
-| **TOTAL Testes/Ajustes/Deploy** | **9 h** | **R$ 810,00** | |
+**Testes, Ajustes e Deploy para produção:** cobrados **uma única vez** na **Fase 11 – entrega final** (seção 4.10). Contribuição desta funcionalidade: 4 h de testes de homologação/E2E/regressão (somados na Fase 11); ajustes e deploy pela média.
 
 | Horas | Prazo | Investimento |
 |---|---|---|
-| 37 h (28 h desenv. + 9 h testes/ajustes/deploy) | 4,625 dias úteis (~1 semana) | **R$ 3.330,00** |
+| 28 h (desenvolvimento) | 3,5 dias úteis | **R$ 2.520,00** |
 
 > Premissas: backend estimado pelo comercial com base no escopo inicial e no código do repositório real (NodeJS + PostgreSQL); a **Alvenius é responsável por disponibilizar no Protheus o endpoint de projetos (lista com os campos exibidos e contador de spools) e o filtro por projeto** nos endpoints existentes — fora do escopo desta proposta; sem persistência em banco nesta fase — projeto ativo apenas na sessão.
 
 ---
 
-### 4.7 Fase 9 – Vincular Cadastro ao Projeto · **NOVA FUNCIONALIDADE**
+### 4.7 Fase 8 – Vincular Cadastro ao Projeto · **NOVA FUNCIONALIDADE**
 
 **Objetivo de negócio e problema resolvido**
 Garantir que todo spool/componente cadastrado pertença ao projeto ativo, exibindo o projeto em cards, na leitura de QRCode e na validação, com listas sempre filtradas pelo projeto.
@@ -388,7 +381,7 @@ Garantir que todo spool/componente cadastrado pertença ao projeto ativo, exibin
 | 06 | ![Leitura no cadastro](prints/fase-2/06-modal-cadastro-leitura-projeto.png) · [mobile](prints/fase-2/06-modal-cadastro-leitura-projeto-mobile.png) | ① NOVO projeto ativo vinculado ao cadastro · ② AJUSTADO confirmação no visor (spool lido · componentes) |
 | 07 | ![Validar QRCode – leitor](prints/fase-2/07-validar-leitor-sucesso-projeto.png) · [mobile](prints/fase-2/07-validar-leitor-sucesso-projeto-mobile.png) | ① NOVO QRCode válido com o projeto do spool no visor |
 
-> Prints 02 e 05 recapturados após as Fases 11–12, somente com as marcações das Fases 9–10.
+> Prints 02 e 05 recapturados após a Fase 9, somente com as marcações da Fase 8.
 
 > 📊 *Espaço reservado: fluxo Cadastro → Protheus com vínculo* — **Destacar envio do código do projeto no payload**
 
@@ -426,24 +419,17 @@ Garantir que todo spool/componente cadastrado pertença ao projeto ativo, exibin
 
 *Índice de reaproveitamento: 38% (11 h de 29 h base).*
 
-**Testes, Ajustes e Deploy para produção (em separado)**
-
-| Item | Horas | Valor (R$) | Validação |
-|---|---:|---:|---|
-| Testes (homologação, E2E e regressão do cadastro e módulos) | 3 h | 270,00 | estimado pelo comercial |
-| Ajustes (correções pós-homologação) | 2 h | 180,00 | estimado pelo comercial |
-| Deploy para produção | 2 h | 180,00 | estimado pelo comercial |
-| **TOTAL Testes/Ajustes/Deploy** | **7 h** | **R$ 630,00** | |
+**Testes, Ajustes e Deploy para produção:** cobrados **uma única vez** na **Fase 11 – entrega final** (seção 4.10). Contribuição desta funcionalidade: 3 h de testes de homologação/E2E/regressão (somados na Fase 11); ajustes e deploy pela média.
 
 | Horas | Prazo | Investimento |
 |---|---|---|
-| 30 h (23 h desenv. + 7 h testes/ajustes/deploy) | 3,75 dias úteis | **R$ 2.700,00** |
+| 23 h (desenvolvimento) | 2,875 dias úteis | **R$ 2.070,00** |
 
 > Premissas: estimativa do comercial com base no escopo inicial e no código do repositório real (`models/register.js`, `pages/api/v1/register`, `components/container/process-register`, `components/ui/modal/qr-code-*`, `components/ui/card-item`, `pages/validates-qrcode`); a **Alvenius é responsável por o Protheus aceitar o código do projeto no cadastro e retorná-lo nas consultas de spool/componente** — fora do escopo; sem persistência em banco local; horas sujeitas a ajuste fino após inventário real do MVP pelo frontend.
 
 ---
 
-### 4.8 Fase 11 – Vincular Etapas (Caldeiraria, Revestimento, Pintura) ao Projeto · **NOVA FUNCIONALIDADE**
+### 4.8 Fase 9 – Vincular Etapas (Caldeiraria, Revestimento, Pintura) ao Projeto · **NOVA FUNCIONALIDADE**
 
 **Objetivo de negócio e problema resolvido**
 Garantir que as movimentações de Caldeiraria, Revestimento e Pintura ocorram somente para spools do projeto ativo, com contadores por projeto e bloqueio de spools de outro projeto.
@@ -472,13 +458,13 @@ Garantir que as movimentações de Caldeiraria, Revestimento e Pintura ocorram s
 
 | Disciplina | Reaproveitado (sem custo / subtraído) | Novo | Ajustado |
 |---|---|---|---|
-| **Backend** (NodeJS) | Sessão/token Protheus e next-connect (`pages/api/v1/boilermaking\|coating\|painting`); provider/adapters Protheus; projeto do spool (Fase 9) e filtro por projeto (Fase 7) | Validação spool×projeto ativo nas rotas de etapa (409 com o projeto do spool) | `models/boilermaking.js`, `coating.js`, `painting.js` enviam o projeto na movimentação; contadores por projeto |
-| **Frontend** (NextJS/React/Tailwind) | `ProjectTag`; `getProjectRef`/`getActiveProject`; tag nos cards (Fase 9); `getSpoolsByProject`; `ProcessesAccordion`; toasts | `getCountersByProject`; faixa "Projeto ativo" em cada etapa; bloqueio de spool de outro projeto (aviso + toast + ação desabilitada) + guard extra em `ProcessStageView`; `updateSpoolStatus` grava o projeto | `process-stage-view` (contadores + projeto na movimentação); `modal-qrcode` (topo com projeto no modo etapa); CSS modals/views |
-| **Designer** | Faixa e tag de projeto (Fases 7–10); cards e modal QRCode | Estado de bloqueio "spool de outro projeto" | Topo das etapas com faixa e contadores |
+| **Backend** (NodeJS) | Sessão/token Protheus e next-connect (`pages/api/v1/boilermaking\|coating\|painting`); provider/adapters Protheus; projeto do spool (Fase 8) e filtro por projeto (Fase 7) | Validação spool×projeto ativo nas rotas de etapa (409 com o projeto do spool) | `models/boilermaking.js`, `coating.js`, `painting.js` enviam o projeto na movimentação; contadores por projeto |
+| **Frontend** (NextJS/React/Tailwind) | `ProjectTag`; `getProjectRef`/`getActiveProject`; tag nos cards (Fase 8); `getSpoolsByProject`; `ProcessesAccordion`; toasts | `getCountersByProject`; faixa "Projeto ativo" em cada etapa; bloqueio de spool de outro projeto (aviso + toast + ação desabilitada) + guard extra em `ProcessStageView`; `updateSpoolStatus` grava o projeto | `process-stage-view` (contadores + projeto na movimentação); `modal-qrcode` (topo com projeto no modo etapa); CSS modals/views |
+| **Designer** | Faixa e tag de projeto (Fases 7–8); cards e modal QRCode | Estado de bloqueio "spool de outro projeto" | Topo das etapas com faixa e contadores |
 | **Database** (PostgreSQL) | Tabelas de usuários/sessões | — | Sem alteração: validação e movimentação no Protheus |
 | **Testes** (desenvolvimento) | Testes unit/integration das 3 etapas; mocks Protheus e de projetos | Caso spool de outro projeto bloqueado (409) | Testes das 3 etapas validam projeto e contadores |
 
-**Matriz de correlação — Cenário A + B** (reaproveita das Fases 7–10 tag, helpers, projeto do spool e filtro; altera `process-stage-view`, `modal-qrcode` e os models das 3 etapas). As 3 etapas compartilham componente e models de mesmo padrão, por isso o custo não triplica. **Depende das Fases 1 e 2.**
+**Matriz de correlação — Cenário A + B** (reaproveita das Fases 7–8 tag, helpers, projeto do spool e filtro; altera `process-stage-view`, `modal-qrcode` e os models das 3 etapas). As 3 etapas compartilham componente e models de mesmo padrão, por isso o custo não triplica. **Depende das Fases 1 e 2.**
 
 | Área | Do zero | Reaproveitado | Ajustes | Horas | Valor (R$) | Validação |
 |---|---:|---:|---:|---:|---:|---|
@@ -491,24 +477,17 @@ Garantir que as movimentações de Caldeiraria, Revestimento e Pintura ocorram s
 
 *Índice de reaproveitamento: 39% (12 h de 31 h base).*
 
-**Testes, Ajustes e Deploy para produção (em separado)**
-
-| Item | Horas | Valor (R$) | Validação |
-|---|---:|---:|---|
-| Testes (homologação, E2E e regressão das 3 etapas) | 4 h | 360,00 | estimado pelo comercial |
-| Ajustes (correções pós-homologação) | 2 h | 180,00 | estimado pelo comercial |
-| Deploy para produção | 2 h | 180,00 | estimado pelo comercial |
-| **TOTAL Testes/Ajustes/Deploy** | **8 h** | **R$ 720,00** | |
+**Testes, Ajustes e Deploy para produção:** cobrados **uma única vez** na **Fase 11 – entrega final** (seção 4.10). Contribuição desta funcionalidade: 4 h de testes de homologação/E2E/regressão (somados na Fase 11); ajustes e deploy pela média.
 
 | Horas | Prazo | Investimento |
 |---|---|---|
-| 33 h (25 h desenv. + 8 h testes/ajustes/deploy) | 4,125 dias úteis | **R$ 2.970,00** |
+| 25 h (desenvolvimento) | 3,125 dias úteis | **R$ 2.250,00** |
 
 > Premissas: estimativa do comercial com base no escopo inicial e no código do repositório real (`models/boilermaking.js`, `coating.js`, `painting.js`, `pages/api/v1/boilermaking|coating|painting`, `components/container/process-flow`, `tests/unit|integration/api/v1/*`) e no inventário real do frontend; a **Alvenius é responsável por o Protheus aceitar o projeto nas movimentações e retornar o projeto do spool** — fora do escopo; sem persistência em banco local; fora: projeto nos cards de transferência.
 
 ---
 
-### 4.9 Fase 13 – Vincular Projeto ao Fluxo de Transferência · **NOVA FUNCIONALIDADE**
+### 4.9 Fase 10 – Vincular Projeto ao Fluxo de Transferência · **NOVA FUNCIONALIDADE**
 
 **Objetivo de negócio e problema resolvido**
 Garantir que as transferências sejam registradas e acompanhadas por projeto, com listas e contadores do projeto ativo e bloqueio de itens de outro projeto.
@@ -541,13 +520,13 @@ Garantir que as transferências sejam registradas e acompanhadas por projeto, co
 
 | Disciplina | Reaproveitado (sem custo / subtraído) | Novo | Ajustado |
 |---|---|---|---|
-| **Backend** (NodeJS) | Sessão/token Protheus e next-connect (`pages/api/v1/transfer/[process]`, `supplier/[process]`); provider/adapters Protheus; validação item×projeto (padrão Fase 11) e filtro por projeto (Fase 7) | Contadores Em Trânsito/Concluído/Total por projeto; item de outro projeto rejeitado (409) | `models/transfer.js` envia o projeto na gravação; listas de `transfer`/`supplier` filtradas por projeto |
-| **Frontend** (NextJS/React/Tailwind) | `ProjectTag`; `getActiveProject`/`getProjectRef`; guard `PROJECT_ROUTES` (já cobria transferências); visual/toast "outro projeto" (Fase 11); payload da modal com projeto (Fase 9) | Vínculo do projeto nas transferências; filtro por projeto; contadores por projeto; faixa + contadores nas listas; empty state por projeto; faixa na nova transferência; alerta de item de outro projeto (bloqueio, toast, demo) | Gravação envia projeto + valida; itens lidos recebem projeto; limpeza do alerta; texto spool/componente no alerta |
-| **Designer** | Faixa e tag de projeto (Fases 7–9); alerta "outro projeto" (Fase 11) | Contadores de transferência por projeto; empty state por projeto | Listas e nova transferência com faixa de projeto |
+| **Backend** (NodeJS) | Sessão/token Protheus e next-connect (`pages/api/v1/transfer/[process]`, `supplier/[process]`); provider/adapters Protheus; validação item×projeto (padrão Fase 9) e filtro por projeto (Fase 7) | Contadores Em Trânsito/Concluído/Total por projeto; item de outro projeto rejeitado (409) | `models/transfer.js` envia o projeto na gravação; listas de `transfer`/`supplier` filtradas por projeto |
+| **Frontend** (NextJS/React/Tailwind) | `ProjectTag`; `getActiveProject`/`getProjectRef`; guard `PROJECT_ROUTES` (já cobria transferências); visual/toast "outro projeto" (Fase 9); payload da modal com projeto (Fase 8) | Vínculo do projeto nas transferências; filtro por projeto; contadores por projeto; faixa + contadores nas listas; empty state por projeto; faixa na nova transferência; alerta de item de outro projeto (bloqueio, toast, demo) | Gravação envia projeto + valida; itens lidos recebem projeto; limpeza do alerta; texto spool/componente no alerta |
+| **Designer** | Faixa e tag de projeto (Fases 7–8); alerta "outro projeto" (Fase 9) | Contadores de transferência por projeto; empty state por projeto | Listas e nova transferência com faixa de projeto |
 | **Database** (PostgreSQL) | Tabelas de usuários/sessões | — | Sem alteração: vínculo e validação no Protheus |
 | **Testes** (desenvolvimento) | Testes integration de `transfer/[process]` (get/post) e `supplier`; mocks Protheus e de projetos | Caso item de outro projeto bloqueado (409) | Testes de transfer validam projeto, filtro e contadores |
 
-**Matriz de correlação — Cenário A + B** (reaproveita das Fases 7–11 tag, helpers, guard, alerta "outro projeto" e payload com projeto; altera gravação e listas de transferência). **Depende das Fases 7, 9 e 11.**
+**Matriz de correlação — Cenário A + B** (reaproveita das Fases 7–9 tag, helpers, guard, alerta "outro projeto" e payload com projeto; altera gravação e listas de transferência). **Depende das Fases 7, 9 e 11.**
 
 | Área | Do zero | Reaproveitado | Ajustes | Horas | Valor (R$) | Validação |
 |---|---:|---:|---:|---:|---:|---|
@@ -560,20 +539,34 @@ Garantir que as transferências sejam registradas e acompanhadas por projeto, co
 
 *Índice de reaproveitamento: 39% (13 h de 33 h base).*
 
-**Testes, Ajustes e Deploy para produção (em separado)**
-
-| Item | Horas | Valor (R$) | Validação |
-|---|---:|---:|---|
-| Testes (homologação, E2E e regressão de transferências) | 4 h | 360,00 | estimado pelo comercial |
-| Ajustes (correções pós-homologação) | 2 h | 180,00 | estimado pelo comercial |
-| Deploy para produção | 2 h | 180,00 | estimado pelo comercial |
-| **TOTAL Testes/Ajustes/Deploy** | **8 h** | **R$ 720,00** | |
+**Testes, Ajustes e Deploy para produção:** cobrados **uma única vez** na **Fase 11 – entrega final** (seção 4.10). Contribuição desta funcionalidade: 4 h de testes de homologação/E2E/regressão (somados na Fase 11); ajustes e deploy pela média.
 
 | Horas | Prazo | Investimento |
 |---|---|---|
-| 34 h (26 h desenv. + 8 h testes/ajustes/deploy) | 4,25 dias úteis | **R$ 3.060,00** |
+| 26 h (desenvolvimento) | 3,25 dias úteis | **R$ 2.340,00** |
 
 > Premissas: estimativa do comercial com base no escopo inicial e no código do repositório real (`models/transfer.js`, `models/supplier.js`, `pages/api/v1/transfer/[process]`, `pages/api/v1/supplier/[process]`, `components/container/process-transfer/*`, `tests/integration/api/v1/transfer|supplier`) e no inventário real do frontend; sem persistência em banco local; **fora do escopo:** conclusão de transferência (Em Trânsito → Concluído) e detalhe — responsabilidade da API externa Protheus ADVPL do cliente; a Alvenius é responsável por o Protheus aceitar e retornar o projeto nas transferências.
+
+---
+
+### 4.10 Fase 11 – Testes, Ajustes e Deploy para Produção (entrega final) · **ENTREGA ÚNICA**
+
+**O que é:** homologação integrada, correções pós-homologação e deploy único em produção das Fases 7 a 10, cobrados **uma única vez** na entrega — em vez de repetidos em cada funcionalidade.
+
+**Planilha por área**
+
+| Área | Do zero | Reaproveitado | Ajustes | Horas | Valor (R$) | Validação | Cálculo |
+|---|---:|---:|---:|---:|---:|---|---|
+| Testes (homologação/E2E/regressão) | 15 h | 0 h | 0 h | 15 h | 1.350,00 | estimado pelo comercial | Soma: 4 (Fase 7) + 3 (Fase 8) + 4 (Fase 9) + 4 (Fase 10) |
+| Ajustes (pós-homologação) | 2 h | 0 h | 0 h | 2 h | 180,00 | estimado pelo comercial | Média de 3, 2, 2 e 2 h = 2,25 h → 2 h |
+| Deploy para produção | 2 h | 0 h | 0 h | 2 h | 180,00 | estimado pelo comercial | Média de 2, 2, 2 e 2 h = 2 h |
+| **TOTAL** | **19 h** | **0 h** | **0 h** | **19 h** | **R$ 1.710,00** | | |
+
+| Horas | Prazo | Investimento |
+|---|---|---|
+| 19 h | 2,375 dias úteis (Sprint 9: 18/12/2026 a 22/12/2026) | **R$ 1.710,00** |
+
+> Deploy concluído antes do recesso de 25/12/2026; 23 e 24/12 ficam reservados como contingência.
 
 ---
 
@@ -589,23 +582,20 @@ Garantir que as transferências sejam registradas e acompanhadas por projeto, co
 | 5 | Integração com ERP *(já existente)* | 0 h | 0 | 0,00 |
 | 6 | Homologação, treinamento e entrada em produção *(já existente)* | 0 h | 0 | 0,00 |
 | 7 | **Fase 7 – Seleção de Projetos (pós-login) – desenvolvimento** | 28 h | 3,5 | 2.520,00 |
-| 8 | **Testes, ajustes e deploy para produção (Seleção de Projetos)** | 9 h | 1,125 | 810,00 |
-| 9 | **Fase 9 – Vincular Cadastro ao Projeto – desenvolvimento** | 23 h | 2,875 | 2.070,00 |
-| 10 | **Testes, ajustes e deploy para produção (Vincular Cadastro ao Projeto)** | 7 h | 0,875 | 630,00 |
-| 11 | **Fase 11 – Vincular Etapas ao Projeto – desenvolvimento** | 25 h | 3,125 | 2.250,00 |
-| 12 | **Testes, ajustes e deploy para produção (Vincular Etapas ao Projeto)** | 8 h | 1 | 720,00 |
-| 13 | **Fase 13 – Vincular Projeto ao Fluxo de Transferência – desenvolvimento** | 26 h | 3,25 | 2.340,00 |
-| 14 | **Testes, ajustes e deploy para produção (Vincular Projeto ao Fluxo de Transferência)** | 8 h | 1 | 720,00 |
-| | **TOTAL** | **134 h** | **16,75 dias úteis (~3,5 semanas)** | **R$ 12.060,00** |
+| 8 | **Fase 8 – Vincular Cadastro ao Projeto – desenvolvimento** | 23 h | 2,875 | 2.070,00 |
+| 9 | **Fase 9 – Vincular Etapas ao Projeto – desenvolvimento** | 25 h | 3,125 | 2.250,00 |
+| 10 | **Fase 10 – Vincular Projeto ao Fluxo de Transferência – desenvolvimento** | 26 h | 3,25 | 2.340,00 |
+| 11 | **Fase 11 – Testes, ajustes e deploy para produção (entrega final)** | 19 h | 2,375 | 1.710,00 |
+| | **TOTAL** | **121 h** | **15,125 dias úteis (~3 semanas)** | **R$ 10.890,00** |
 
-**Planilha por área — Fases 0 e 6** *(já existentes; Fases 1–5 em 4.1–4.5; Fases 7–8 em 4.6; Fases 9–10 em 4.7; Fases 11–12 em 4.8; Fases 13–14 em 4.9)*
+**Planilha por área — Fases 0 e 6** *(já existentes; Fases 1–5 em 4.1–4.5; Fase 7 em 4.6; Fase 8 em 4.7; Fase 9 em 4.8; Fase 10 em 4.9; Fase 11 em 4.10)*
 
 | Fase | Área | Do zero | Reaproveitado | Ajustes | Horas | Valor (R$) | Validação |
 |---|---|---:|---:|---:|---:|---:|---|
 | 0 | Backend · Frontend · Designer · Database · Testes | 0 h | 0 h | 0 h | 0 h | 0,00 | já existente |
 | 6 | Backend · Frontend · Designer · Database · Testes | 0 h | 0 h | 0 h | 0 h | 0,00 | já existente |
 
-**Consolidado Testes / Ajustes / Deploy (novas funcionalidades):** Testes 15 h (R$ 1.350,00) · Ajustes 9 h (R$ 810,00) · Deploy 8 h (R$ 720,00) · **Total 32 h (R$ 2.880,00)**.
+**Testes / Ajustes / Deploy (cobrança única na Fase 11 – entrega final):** Testes 15 h (R$ 1.350,00, soma) · Ajustes 2 h (R$ 180,00, média) · Deploy 2 h (R$ 180,00, média) · **Total 19 h (R$ 1.710,00)**.
 
 **Entregas por sprint (2 semanas):**
 
@@ -615,19 +605,20 @@ Garantir que as transferências sejam registradas e acompanhadas por projeto, co
 | 2 | Fase 2 *(já existente)* | 0 | — |
 | 3 | Fases 3 e 4 *(já existentes)* | 0 | — |
 | 4 | Fase 5 + Fase 6 *(já existentes)* | 0 | — |
-| 5 | Fases 7 e 8 — Seleção de Projetos | 4,625 | 01/12/2026 a 07/12/2026 |
-| 6 | Fases 9 e 10 — Vincular Cadastro ao Projeto | 3,75 | 07/12/2026 a 11/12/2026 |
-| 7 | Fases 11 e 12 — Vincular Etapas ao Projeto | 4,125 | 11/12/2026 a 17/12/2026 |
-| 8 | Fases 13 e 14 — Vincular Projeto ao Fluxo de Transferência | 4,25 | 17/12/2026 a 23/12/2026 |
+| 5 | Fase 7 — Seleção de Projetos | 3,5 | 01/12/2026 a 04/12/2026 |
+| 6 | Fase 8 — Vincular Cadastro ao Projeto | 2,875 | 04/12/2026 a 09/12/2026 |
+| 7 | Fase 9 — Vincular Etapas ao Projeto | 3,125 | 09/12/2026 a 14/12/2026 |
+| 8 | Fase 10 — Vincular Projeto ao Fluxo de Transferência | 3,25 | 14/12/2026 a 17/12/2026 |
+| 9 | Fase 11 — Testes, ajustes e deploy para produção (entrega final) | 2,375 | 18/12/2026 a 22/12/2026 (antes do recesso de 25/12; 23–24/12 de contingência) |
 
 **Condições de pagamento (parcelas quinzenais, dias corridos a partir do início em 01/12/2026):**
 
 | Parcela | Vencimento | Data | % | Valor (R$) |
 |---|---|---|---:|---:|
-| 1ª | Na aprovação da proposta (D+0) | 01/12/2026 | 30% | 3.618,00 |
-| 2ª | 15 dias após a aprovação (D+15) | 16/12/2026 | 40% | 4.824,00 |
-| 3ª | 30 dias após a aprovação (D+30) | 31/12/2026 | 30% | 3.618,00 |
-| | **Total** | | **100%** | **R$ 12.060,00** |
+| 1ª | Na aprovação da proposta (D+0) | 01/12/2026 | 30% | 3.267,00 |
+| 2ª | 15 dias após a aprovação (D+15) | 16/12/2026 | 40% | 4.356,00 |
+| 3ª | 30 dias após a aprovação (D+30) | 31/12/2026 | 30% | 3.267,00 |
+| | **Total** | | **100%** | **R$ 10.890,00** |
 
 > Marcos da proposta original (aprovação / Sprint 2 / homologação final) estão **substituídos** pelos marcos acima, aguardando decisão do cliente.
 

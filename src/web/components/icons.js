@@ -21,6 +21,8 @@ export const LUCIDE_PATHS = {
   'log-out': `<path d="m16 17 5-5-5-5" /><path d="M21 12H9" /><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />`,
   'arrow-left': `<path d="m12 19-7-7 7-7" /><path d="M19 12H5" />`,
   'arrow-right': `<path d="M5 12h14" /><path d="m12 5 7 7-7 7" />`,
+  'external-link': `<path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />`,
+  'layout-list': `<rect width="7" height="7" x="3" y="3" rx="1" /><rect width="7" height="7" x="3" y="14" rx="1" /><path d="M14 4h7" /><path d="M14 9h7" /><path d="M14 15h7" /><path d="M14 20h7" />`,
   'home': `<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" /><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />`,
   'chevron-right': `<path d="m9 18 6-6-6-6" />`,
   'chevron-up': `<path d="m18 15-6-6-6 6" />`,
