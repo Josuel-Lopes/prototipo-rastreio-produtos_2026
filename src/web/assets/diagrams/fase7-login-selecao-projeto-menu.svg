@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 300" width="1080" height="300" role="img" aria-labelledby="t d" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <title id="t">Fluxo Login → Seleção de projetos → Projeto ativo → Menu</title>
+  <desc id="d">Quatro etapas em sequência. Seleção de projetos (azul) e Projeto ativo (verde) são as etapas novas; Login e Menu já existem.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#0B2545"/>
+    </marker>
+  </defs>
+
+  <rect width="1080" height="300" fill="#FFFFFF"/>
+
+  <!-- Setas -->
+  <g stroke="#0B2545" stroke-width="3" fill="none" marker-end="url(#arrow)">
+    <line x1="232" y1="130" x2="306" y2="130"/>
+    <line x1="502" y1="130" x2="576" y2="130"/>
+    <line x1="772" y1="130" x2="846" y2="130"/>
+  </g>
+
+  <!-- 1. Login (existente) -->
+  <rect x="40" y="80" width="190" height="100" rx="12" fill="#F2F4F7" stroke="#98A2B3" stroke-width="2"/>
+  <text x="135" y="124" text-anchor="middle" font-size="22" font-weight="700" fill="#0B2545">Login</text>
+  <text x="135" y="152" text-anchor="middle" font-size="14" fill="#475467">usuário e senha</text>
+
+  <!-- 2. Seleção de projetos (nova) -->
+  <rect x="310" y="80" width="190" height="100" rx="12" fill="#EEF4FF" stroke="#1F4FD8" stroke-width="3"/>
+  <rect x="380" y="62" width="50" height="22" rx="11" fill="#1F4FD8"/>
+  <text x="405" y="78" text-anchor="middle" font-size="12" font-weight="700" fill="#FFFFFF" letter-spacing="1">NOVO</text>
+  <text x="405" y="124" text-anchor="middle" font-size="22" font-weight="700" fill="#0B2545">Seleção</text>
+  <text x="405" y="152" text-anchor="middle" font-size="14" fill="#1F4FD8">de projetos</text>
+
+  <!-- 3. Projeto ativo (nova) -->
+  <rect x="580" y="80" width="190" height="100" rx="12" fill="#ECFDF3" stroke="#12B76A" stroke-width="3"/>
+  <rect x="650" y="62" width="50" height="22" rx="11" fill="#12B76A"/>
+  <text x="675" y="78" text-anchor="middle" font-size="12" font-weight="700" fill="#064E3B" letter-spacing="1">NOVO</text>
+  <text x="675" y="124" text-anchor="middle" font-size="22" font-weight="700" fill="#0B2545">Projeto ativo</text>
+  <text x="675" y="152" text-anchor="middle" font-size="14" fill="#027A48">contexto da sessão</text>
+
+  <!-- 4. Menu (existente) -->
+  <rect x="850" y="80" width="190" height="100" rx="12" fill="#F2F4F7" stroke="#98A2B3" stroke-width="2"/>
+  <text x="945" y="124" text-anchor="middle" font-size="22" font-weight="700" fill="#0B2545">Menu</text>
+  <text x="945" y="152" text-anchor="middle" font-size="14" fill="#475467">módulos do projeto</text>
+
+  <!-- Legenda -->
+  <g font-size="14" fill="#334155">
+    <rect x="40" y="232" width="18" height="18" rx="4" fill="#F2F4F7" stroke="#98A2B3" stroke-width="2"/>
+    <text x="68" y="246">Etapa existente</text>
+    <rect x="230" y="232" width="18" height="18" rx="4" fill="#EEF4FF" stroke="#1F4FD8" stroke-width="2.5"/>
+    <text x="258" y="246">Etapa nova: seleção de projetos</text>
+    <rect x="510" y="232" width="18" height="18" rx="4" fill="#ECFDF3" stroke="#12B76A" stroke-width="2.5"/>
+    <text x="538" y="246">Etapa nova: projeto ativo</text>
+  </g>
+</svg>
