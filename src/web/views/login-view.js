@@ -35,7 +35,9 @@ export class LoginView {
                 id="login-username" 
                 class="form-input form-input-plain" 
                 placeholder="Digite seu nome de usuário" 
-                value="josuellopes"
+                autocomplete="username"
+                autocapitalize="none"
+                spellcheck="false"
                 required
               />
             </div>
@@ -51,7 +53,7 @@ export class LoginView {
                 id="login-password" 
                 class="form-input form-input-plain" 
                 placeholder="Digite sua senha" 
-                value="123456"
+                autocomplete="current-password"
                 required
               />
             </div>
