@@ -302,11 +302,11 @@ export class PropostaView {
 
   /* ----------------------------- Estrutura geral ---------------------------- */
 
-  /** Modo de visualização atual: lido da URL (?view=resumido|detalhado); padrão detalhado. */
+  /** Modo de visualização atual: lido da URL (?view=resumido|detalhado); padrão resumido (detalhado se não houver summaryView). */
   getViewMode(data = this.data) {
     if (!data?.summaryView || data.summaryView.enabled === false) return 'detalhado';
     const v = String(new URLSearchParams(window.location.search).get('view') || '').toLowerCase();
-    return v === 'resumido' ? 'resumido' : 'detalhado';
+    return v === 'detalhado' ? 'detalhado' : 'resumido';
   }
 
   /** Conteúdo da folha conforme a visão selecionada. */
@@ -336,7 +336,7 @@ export class PropostaView {
     if (!sv || sv.enabled === false) return '';
     const mode = this.getViewMode(data);
     const opt = (key, label, icon) => `<button type="button" class="view-switch-btn" data-view-mode="${key}" aria-pressed="${mode === key ? 'true' : 'false'}" aria-label="${t(label)}" title="${t(label)}"><span class="view-switch-icon" aria-hidden="true">${lucide(icon, { size: 16, strokeWidth: 2.2 })}</span><span class="view-switch-text">${t(label)}</span></button>`;
-    return `<div class="view-switch" role="group" aria-label="Modo de visualização da proposta">${opt('detalhado', sv.detailedLabel || 'Detalhado', 'file-text')}${opt('resumido', sv.label || 'Resumido', 'layout-list')}</div>`;
+    return `<div class="view-switch" role="group" aria-label="Modo de visualização da proposta">${opt('resumido', sv.label || 'Resumido', 'layout-list')}${opt('detalhado', sv.detailedLabel || 'Detalhado', 'file-text')}</div>`;
   }
 
   renderShell(data, content) {
@@ -452,6 +452,11 @@ export class PropostaView {
             ${meta.issuedAt ? `<span>Emitida em ${formatDate(meta.issuedAt)}</span>` : ''}
           </p>
         </header>
+        <aside class="sum-callout" role="note" aria-label="Sobre a versão resumida">
+          <span class="sum-callout-icon" aria-hidden="true">${lucide('info', { size: 18, strokeWidth: 2 })}</span>
+          <p class="sum-callout-text">Esta é a versão resumida da proposta. Consulte a versão Detalhada para ver o escopo por funcionalidade, horas, cálculo do investimento, planilhas e cronograma completos.</p>
+          <button type="button" class="sum-callout-btn no-print" data-view-mode="detalhado">${lucide('file-text', { size: 15, strokeWidth: 2 })}<span>Ver versão detalhada</span></button>
+        </aside>
         ${body}
         ${this.renderSummaryFooter(d)}
       </article>

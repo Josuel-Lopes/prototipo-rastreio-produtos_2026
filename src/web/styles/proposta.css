@@ -4459,6 +4459,32 @@ body.toc-sheet-open:has(.view-proposta-wrapper) {
 .sum-hero h1 { margin: 6px 0 8px; font-size: 26px; line-height: 1.25; color: var(--prop-navy); }
 .sum-hero-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; font-size: 13px; color: var(--prop-gray); }
 
+.sum-callout {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+  margin: -8px 0 24px; padding: 12px 14px;
+  background: #F1F5FD; border: 1px solid var(--prop-border-subtle); border-left: 3px solid var(--prop-royal);
+  border-radius: 8px;
+}
+.sum-callout-icon { display: inline-flex; color: var(--prop-royal); flex-shrink: 0; }
+.sum-callout-text { flex: 1 1 280px; margin: 0; font-size: 13px; line-height: 1.5; color: #334155; }
+.sum-callout-btn {
+  display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+  padding: 6px 12px; font: inherit; font-size: 13px; font-weight: 600;
+  color: var(--prop-royal); background: #FFFFFF; border: 1px solid var(--prop-royal); border-radius: 6px; cursor: pointer;
+}
+.sum-callout-btn:hover { background: var(--prop-royal); color: #FFFFFF; }
+.sum-callout-btn:focus-visible { outline: 2px solid var(--prop-royal); outline-offset: 2px; }
+@media print {
+  .sum-callout {
+    display: flex; flex-wrap: nowrap; align-items: center; gap: 10px;
+    box-sizing: border-box; width: 100%; margin: 0 0 10px; padding: 8px 12px;
+    break-inside: avoid; page-break-inside: avoid;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .sum-callout-icon { align-self: center; }
+  .sum-callout-text { flex: 1 1 auto; min-width: 0; font-size: 11.5px; line-height: 1.4; }
+}
+
 .sum-section { margin-bottom: 28px; }
 .sum-text, .sum-note, .sum-validity { margin: 0 0 10px; font-size: 14.5px; line-height: 1.6; color: #334155; }
 .sum-note { font-size: 12.5px; color: var(--prop-gray); }
@@ -4630,7 +4656,7 @@ body.toc-sheet-open:has(.view-proposta-wrapper) {
   .proposal-sheet--summary .sum-section { margin-top: 0 !important; margin-bottom: 10px !important; padding-top: 0 !important; padding-bottom: 0 !important; }
   .proposal-sheet--summary .sum-section p,
   .proposal-sheet--summary .sum-section li { font-size: 11.5px; line-height: 1.4; }
-  .sum-hero { padding: 14px 18px; margin-bottom: 10px; }
+  .sum-hero { padding: 0 0 12px; margin-bottom: 10px; }
   .sum-hero h1 { font-size: 20px; }
   .sum-subhead { margin: 10px 0 6px; }
   .sum-done-item { padding: 6px 10px; }
