@@ -552,28 +552,42 @@
   padding: 0 4px !important;
 }
 
-#btn-cadastro-qrcode {
-  background: #1d4ed8 !important;
+#btn-cadastro-qrcode,
+.btn-cadastro-qrcode,
+#btn-transf-qrcode {
+  background: #1956ce !important;
   color: #ffffff !important;
   cursor: pointer;
   transition: background-color 0.15s ease;
   border: none !important;
+  height: 44px !important;
 }
 
-#btn-cadastro-qrcode:hover {
-  background: #1e40af !important;
+#btn-cadastro-qrcode:hover,
+.btn-cadastro-qrcode:hover,
+#btn-transf-qrcode:hover {
+  background: #1646a8 !important;
 }
 
-#btn-cadastro-qrcode svg {
+#btn-cadastro-qrcode svg,
+.btn-cadastro-qrcode svg,
+#btn-transf-qrcode svg {
   stroke: #ffffff !important;
   width: 18px;
   height: 18px;
   flex-shrink: 0;
 }
 
+#btn-cadastro-qrcode span,
+.btn-cadastro-qrcode span,
+#btn-transf-qrcode span {
+  color: #ffffff !important;
+}
+
 /* Botão 2: Limpar */
 #btn-cadastro-limpar,
 #btn-limpar,
+#btn-transf-limpar,
 .btn-cadastro-limpar {
   background: #dedede !important;
   color: #d9777f !important;
@@ -583,6 +597,7 @@
 
 #btn-cadastro-limpar svg,
 #btn-limpar svg,
+#btn-transf-limpar svg,
 .btn-cadastro-limpar svg {
   stroke: #d9777f !important;
   width: 18px;
@@ -593,6 +608,7 @@
 
 #btn-cadastro-limpar:disabled,
 #btn-limpar:disabled,
+#btn-transf-limpar:disabled,
 .btn-cadastro-limpar:disabled {
   background: #dedede !important;
   color: #d9777f !important;
@@ -602,12 +618,14 @@
 
 #btn-cadastro-limpar:disabled svg,
 #btn-limpar:disabled svg,
+#btn-transf-limpar:disabled svg,
 .btn-cadastro-limpar:disabled svg {
   stroke: #d9777f !important;
 }
 
 #btn-cadastro-limpar:not(:disabled),
 #btn-limpar:not(:disabled),
+#btn-transf-limpar:not(:disabled),
 .btn-cadastro-limpar:not(:disabled),
 .btn-cadastro-limpar.btn-active {
   background: #ef4444 !important;
@@ -618,6 +636,7 @@
 
 #btn-cadastro-limpar:not(:disabled) svg,
 #btn-limpar:not(:disabled) svg,
+#btn-transf-limpar:not(:disabled) svg,
 .btn-cadastro-limpar:not(:disabled) svg,
 .btn-cadastro-limpar.btn-active svg {
   stroke: #ffffff !important;
@@ -625,6 +644,7 @@
 
 #btn-cadastro-limpar:not(:disabled):hover,
 #btn-limpar:not(:disabled):hover,
+#btn-transf-limpar:not(:disabled):hover,
 .btn-cadastro-limpar:not(:disabled):hover,
 .btn-cadastro-limpar.btn-active:hover {
   background: #dc2626 !important;
@@ -633,6 +653,7 @@
 /* Botão 3: Gravar */
 #btn-cadastro-gravar,
 #btn-gravar,
+#btn-transf-gravar,
 .btn-cadastro-gravar {
   background: #dedede !important;
   color: #70c496 !important;
@@ -642,6 +663,7 @@
 
 #btn-cadastro-gravar svg,
 #btn-gravar svg,
+#btn-transf-gravar svg,
 .btn-cadastro-gravar svg {
   stroke: #70c496 !important;
   width: 18px;
@@ -652,6 +674,7 @@
 
 #btn-cadastro-gravar:disabled,
 #btn-gravar:disabled,
+#btn-transf-gravar:disabled,
 .btn-cadastro-gravar:disabled {
   background: #dedede !important;
   color: #70c496 !important;
@@ -661,12 +684,14 @@
 
 #btn-cadastro-gravar:disabled svg,
 #btn-gravar:disabled svg,
+#btn-transf-gravar:disabled svg,
 .btn-cadastro-gravar:disabled svg {
   stroke: #70c496 !important;
 }
 
 #btn-cadastro-gravar:not(:disabled),
 #btn-gravar:not(:disabled),
+#btn-transf-gravar:not(:disabled),
 .btn-cadastro-gravar:not(:disabled),
 .btn-cadastro-gravar.btn-active {
   background: #16a34a !important;
@@ -677,6 +702,7 @@
 
 #btn-cadastro-gravar:not(:disabled) svg,
 #btn-gravar:not(:disabled) svg,
+#btn-transf-gravar:not(:disabled) svg,
 .btn-cadastro-gravar:not(:disabled) svg,
 .btn-cadastro-gravar.btn-active svg {
   stroke: #ffffff !important;
@@ -684,6 +710,7 @@
 
 #btn-cadastro-gravar:not(:disabled):hover,
 #btn-gravar:not(:disabled):hover,
+#btn-transf-gravar:not(:disabled):hover,
 .btn-cadastro-gravar:not(:disabled):hover,
 .btn-cadastro-gravar.btn-active:hover {
   background: #15803d !important;
@@ -1365,5 +1392,216 @@
   font-size: 12px;
   color: #9ca3af;
   max-width: 260px;
+}
+
+/* ==========================================================================
+   6. Tela de Criação de Transferência (Fidelidade copilot-image-3a2fe1.png)
+   ========================================================================== */
+.view-nova-transferencia-container {
+  width: 100%;
+}
+
+.card-nova-transferencia {
+  /* Segue a casca e proporções do card-page-base Alvenius */
+}
+
+/* 6.1 Seção FORNECEDOR */
+.fornecedor-section {
+  width: 100% !important;
+  margin: 0 2px 10px 2px !important;
+  box-sizing: border-box;
+}
+
+.fornecedor-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 6px 0;
+  text-transform: uppercase;
+  text-align: left;
+  letter-spacing: 0.3px;
+}
+
+.fornecedor-block {
+  margin-bottom: 8px;
+}
+
+.fornecedor-subheading {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 2px;
+  text-align: left;
+}
+
+.fornecedor-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 1px 0;
+  font-size: 12.5px;
+}
+
+.fornecedor-row-cols {
+  display: flex;
+  justify-content: flex-start;
+  gap: 16px;
+}
+
+.fornecedor-col {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.fornecedor-col-cod {
+  min-width: 130px;
+}
+
+.fornecedor-col-loja {
+  min-width: 80px;
+}
+
+.fornecedor-label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #111827;
+  white-space: pre;
+  text-align: left;
+}
+
+.fornecedor-value {
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 12.5px;
+  min-height: 18px;
+}
+
+.fornecedor-value-empty {
+  color: #9ca3af;
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+
+/* 6.2 Pergunta sobre Terceiro */
+.terceiro-section {
+  width: 100%;
+  margin: 4px 2px 12px 2px;
+  box-sizing: border-box;
+}
+
+.terceiro-question-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: #111827;
+  font-weight: 500;
+}
+
+.terceiro-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #4b5563;
+  flex-shrink: 0;
+}
+
+.terceiro-question-text {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.terceiro-answer {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  padding-left: 21px;
+  margin-top: 2px;
+  min-height: 18px;
+}
+
+.terceiro-answer-empty {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+/* 6.3 Tabela de Componentes da Transferência */
+.table-components-transferencia th.th-item {
+  width: 18% !important;
+  text-align: left !important;
+  padding-left: 8px !important;
+  border: none !important;
+}
+
+.table-components-transferencia th.th-cod {
+  width: 54% !important;
+  text-align: left !important;
+  padding-left: 8px !important;
+  border: none !important;
+}
+
+.table-components-transferencia th.th-qtd {
+  width: 28% !important;
+  text-align: right !important;
+  padding-right: 8px !important;
+  border: none !important;
+}
+
+.table-components-transferencia td.col-item {
+  width: 18% !important;
+  text-align: left !important;
+  padding-left: 8px !important;
+  border-right: 1.5px solid #7188a4 !important;
+  font-weight: 700;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  font-size: 12px;
+}
+
+.table-components-transferencia td.col-cod {
+  width: 54% !important;
+  border-right: 1.5px solid #7188a4 !important;
+  padding: 6px 8px !important;
+  font-size: 12px;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.table-components-transferencia td.col-qtd {
+  width: 28% !important;
+  text-align: right !important;
+  padding-right: 8px !important;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.transf-table-empty {
+  min-height: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+}
+
+.transf-table-empty.is-hidden {
+  display: none !important;
+  min-height: 0 !important;
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  visibility: hidden !important;
+}
+
+.transf-empty-hint {
+  font-size: 12px;
+  color: #9ca3af;
+  font-style: italic;
+  text-align: center;
 }
 

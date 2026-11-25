@@ -16,6 +16,7 @@ import { CaldeirariaView } from './views/caldeiraria-view.js';
 import { RevestimentoView } from './views/revestimento-view.js';
 import { PinturaView } from './views/pintura-view.js';
 import { TransferenciaComponenteView } from './views/transferencia-componente-view.js';
+import { NovaTransferenciaView } from './views/nova-transferencia-view.js';
 
 import { getCurrentUser, setCurrentUser, logoutUser, getSpoolByCode } from './mocks/spools-mock.js';
 
@@ -64,12 +65,16 @@ class App {
       }),
       transferenciaComponente: new TransferenciaComponenteView('app-view', {
         onNavigate: (route) => this.navigateTo(route)
+      }),
+      novaTransferencia: new NovaTransferenciaView('app-view', {
+        onNavigate: (route) => this.navigateTo(route),
+        onOpenQrCode: (callback) => this.openQrCodeScanner(callback, 'transferencia-componente')
       })
     };
   }
 
   init() {
-    console.log('Alvenius Spool Management v2.6.0 iniciado.');
+    console.log('Alvenius Spool Management v2.7.0 iniciado.');
     
     const savedUser = sessionStorage.getItem('app_user');
     if (savedUser) {
@@ -168,6 +173,12 @@ class App {
       return;
     }
 
+    if (route === 'nova-transferencia') {
+      this.currentRoute = 'nova-transferencia';
+      this.render();
+      return;
+    }
+
     this.currentRoute = route;
     this.render();
   }
@@ -179,7 +190,8 @@ class App {
       case 'revestimento': return 'Revestimento';
       case 'pintura': return 'Pintura';
       case 'transferencia':
-      case 'transferencia-componente': return 'Transferência';
+      case 'transferencia-componente':
+      case 'nova-transferencia': return 'Transferência';
       case 'validar-qrcode': return 'Validar QRCode';
       default: return 'Rastreio de produtos';
     }
@@ -208,6 +220,8 @@ class App {
       this.views.pintura.render();
     } else if (this.currentRoute === 'transferencia-componente') {
       this.views.transferenciaComponente.render();
+    } else if (this.currentRoute === 'nova-transferencia') {
+      this.views.novaTransferencia.render();
     }
 
     // Scroll para o topo
@@ -277,9 +291,16 @@ class App {
   openQrCodeScanner(onScanSuccess, mode = 'cadastro') {
     this.modalQrCode.open({
       mode,
-      onScan: (code, spool) => {
+      onScan: (codeOrData, extra) => {
         if (typeof onScanSuccess === 'function') {
-          onScanSuccess(code, spool);
+          onScanSuccess(codeOrData, extra);
+        }
+      },
+      onClose: (data) => {
+        if ((mode === 'transferencia-componente' || mode === 'transferencia') && data) {
+          if (typeof onScanSuccess === 'function') {
+            onScanSuccess(data);
+          }
         }
       }
     });

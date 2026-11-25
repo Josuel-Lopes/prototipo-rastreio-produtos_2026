@@ -48,6 +48,46 @@ export const MOCK_VALIDAR_ITEMS = [
   }
 ];
 
+export const MOCK_TRANSFER_POOL = [
+  {
+    codigo: 'FLW21224113Z211',
+    qtd: '2 UN',
+    desc: 'Flange solto, 20pol, face plana, dimensões conforme AWWA C 207 TAB.2 CLASSE D',
+    rawQr: 'COD_PRODUTO: FLW21224113Z211 | COD_FORNEC: 005436 | CORRIDA: teste FS | DESC: Flange solto, 20pol, face plana, dimensões conforme AWWA C 207 TAB.2 CLASSE D'
+  },
+  {
+    codigo: 'FLA31258019Z111',
+    qtd: '1 UN',
+    desc: 'Flange sobreposto, 20pol, face plana, aço carbono forjado ASTM A105',
+    rawQr: 'COD_PRODUTO: FLA31258019Z111 | COD_FORNEC: 005436 | CORRIDA: teste FF | DESC: Flange sobreposto, 20pol, face plana, aço carbono forjado ASTM A105'
+  },
+  {
+    codigo: 'CUR90-16-SCH80',
+    qtd: '1 UN',
+    desc: 'Curva 90 Graus 16pol Sch 80 ASTM A234 WPB',
+    rawQr: 'COD_PRODUTO: CUR90-16-SCH80 | COD_FORNEC: 003385 | CORRIDA: K-8819 | DESC: Curva 90 Graus 16pol Sch 80 ASTM A234 WPB'
+  },
+  {
+    codigo: 'TUB-COND-4-SCH40',
+    qtd: '6000 MM',
+    desc: 'Tubo Condução Aço Carbono 4" Sch 40 x 6000mm NBR 5590',
+    rawQr: 'COD_PRODUTO: TUB-COND-4-SCH40 | COD_FORNEC: 001290 | CORRIDA: C-4412 | DESC: Tubo Condução Aço Carbono 4" Sch 40 x 6000mm NBR 5590'
+  },
+  {
+    codigo: 'TE40-SCH40',
+    qtd: '1 UN',
+    desc: 'Te Reto 4pol Sch 40 ASTM A234 WPB',
+    rawQr: 'COD_PRODUTO: TE40-SCH40 | COD_FORNEC: 005436 | CORRIDA: T-1022 | DESC: Te Reto 4pol Sch 40 ASTM A234 WPB'
+  }
+];
+
+export const FORNECEDORES_MAP = {
+  '000052': { codigo: '000052', loja: '01', nome: 'ALVENIUS TUBOS E CONEXOES LTDA' },
+  '005436': { codigo: '005436', loja: '01', nome: 'TUBOS BRASIL LTDA' },
+  '003385': { codigo: '003385', loja: '01', nome: 'PETROPASY TECNOLOGIA E SERVICOS' },
+  '004120': { codigo: '004120', loja: '02', nome: 'USINAGEM E MONTAGEM VALE' }
+};
+
 export class ModalQrCodeComponent {
   constructor(containerId = 'modal-root') {
     this.container = document.getElementById(containerId);
@@ -58,6 +98,7 @@ export class ModalQrCodeComponent {
     this.validarScanIndex = 0;
     this.lastScannedItem = null;
     this.showingSuccessModal = false;
+    this.transferData = null;
     this.onScanCallback = null;
     this.onCloseCallback = null;
     this.onActionCallback = null;
@@ -78,6 +119,17 @@ export class ModalQrCodeComponent {
       this.lastScannedItem = null;
       this.showingSuccessModal = false;
       this.isScanned = false;
+    } else if (this.mode === 'transferencia-componente' || this.mode === 'transferencia') {
+      this.isScanned = false;
+      this.transferData = {
+        realizador: 'terceiro',
+        origem: { codigo: '', loja: '', nome: '' },
+        destino: { codigo: '', loja: '', nome: '' },
+        terceiro: 'SIM',
+        componentes: [],
+        ultimoLido: '',
+        scanIndex: 0
+      };
     }
     this.isOpen = true;
     this.render();
@@ -92,6 +144,31 @@ export class ModalQrCodeComponent {
       this.container.classList.remove('has-modal');
     }
     document.removeEventListener('keydown', this.handleKeyDown);
+
+    if (this.mode === 'transferencia-componente' || this.mode === 'transferencia') {
+      const hasComponentes = this.transferData && this.transferData.componentes && this.transferData.componentes.length > 0;
+      let payload = null;
+      if (hasComponentes) {
+        const origem = (this.transferData.origem && this.transferData.origem.codigo)
+          ? { ...this.transferData.origem }
+          : { ...FORNECEDORES_MAP['000052'] };
+        const destino = (this.transferData.destino && this.transferData.destino.codigo)
+          ? { ...this.transferData.destino }
+          : { ...FORNECEDORES_MAP['003385'] };
+
+        payload = {
+          origem,
+          destino,
+          terceiro: this.transferData.realizador === 'terceiro' ? 'SIM' : 'NÃO',
+          componentes: [...this.transferData.componentes]
+        };
+      }
+
+      if (typeof this.onCloseCallback === 'function') {
+        this.onCloseCallback(payload);
+      }
+      return;
+    }
 
     if (this.mode !== 'cadastro') {
       if (typeof this.onCloseCallback === 'function') {
@@ -302,7 +379,9 @@ export class ModalQrCodeComponent {
 
     this.container.classList.add('has-modal');
 
-    if (this.mode === 'validar-qrcode') {
+    if (this.mode === 'transferencia-componente' || this.mode === 'transferencia') {
+      this.renderTransferenciaMode();
+    } else if (this.mode === 'validar-qrcode') {
       if (this.showingSuccessModal) {
         this.renderValidarSuccessModal();
       } else {
@@ -315,6 +394,185 @@ export class ModalQrCodeComponent {
     }
 
     this.bindEvents();
+  }
+
+  renderTransferenciaMode() {
+    const data = this.transferData || {
+      realizador: 'terceiro',
+      origem: { codigo: '', loja: '', nome: '' },
+      destino: { codigo: '', loja: '', nome: '' },
+      terceiro: 'SIM',
+      componentes: [],
+      ultimoLido: '',
+      scanIndex: 0
+    };
+    const isAlvenius = data.realizador === 'alvenius';
+    const origemLabel = isAlvenius ? 'Origem Alvenius:' : 'Origem Terceiro:';
+
+    this.container.innerHTML = `
+      <div class="modal-backdrop qrcode-backdrop-fullscreen" id="qrcode-modal-backdrop">
+        <div class="qrcode-container-wrapper" role="dialog" aria-modal="true" aria-labelledby="qrcode-floating-pill-title">
+          
+          <!-- Topo: Pílula escura flutuante central com o título "Leitor de QRCode" -->
+          <div class="qrcode-floating-pill-header">
+            <div class="qrcode-floating-pill" id="qrcode-floating-pill-title">Leitor de QRCode</div>
+          </div>
+
+          <!-- Card 1: Visor da Câmera (Com desenho SVG do QRCode simulado) -->
+          ${this.renderViewfinder(data.componentes.length > 0)}
+
+          <!-- Botão azul para simular leitura "Simula Ler QRCode" -->
+          <div class="qrcode-scan-action-wrap">
+            <button 
+              class="qrcode-btn-modal-scan" 
+              id="btn-modal-trigger-scan" 
+              type="button" 
+              title="Clique para simular a leitura do QRCode"
+            >
+              ${lucide('qr-code', { size: 18, stroke: '#ffffff', strokeWidth: 2 })}
+              <span>Simula Ler QRCode</span>
+            </button>
+          </div>
+
+          <!-- Card 2: Card Branco de Conteúdo -->
+          <div class="qrcode-card-transferencia">
+            <!-- Cabeçalho de texto instrucional -->
+            <div class="qrcode-instr-transfer-header">
+              <div class="qrcode-instr-transfer-title">Ler QRCode do Componente.</div>
+              <div class="qrcode-instr-transfer-step">1 - Selecione realizador.</div>
+              <div class="qrcode-instr-transfer-step">2 - Selecione o fornecedor.</div>
+              <div class="qrcode-instr-transfer-step">3 - Ler o QRCode do Componente para serviço.</div>
+            </div>
+
+            <!-- Linha horizontal com degradê azul luminoso -->
+            <div class="qrcode-blue-gradient-line"></div>
+
+            <!-- Pergunta com ícone circular (?) -->
+            <div class="qrcode-transfer-realizador-section">
+              <div class="qrcode-transfer-question-row">
+                <span class="qrcode-transfer-question-icon" aria-hidden="true">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
+                </span>
+                <span class="qrcode-transfer-question-text">Serviço realizado por?</span>
+              </div>
+              <div class="qrcode-transfer-radios-row">
+                <label class="qrcode-radio-label">
+                  <input 
+                    type="radio" 
+                    name="modal-transfer-realizador" 
+                    value="alvenius" 
+                    ${isAlvenius ? 'checked' : ''} 
+                    class="qrcode-radio-input" 
+                    id="radio-realizador-alvenius"
+                  />
+                  <span>Alvenius</span>
+                </label>
+                <label class="qrcode-radio-label">
+                  <input 
+                    type="radio" 
+                    name="modal-transfer-realizador" 
+                    value="terceiro" 
+                    ${!isAlvenius ? 'checked' : ''} 
+                    class="qrcode-radio-input" 
+                    id="radio-realizador-terceiro"
+                  />
+                  <span>Terceiro</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Campo Dropdown 1: Origem Terceiro: -->
+            <div class="qrcode-transfer-form-group">
+              <label class="qrcode-transfer-label" for="qrcode-select-origem">${origemLabel}</label>
+              <div class="qrcode-select-wrapper">
+                <select class="qrcode-transfer-select" id="qrcode-select-origem">
+                  <option value="" ${!data.origem.codigo ? 'selected' : ''}>Selecione...</option>
+                  <option value="000052" ${data.origem.codigo === '000052' ? 'selected' : ''}>000052 - 01 - ALVENIUS TUBOS E CONEXOES LTDA</option>
+                  <option value="005436" ${data.origem.codigo === '005436' ? 'selected' : ''}>005436 - 01 - TUBOS BRASIL LTDA</option>
+                </select>
+                <div class="qrcode-select-arrow" aria-hidden="true">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Campo Dropdown 2: Destino Fornecedor: -->
+            <div class="qrcode-transfer-form-group">
+              <label class="qrcode-transfer-label" for="qrcode-select-destino">Destino Fornecedor:</label>
+              <div class="qrcode-select-wrapper">
+                <select class="qrcode-transfer-select" id="qrcode-select-destino">
+                  <option value="" ${!data.destino.codigo ? 'selected' : ''}>Selecione...</option>
+                  <option value="003385" ${data.destino.codigo === '003385' ? 'selected' : ''}>003385 - 01 - PETROPASY TECNOLOGIA E SERVICOS</option>
+                  <option value="004120" ${data.destino.codigo === '004120' ? 'selected' : ''}>004120 - 02 - USINAGEM E MONTAGEM VALE</option>
+                </select>
+                <div class="qrcode-select-arrow" aria-hidden="true">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tabela de Componentes adicionados -->
+            <div class="qrcode-transfer-comp-section">
+              <div class="qrcode-transfer-comp-title">Componente</div>
+              <div class="qrcode-transfer-table-box">
+                <table class="qrcode-transfer-table">
+                  <thead>
+                    <tr>
+                      <th class="th-transfer-item">ITENS</th>
+                      <th class="th-transfer-cod">CÓDIGO</th>
+                      <th class="th-transfer-action"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="qrcode-transfer-tbody">
+                    ${data.componentes.map((comp, idx) => `
+                      <tr data-index="${idx}">
+                        <td class="col-transfer-item">${comp.item || String(idx + 1).padStart(2, '0')}</td>
+                        <td class="col-transfer-cod">${comp.codigo}</td>
+                        <td class="col-transfer-action">
+                          <button type="button" class="btn-remove-transfer-comp" data-index="${idx}" title="Remover componente ${comp.codigo}">
+                            ${lucide('trash-2', { size: 16, stroke: '#ef4444', strokeWidth: 1.8 })}
+                          </button>
+                        </td>
+                      </tr>
+                    `).join('')}
+                    ${data.componentes.length === 0 ? `
+                      <tr>
+                        <td colspan="3" class="col-transfer-empty">Aguardando leitura do QRCode...</td>
+                      </tr>
+                    ` : ''}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Card 3: Último QRCode lido: -->
+          <div class="qrcode-card-last-read">
+            <div class="qrcode-last-read-title">Último QRCode lido:</div>
+            ${data.ultimoLido 
+              ? `<div class="qrcode-last-read-inline-data" id="qrcode-transfer-last-read">${data.ultimoLido}</div>` 
+              : `<div class="qrcode-waiting-text" id="qrcode-transfer-last-read">Aguardando leitura...</div>`
+            }
+          </div>
+
+          <!-- Botão inferior de fechar -->
+          <button class="qrcode-btn-close-red" id="qrcode-btn-close-bottom" type="button" title="Fechar e aplicar dados na transferência">
+            ${lucide('circle-x', { size: 20, stroke: '#ffffff', strokeWidth: 2.2 })}
+            <span>Fechar</span>
+          </button>
+
+        </div>
+      </div>
+    `;
   }
 
   renderCaldeirariaMode() {
@@ -709,11 +967,26 @@ export class ModalQrCodeComponent {
       btnValidarScan.addEventListener('click', handleTriggerScanValidar);
     }
 
-    // Ação "Ler QRCode" nos outros modos (Cadastro / Caldeiraria)
+    // Ação "Ler QRCode" nos outros modos (Cadastro / Caldeiraria / Transferência)
     const handleTriggerScanGeneral = (e) => {
       e.stopPropagation();
       if (this.mode === 'validar-qrcode') {
         handleTriggerScanValidar(e);
+        return;
+      }
+      if (this.mode === 'transferencia-componente' || this.mode === 'transferencia') {
+        const pool = MOCK_TRANSFER_POOL;
+        const nextItem = pool[this.transferData.scanIndex % pool.length];
+        this.transferData.scanIndex++;
+        const nextNum = String(this.transferData.componentes.length + 1).padStart(2, '0');
+        this.transferData.componentes.push({
+          item: nextNum,
+          codigo: nextItem.codigo,
+          qtd: nextItem.qtd
+        });
+        this.transferData.ultimoLido = nextItem.rawQr;
+        this.isScanned = true;
+        this.render();
         return;
       }
       if (!this.isScanned) {
@@ -733,6 +1006,83 @@ export class ModalQrCodeComponent {
 
     if (viewfinder) {
       viewfinder.addEventListener('click', handleTriggerScanGeneral);
+    }
+
+    // Eventos específicos do modo Transferência de Componente
+    if (this.mode === 'transferencia-componente' || this.mode === 'transferencia') {
+      const removeBtns = this.container.querySelectorAll('.btn-remove-transfer-comp');
+      removeBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const idx = parseInt(btn.dataset.index, 10);
+          if (!isNaN(idx) && this.transferData && this.transferData.componentes[idx]) {
+            const removed = this.transferData.componentes.splice(idx, 1);
+            this.transferData.componentes.forEach((comp, i) => {
+              comp.item = String(i + 1).padStart(2, '0');
+            });
+            if (this.transferData.componentes.length === 0) {
+              this.transferData.ultimoLido = '';
+              this.isScanned = false;
+            } else {
+              // Atualiza o último lido para o último item restante na lista
+              const lastRemaining = this.transferData.componentes[this.transferData.componentes.length - 1];
+              const poolItem = MOCK_TRANSFER_POOL.find(p => p.codigo === lastRemaining.codigo);
+              if (poolItem) {
+                this.transferData.ultimoLido = poolItem.rawQr;
+              }
+            }
+            this.render();
+          }
+        });
+      });
+
+      const radioAlvenius = this.container.querySelector('#radio-realizador-alvenius');
+      const radioTerceiro = this.container.querySelector('#radio-realizador-terceiro');
+      if (radioAlvenius) {
+        radioAlvenius.addEventListener('change', () => {
+          if (radioAlvenius.checked && this.transferData) {
+            this.transferData.realizador = 'alvenius';
+            this.transferData.terceiro = 'NÃO';
+            this.render();
+          }
+        });
+      }
+      if (radioTerceiro) {
+        radioTerceiro.addEventListener('change', () => {
+          if (radioTerceiro.checked && this.transferData) {
+            this.transferData.realizador = 'terceiro';
+            this.transferData.terceiro = 'SIM';
+            this.render();
+          }
+        });
+      }
+
+      const selectOrigem = this.container.querySelector('#qrcode-select-origem');
+      const selectDestino = this.container.querySelector('#qrcode-select-destino');
+      if (selectOrigem) {
+        selectOrigem.addEventListener('change', (e) => {
+          const val = e.target.value;
+          if (this.transferData) {
+            if (val === '') {
+              this.transferData.origem = { codigo: '', loja: '', nome: '' };
+            } else if (FORNECEDORES_MAP[val]) {
+              this.transferData.origem = { ...FORNECEDORES_MAP[val] };
+            }
+          }
+        });
+      }
+      if (selectDestino) {
+        selectDestino.addEventListener('change', (e) => {
+          const val = e.target.value;
+          if (this.transferData) {
+            if (val === '') {
+              this.transferData.destino = { codigo: '', loja: '', nome: '' };
+            } else if (FORNECEDORES_MAP[val]) {
+              this.transferData.destino = { ...FORNECEDORES_MAP[val] };
+            }
+          }
+        });
+      }
     }
 
     if (btnIniciar) {

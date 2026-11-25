@@ -53,28 +53,9 @@ export class TransferenciaComponenteView {
   }
 
   handleCreateTransfer() {
-    const novaTransferencia = addTransferComponente({
-      tipo: 'componente',
-      status: 'Aguardando SC',
-      statusCor: '#f97316',
-      etapaAtual: 1,
-      fornecedorOrigem: '000052 - 01 - ALVENIUS',
-      fornecedorDestino: '003385 - 01 - PETROPASY TECNOLOGIA',
-      itens: [
-        { codigo: `CMP${Date.now().toString().slice(-8)}`, descricao: 'Componente Inox Tubulação', quantidade: 2 },
-        { codigo: `FLW${Date.now().toString().slice(-7)}A`, descricao: 'Flange Sobreposto 4"', quantidade: 2 }
-      ]
-    });
-
-    // Auto-expande a nova transferência criada para visualização imediata
-    this.expandedCards.add(novaTransferencia.id);
-
-    toast.success(
-      'Transferência Criada',
-      `Romaneio de transferência ${novaTransferencia.codigo} gerado com sucesso!`
-    );
-
-    this.render();
+    if (typeof this.options.onNavigate === 'function') {
+      this.options.onNavigate('nova-transferencia');
+    }
   }
 
   render() {

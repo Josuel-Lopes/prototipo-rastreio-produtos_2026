@@ -252,10 +252,20 @@ jobs:
 
 Este projeto adota as convenções do [Semantic Versioning (SemVer)](https://semver.org/lang/pt-BR/):
 
-- Versão Atual: **`v2.6.0`**
+- Versão Atual: **`v2.7.0`**
 
 ##### Histórico Recente
 
+- **`v2.7.0`**:
+  - Implementação da tela **Criar Nova Transferência** (`copilot-image-3a2fe1.png`):
+    - Acesso direto pelo botão azul "Criar Nova Transferência" na listagem de transferências de componentes.
+    - PageContainer padrão Alvenius com banner informativo "Transferência", subtítulo descritivo com ícone info e separador com degradê luminoso `page-accent-line`.
+    - Seção **FORNECEDOR** com blocos estruturados para Origem e Destino exibindo Código, Loja e Nome em alinhamento preciso e placeholders dinâmicos antes da captura.
+    - Pergunta operacional sobre serviço realizado por terceiro com ícone circular de interrogação `(?)` e resposta reativa "SIM".
+    - Quadro **COMPONENTES** com caixa industrial, barra superior cinza e tabela em 3 colunas (`ITENS`, `CÓDIGOS`, `QTD.`), com placeholder de espera e preenchimento imediato após a leitura.
+    - Rodapé com 3 botões de ação idênticos à tela de Cadastro: "Ler QRCode" (azul ativo), "Limpar" (reativo com alternância para vermelho ativo) e "Gravar" (reativo com alternância para verde ativo).
+    - Integração completa com o leitor óptico `ModalQrCodeComponent` para captura de romaneios de transferência.
+    - Persistência e gravação de novas transferências no mock `transfers-mock.js` com redirecionamento automático para a tela de listagem de componentes e toast de confirmação.
 - **`v2.6.0`**:
   - Implementação da tela de **Transferência - Componente** (`copilot-image-fc3082.png`, `copilot-image-85fa22.png` e `copilot-image-93dd6b.png`):
     - Abertura direta a partir da seleção de "COMPONENTE" na Modal de Transferência.

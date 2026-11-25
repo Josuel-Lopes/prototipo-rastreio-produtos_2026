@@ -1184,6 +1184,283 @@
 }
 
 /* ==========================================================================
+   Modal Leitor de QRCode - Transferência de Componente (Prints 97381c & 176a5e)
+   ========================================================================== */
+.qrcode-card-transferencia {
+  background: #ffffff !important;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.qrcode-instr-transfer-header {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.qrcode-instr-transfer-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.qrcode-instr-transfer-step {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.qrcode-transfer-realizador-section {
+  margin: 12px 0 14px 0;
+}
+
+.qrcode-transfer-question-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.qrcode-transfer-question-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #4b5563;
+}
+
+.qrcode-transfer-question-text {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.qrcode-transfer-radios-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-left: 21px;
+}
+
+.qrcode-radio-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+  user-select: none;
+}
+
+.qrcode-radio-input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #9ca3af;
+  border-radius: 50%;
+  outline: none;
+  cursor: pointer;
+  margin: 0;
+  display: grid;
+  place-content: center;
+  transition: border-color 0.15s ease;
+}
+
+.qrcode-radio-input::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transform: scale(0);
+  transition: 0.12s transform ease-in-out;
+  box-shadow: inset 1em 1em #1956ce;
+}
+
+.qrcode-radio-input:checked {
+  border-color: #1956ce;
+}
+
+.qrcode-radio-input:checked::before {
+  transform: scale(1);
+}
+
+.qrcode-transfer-form-group {
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.qrcode-transfer-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.qrcode-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.qrcode-transfer-select {
+  width: 100%;
+  height: 38px;
+  background-color: #ffffff;
+  border: 1px solid #7188a4;
+  border-radius: 0px;
+  padding: 0 30px 0 10px;
+  font-size: 12px;
+  color: #1e293b;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.qrcode-transfer-select:focus {
+  border-color: #1956ce;
+  box-shadow: 0 0 0 2px rgba(25, 86, 206, 0.15);
+}
+
+.qrcode-select-arrow {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+}
+
+.qrcode-transfer-comp-section {
+  margin-top: 14px;
+  text-align: left;
+}
+
+.qrcode-transfer-comp-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 6px;
+}
+
+.qrcode-transfer-table-box {
+  border: 1px solid #7188a4;
+  box-sizing: border-box;
+  background: #ffffff;
+  width: 100%;
+}
+
+.qrcode-transfer-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.qrcode-transfer-table thead th {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 8px;
+  border-bottom: 1px solid #7188a4;
+  text-align: left;
+}
+
+.qrcode-transfer-table th.th-transfer-item {
+  width: 20%;
+  text-align: center;
+  border-right: 1px solid #cbd5e1;
+}
+
+.qrcode-transfer-table th.th-transfer-cod {
+  width: 65%;
+  padding-left: 8px;
+  border-right: 1px solid #cbd5e1;
+}
+
+.qrcode-transfer-table th.th-transfer-action {
+  width: 15%;
+  text-align: center;
+}
+
+.qrcode-transfer-table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.qrcode-transfer-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.qrcode-transfer-table td {
+  padding: 6px 8px;
+  font-size: 11.5px;
+  color: #1e293b;
+  vertical-align: middle;
+}
+
+.qrcode-transfer-table td.col-transfer-item {
+  text-align: center;
+  font-weight: 700;
+  border-right: 1px solid #cbd5e1;
+}
+
+.qrcode-transfer-table td.col-transfer-cod {
+  font-weight: 500;
+  border-right: 1px solid #cbd5e1;
+  word-break: break-all;
+}
+
+.qrcode-transfer-table td.col-transfer-action {
+  text-align: center;
+  padding: 2px 4px;
+}
+
+.qrcode-transfer-table td.col-transfer-empty {
+  text-align: center;
+  color: #9ca3af;
+  font-style: italic;
+  padding: 14px 8px;
+}
+
+.btn-remove-transfer-comp {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn-remove-transfer-comp:hover {
+  background-color: #fee2e2;
+  transform: scale(1.1);
+}
+
+.btn-remove-transfer-comp svg {
+  stroke: #ef4444;
+}
+
+/* ==========================================================================
    Toasts & Alertas Flutuantes
    ========================================================================== */
 #toast-root {
