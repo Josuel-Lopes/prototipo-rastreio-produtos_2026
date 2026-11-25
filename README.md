@@ -1,6 +1,6 @@
-# spool-management-by-project
+# prototipo-rastreio-produtos_2026
 
-spool management by project
+spool-management-by-project - Protótipo para aprovação de layout e funcionalidades
 
 ## Executar
 ```bash
