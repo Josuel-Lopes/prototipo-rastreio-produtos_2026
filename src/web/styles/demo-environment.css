@@ -29,6 +29,35 @@ body.is-demo {
   padding-bottom: calc(var(--demo-ribbon-h) + env(safe-area-inset-bottom, 0px));
 }
 
+/* Rota proposta: mesma barra, sem rótulo "Ambiente de demonstração" / "Dados fictícios"; exibe a versão */
+.demo-ribbon__proposal-only {
+  display: none;
+}
+
+body.route-proposta .demo-ribbon__dot,
+body.route-proposta .demo-ribbon__label,
+body.route-proposta .demo-ribbon__label + .demo-ribbon__sep,
+body.route-proposta .demo-ribbon__demo-only {
+  display: none;
+}
+
+body.route-proposta .demo-ribbon__proposal-only:not([hidden]) {
+  display: inline;
+}
+
+/* Rota proposta (desktop): ordem "MAXCODE42 → Alvenius · Proposta comercial PROP · Versão X" */
+@media (min-width: 768px) {
+  body.route-proposta .demo-ribbon__desk,
+  body.route-proposta .demo-ribbon__maxcode {
+    display: contents;
+  }
+
+  body.route-proposta .demo-ribbon__maxcode-text { order: 1; }
+  body.route-proposta .demo-ribbon__maxcode > .demo-ribbon__sep { order: 2; }
+  body.route-proposta .demo-ribbon__id { order: 3; }
+  body.route-proposta .demo-ribbon__proposal-only { order: 4; }
+}
+
 /* Ribbon */
 .demo-ribbon {
   position: fixed;

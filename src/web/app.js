@@ -308,6 +308,9 @@ class App {
   }
 
   render() {
+    // A faixa "Ambiente de demonstração" não aparece na proposta (somente nas demais rotas do app)
+    document.body.classList.toggle('route-proposta', this.currentRoute === 'proposta');
+
     // Caso especial: View executiva da Proposta Comercial possui cabeçalho e action bar próprios
     if (this.currentRoute === 'proposta') {
       const headerEl = document.getElementById('app-header');

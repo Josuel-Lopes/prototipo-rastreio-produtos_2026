@@ -290,6 +290,16 @@ export class PropostaView {
     this.bindEvents();
   }
 
+  /** Exibe a versão (meta.version) na barra fixa do rodapé enquanto a rota é a proposta. */
+  updateRibbonVersion(data) {
+    const wrap = document.querySelector('[data-ribbon-version]');
+    const text = document.querySelector('[data-ribbon-version-text]');
+    if (!wrap || !text) return;
+    const v = data?.meta?.version;
+    text.textContent = v ? `Versão ${v}` : '';
+    wrap.hidden = !v;
+  }
+
   async loadData() {
     const url = `${PROPOSTA_DATA_URL}?t=${Date.now()}`;
     const res = await fetch(url, { cache: 'no-store', headers: { Accept: 'application/json' } });
@@ -297,6 +307,7 @@ export class PropostaView {
     const signature = await res.text();
     const data = JSON.parse(signature);
     if (!data || typeof data !== 'object' || !data.meta) throw new Error('JSON da proposta inválido');
+    this.updateRibbonVersion(data);
     return { data, signature };
   }
 
