@@ -17,6 +17,7 @@
 
 #modal-root.has-modal {
   pointer-events: auto;
+  z-index: 9999 !important;
 }
 
 .modal-backdrop {
@@ -217,179 +218,351 @@
 }
 
 /* ==========================================================================
-   Modal Leitor de QRCode (Scanner Câmera)
+   Modal Leitor de QRCode (Scanner Câmera Industrial) - Print copilot-image-157449.png
    ========================================================================== */
-.scanner-pill-header {
+.qrcode-backdrop-fullscreen {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(18, 22, 30, 0.78) !important;
+  z-index: 9999 !important;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  padding: 24px 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  opacity: 1 !important;
+}
+
+.qrcode-container-wrapper {
   width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  position: relative;
+  background: transparent;
+  box-sizing: border-box;
+  opacity: 1 !important;
 }
 
-.scanner-pill {
-  padding: 4px 18px;
-  border-radius: var(--radius-pill);
-  background-color: var(--color-primary-light);
-  color: var(--color-primary-dark);
-  font-size: var(--font-sm);
-  font-weight: var(--weight-bold);
-  letter-spacing: 0.5px;
+/* Header no topo: Leitor de QRCode em texto branco puro #ffffff, 20px, negrito, centralizado */
+.qrcode-top-header {
+  width: 100%;
+  text-align: center;
+  padding-bottom: 0;
+  margin: 0;
+  border-bottom: none;
 }
 
-.scanner-viewfinder-container {
+.qrcode-top-title {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 10px 0;
+}
+
+.qrcode-top-divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.4);
+  margin: 0 0 16px 0;
+}
+
+/* Card 1: Visor da Câmera: Quadro preto, borda branca sólida 4px, cantos 6px, miras azuis fluorescentes */
+.qrcode-camera-viewfinder {
   position: relative;
   width: 100%;
-  height: 240px;
-  background-color: var(--scanner-viewfinder-bg);
-  border-radius: 0px;
-  overflow: hidden;
+  height: 260px;
+  background: #000000 !important;
+  border: 4px solid #ffffff !important;
+  border-radius: 6px;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: var(--space-md);
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+  margin-bottom: 14px;
 }
 
-/* Efeito de grade sutil no fundo do scanner */
-.scanner-grid-bg {
+.qrcode-viewfinder-glow-beam {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-image: 
-    linear-gradient(rgba(0, 188, 212, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 188, 212, 0.08) 1px, transparent 1px);
-  background-size: 20px 20px;
-  opacity: 0.7;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #38bdf8, #2563eb, transparent);
+  box-shadow: 0 0 12px #38bdf8;
+  z-index: 2;
 }
 
-/* Miras dos 4 cantos */
-.scanner-corner {
+/* Moldura de enquadramento centralizada que envolve diretamente o QRCode SVG */
+.qrcode-scanner-frame {
+  position: relative;
+  width: 154px;
+  height: 154px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* Miras azuis fluorescentes (#2563eb) coladas nos 4 cantos do frame de enquadramento */
+.qrcode-corner {
   position: absolute;
-  width: 28px;
-  height: 28px;
-  border-color: var(--scanner-corner);
-  border-style: solid;
   pointer-events: none;
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  border-color: #2563eb;
+  border-width: 4px;
+  z-index: 3;
 }
 
-.scanner-corner.top-left {
-  top: 24px;
-  left: 24px;
-  border-width: 4px 0 0 4px;
+.qrcode-corner.top-left {
+  top: 0px;
+  left: 0px;
+  border-top-style: solid;
+  border-left-style: solid;
   border-top-left-radius: 4px;
 }
 
-.scanner-corner.top-right {
-  top: 24px;
-  right: 24px;
-  border-width: 4px 4px 0 0;
+.qrcode-corner.top-right {
+  top: 0px;
+  right: 0px;
+  border-top-style: solid;
+  border-right-style: solid;
   border-top-right-radius: 4px;
 }
 
-.scanner-corner.bottom-left {
-  bottom: 24px;
-  left: 24px;
-  border-width: 0 0 4px 4px;
+.qrcode-corner.bottom-left {
+  bottom: 0px;
+  left: 0px;
+  border-bottom-style: solid;
+  border-left-style: solid;
   border-bottom-left-radius: 4px;
 }
 
-.scanner-corner.bottom-right {
-  bottom: 24px;
-  right: 24px;
-  border-width: 0 4px 4px 0;
+.qrcode-corner.bottom-right {
+  bottom: 0px;
+  right: 0px;
+  border-bottom-style: solid;
+  border-right-style: solid;
   border-bottom-right-radius: 4px;
 }
 
-/* Linha de Varredura Laser Animada */
-.scanner-laser-line {
-  position: absolute;
-  left: 28px;
-  right: 28px;
-  height: 2px;
-  background-color: var(--scanner-laser);
-  box-shadow: 0 0 12px 2px var(--scanner-laser-glow);
-  animation: laserScan 2.4s ease-in-out infinite alternate;
+/* QRCode vetorizado SVG centralizado no visor em branco puro (sem linha de laser) */
+.qrcode-camera-svg {
+  display: block;
+  user-select: none;
 }
 
-@keyframes laserScan {
-  0% { top: 32px; }
-  100% { top: 204px; }
-}
-
-/* Painel de Instruções inferior */
-.scanner-instructions-card {
-  background-color: var(--color-surface-alt);
-  border: 1px solid #71889e;
-  border-radius: 0px;
-  padding: var(--space-md) var(--space-lg);
+/* Card 1: Instruções (CARD BRANCO SÓLIDO INDEPENDENTE) */
+.qrcode-card-instructions {
+  background: #ffffff !important;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
   text-align: center;
-  margin-bottom: var(--space-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.scanner-handle {
-  width: 40px;
-  height: 4px;
-  background-color: #cbd5e1;
-  border-radius: 2px;
-  margin: 0 auto 10px auto;
+.qrcode-instr-main-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+  text-align: center;
+  margin-bottom: 8px;
 }
 
-.scanner-instruction-line1 {
-  font-size: var(--font-sm);
-  color: var(--color-text-muted);
-  margin-bottom: 2px;
+.qrcode-instr-item {
+  font-size: 13px;
+  font-weight: 700;
+  color: #000000;
+  text-align: center;
+  margin-bottom: 4px;
 }
 
-.scanner-instruction-line2 {
-  font-size: var(--font-base);
-  font-weight: var(--weight-bold);
-  color: var(--color-navy);
-  letter-spacing: 0.5px;
+/* Linha azul inferior */
+.qrcode-blue-gradient-line {
+  height: 2px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+  margin-top: 10px;
+  border: none;
+}
+
+/* Seção Spool e Componentes na Modal QRCode (Abaixo do separador azul) */
+.qrcode-modal-spool-section {
+  margin-top: 12px;
+  text-align: left;
+}
+
+.qrcode-modal-spool-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 6px;
   text-transform: uppercase;
 }
 
-.scanner-divider-gradient {
-  height: 2px;
-  width: 100%;
-  margin: 12px 0;
-  background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+.qrcode-modal-spool-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  margin-bottom: 4px;
 }
 
-/* Bloco do Último QRCode Lido */
-.scanner-last-code-box {
-  background-color: #ffffff;
-  border: 1px solid #71889e;
-  border-radius: 0px;
-  padding: 8px 12px;
+.qrcode-modal-meta-label {
+  font-weight: 700;
+  color: #111827;
+  white-space: nowrap;
+}
+
+.qrcode-modal-meta-value {
+  color: #334155;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.qrcode-modal-components-box {
+  margin-top: 10px;
+  border: 1px solid #7188a4;
+  box-sizing: border-box;
+  background: #ffffff;
+}
+
+.qrcode-modal-comp-header-title {
+  background: #e2e8f0;
+  font-weight: 700;
+  color: #1e293b;
+  text-align: center;
+  padding: 5px;
+  border-bottom: 1px solid #7188a4;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.qrcode-modal-comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  text-align: left;
+}
+
+.qrcode-modal-comp-table thead th {
+  background: #f8fafc;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 5px 4px;
+  border-bottom: 1px solid #7188a4;
+  text-align: left;
+}
+
+.qrcode-modal-comp-table th.th-modal-item,
+.qrcode-modal-comp-table td.col-modal-item {
+  width: 18%;
+  text-align: center;
+  border-right: 1px solid #cbd5e1;
+}
+
+.qrcode-modal-comp-table th.th-modal-desc,
+.qrcode-modal-comp-table td.col-modal-desc {
+  width: 58%;
+  padding-left: 6px;
+  border-right: 1px solid #cbd5e1;
+}
+
+.qrcode-modal-comp-table th.th-modal-qtd,
+.qrcode-modal-comp-table td.col-modal-qtd {
+  width: 24%;
+  text-align: center;
+}
+
+.qrcode-modal-comp-table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.qrcode-modal-comp-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.qrcode-modal-comp-table tbody td {
+  padding: 5px 4px;
+  color: #1e293b;
+}
+
+/* Card 2: Último QRCode Lido (CARD BRANCO SÓLIDO INDEPENDENTE) */
+.qrcode-card-last-read {
+  background: #ffffff !important;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.qrcode-last-read-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.qrcode-last-read-inline-data {
+  font-size: 12px;
+  font-weight: 500;
+  color: #334155;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+/* Botão Fechar */
+.qrcode-btn-close-red {
+  width: 100%;
+  height: 48px;
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-top: 8px;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
-.scanner-last-label {
-  font-size: var(--font-xs);
-  color: var(--color-text-muted);
-  font-weight: var(--weight-semibold);
+.qrcode-btn-close-red:hover {
+  background: #b91c1c !important;
 }
 
-.scanner-last-value {
-  font-family: monospace;
-  font-size: var(--font-sm);
-  font-weight: var(--weight-bold);
-  color: var(--color-primary-dark);
+.qrcode-btn-close-red:active {
+  transform: scale(0.99);
 }
 
-/* Ações Interativas de Simulação de Leitura */
-.scanner-simulation-actions {
-  display: flex;
-  gap: var(--space-sm);
-  margin-top: var(--space-md);
-}
-
-.scanner-manual-input-box {
-  display: flex;
-  gap: var(--space-xs);
-  margin-top: var(--space-sm);
+.qrcode-btn-close-red svg {
+  stroke: #ffffff;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
 /* ==========================================================================

@@ -16,3 +16,6 @@ Este documento reflete a arquitetura base inicial do repositório `spool-managem
 - `infra/`: Scripts operacionais (ex.: `serve.sh`) e configurações.
 - `tests/`: Testes unitários (`tests/unit/`), de integração (`tests/integration/`) e E2E (`tests/e2e/`).
 - `docs/architecture/`: Documentação viva mantida pelo agente `alvenius-task-board`.
+
+## Governança e Papéis dos Agentes
+Consulte [docs/architecture/governanca-papeis-agentes.md](./governanca-papeis-agentes.md) para a especificação inegociável de separação de papéis: o Orquestrador (`alvenius-orchestrator`) exclusivamente gerencia e orquestra sem codificar, delegando a implementação de frontend ao `alvenius-frontend`, layouts conceituais ao `alvenius-designer` e especificações/tarefas ao `alvenius-task-board`.

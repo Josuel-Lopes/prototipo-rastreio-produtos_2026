@@ -114,6 +114,10 @@
 }
 
 html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
   min-height: 100vh;
   font-family: var(--font-family);
   font-size: var(--font-base);
@@ -127,6 +131,10 @@ html, body {
 
 /* Layout Raiz da Aplicação */
 #app {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -145,7 +153,11 @@ html, body {
 
 @media (max-width: 768px) {
   #app-view {
-    padding: 0 12px 24px;
+    width: 100%;
+    max-width: 100vw;
+    padding: 0 12px 24px 12px;
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
 }
 

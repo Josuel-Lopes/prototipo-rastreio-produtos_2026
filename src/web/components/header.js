@@ -5,6 +5,7 @@
  */
 
 import { lucide } from './icons.js';
+import { PageTitle } from './page-title.js';
 
 export const ICONS = {
   logout: lucide('log-out', { size: 16, strokeWidth: 2.2, className: 'header-icon-logout' }),
@@ -75,13 +76,13 @@ export class HeaderComponent {
           <div class="header-brand-section">
             <div class="header-brand-block" id="header-brand-block" title="Alvenius">
               <img src="assets/logo-alvenius-rings-clean.png" alt="Alvenius" class="brand-logo-img">
-              <span class="brand-version-sub" id="header-brand-version">v2.0.0</span>
+              <span class="brand-version-sub" id="header-brand-version">v1.3.1</span>
             </div>
             
             <div class="header-brand-inline" id="header-brand-work" title="Voltar ao Início" data-nav="menu">
               <div class="header-brand-logo-col">
                 <img src="assets/logo-alvenius-rings-clean.png" alt="Alvenius" class="brand-logo-img">
-                <span class="brand-version-sub">v2.0.0</span>
+                <span class="brand-version-sub">v1.3.1</span>
               </div>
               <span class="header-brand-title">RASTREIO DE PRODUTOS</span>
             </div>
@@ -125,9 +126,7 @@ export class HeaderComponent {
         </div>
 
         <!-- Pill Central Flutuante -->
-        <div class="header-center-pill" id="header-center-pill">
-          <span class="floating-pill" id="header-pill-label">Rastreio de produtos</span>
-        </div>
+        ${PageTitle.render('Rastreio de produtos')}
 
         <!-- Painel Dropdown do Menu Expandido (Home e Work Screens) -->
         <div class="header-drawer-panel" id="header-drawer-panel">
@@ -285,11 +284,8 @@ export class HeaderComponent {
     const userNames = this.container.querySelectorAll('#header-user-name, #drawer-user-name');
     userNames.forEach(el => { el.textContent = username; });
 
-    // Atualiza texto da pill
-    const pillEl = this.container.querySelector('#header-pill-label');
-    if (pillEl) {
-      pillEl.textContent = isWorkScreen ? currentPill : 'Rastreio de produtos';
-    }
+    // Atualiza texto da pill central
+    PageTitle.setTitle(isWorkScreen ? currentPill : 'Rastreio de produtos');
 
     if (isLoginPage) {
       // 1. ESTADO LOGIN:

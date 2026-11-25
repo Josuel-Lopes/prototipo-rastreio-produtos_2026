@@ -7,11 +7,13 @@
   width: 100%;
   background-color: #c0c2c7;
   border-bottom: 2px solid #8ea8cc;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
   position: relative;
   z-index: 150;
   height: 145px;
   min-height: 145px;
   box-sizing: border-box;
+  overflow: visible !important;
 }
 
 /* Faixa Superior Principal */
@@ -100,27 +102,45 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 200 !important;
+  z-index: 300 !important;
   pointer-events: none;
 }
 
-.header-center-pill .floating-pill {
-  width: 260px;
-  height: 56px;
-  background-color: #ffffff;
-  border: 1px solid #d0d7de;
-  border-radius: 8px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
-  font-size: 16px;
-  font-weight: 700;
-  color: #0a2540;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.header-center-pill .floating-pill,
+.header-center-pill #header-pill-label {
+  width: 200px !important;
+  max-width: calc(100vw - 32px) !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  background-color: #ffffff !important;
+  border: 1px solid #d0d7de !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  padding: 0 20px !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   pointer-events: auto;
   letter-spacing: 0.2px;
   text-align: center;
+  box-sizing: border-box !important;
+  line-height: 1 !important;
+}
+
+.header-center-pill .floating-pill span,
+.header-center-pill #header-pill-label span {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: auto !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+  font-size: 18px !important;
+  text-align: center !important;
 }
 
 /* Tabs Inline Horizontais (Desktop Modo Work) */
@@ -619,15 +639,38 @@
 
   .header-center-pill {
     top: 145px;
-    z-index: 200 !important;
+    z-index: 300 !important;
   }
 
-  .header-center-pill .floating-pill {
-    width: 260px;
-    max-width: calc(100vw - 32px);
-    height: 56px;
-    font-size: 16px;
-    font-weight: 700;
+  .header-center-pill .floating-pill,
+  .header-center-pill #header-pill-label {
+    width: 200px !important;
+    max-width: calc(100vw - 32px) !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+    padding: 0 20px !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    line-height: 1 !important;
+  }
+
+  .header-center-pill .floating-pill span,
+  .header-center-pill #header-pill-label span {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 18px !important;
   }
 
   .header-drawer-panel {
