@@ -29,11 +29,18 @@ export const MOCK_TRANSFERENCIA_DADOS = {
   ]
 };
 
+const PROCESSO_PILL_MAP = {
+  'caldeiraria-revestimento': 'Caldeiraria',
+  'revestimento-pintura': 'Revestimento',
+  'pintura-faturamento': 'Pintura'
+};
+
 export class NovaTransferenciaView {
   constructor(containerId = 'app-view', options = {}) {
     this.container = document.getElementById(containerId);
     this.options = options;
     this.tipo = options.tipo || 'componente';
+    this.processo = options.processo || 'caldeiraria-revestimento';
     this.origem = { codigo: '', loja: '', nome: '' };
     this.destino = { codigo: '', loja: '', nome: '' };
     this.terceiro = '';
@@ -48,11 +55,20 @@ export class NovaTransferenciaView {
     }
   }
 
+  setProcesso(processo = 'caldeiraria-revestimento') {
+    this.processo = processo;
+    this.limparFormulario(false);
+  }
+
   render(initialData = {}) {
     if (!this.container) return;
 
     if (initialData && initialData.tipo) {
       this.tipo = initialData.tipo;
+    }
+
+    if (initialData && initialData.processo) {
+      this.processo = initialData.processo;
     }
 
     if (initialData && initialData.origem) {
@@ -66,8 +82,9 @@ export class NovaTransferenciaView {
 
     const isSpool = this.tipo === 'spool';
 
-    // Define o título padronizado na pill central flutuante: Caldeiraria para spool, Transferência para componente
-    PageTitle.setTitle(isSpool ? 'Caldeiraria' : 'Transferência');
+    // Define o título padronizado na pill central flutuante: Caldeiraria, Revestimento ou Pintura para spool; Transferência para componente
+    const pillTitle = isSpool ? (PROCESSO_PILL_MAP[this.processo] || 'Caldeiraria') : 'Transferência';
+    PageTitle.setTitle(pillTitle);
 
     const isPreenchido = this.isPreenchido;
     const tableTitle = isSpool ? 'SPOOLS' : 'COMPONENTES';
@@ -418,6 +435,7 @@ export class NovaTransferenciaView {
     if (isSpool) {
       addTransferSpool({
         tipo: 'spool',
+        processo: this.processo,
         status: 'Em Trânsito',
         statusCor: '#f59e0b',
         etapaAtual: 3, // Aguardando ROM
@@ -435,7 +453,7 @@ export class NovaTransferenciaView {
 
       if (typeof this.options.onNavigate === 'function') {
         setTimeout(() => {
-          this.options.onNavigate('transferencia-spool');
+          this.options.onNavigate('transferencia-spool', { processo: this.processo });
         }, 500);
       }
     } else {
@@ -479,7 +497,7 @@ export class NovaTransferenciaView {
             if (dados && Array.isArray(list) && list.length > 0) {
               this.preencherDadosTransferencia(dados);
             }
-          }, mode);
+          }, mode, this.processo);
         }
       });
     }

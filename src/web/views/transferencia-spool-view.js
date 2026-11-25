@@ -1,6 +1,10 @@
 /**
  * Tela de Transferência - SPOOL - Alvenius Spool Management
- * Responsabilidade Única: Listagem, busca e registro do processo de transferência de spools (Caldeiraria -> Revestimento)
+ * Responsabilidade Única: Listagem, busca e registro do processo de transferência de spools
+ * Parametrizável para os processos:
+ *   - 'caldeiraria-revestimento' (Pill: Caldeiraria)
+ *   - 'revestimento-pintura' (Pill: Revestimento)
+ *   - 'pintura-faturamento' (Pill: Pintura)
  * Fidelidade visual absoluta aos layouts copilot-image-554851.png e copilot-image-a134f2.png
  */
 
@@ -10,16 +14,29 @@ import { PageContainer } from '../components/page-container.js';
 import { PageTitle } from '../components/page-title.js';
 import { lucide } from '../components/icons.js';
 
+const PROCESSO_PILL_MAP = {
+  'caldeiraria-revestimento': 'Caldeiraria',
+  'revestimento-pintura': 'Revestimento',
+  'pintura-faturamento': 'Pintura'
+};
+
 export class TransferenciaSpoolView {
   constructor(containerId = 'app-view', options = {}) {
     this.container = document.getElementById(containerId);
     this.options = options;
+    this.processo = options.processo || 'caldeiraria-revestimento';
     this.searchQuery = '';
     this.expandedCards = new Set(); // Armazena IDs dos cards com spools expandidos
   }
 
+  setProcesso(processo = 'caldeiraria-revestimento') {
+    this.processo = processo;
+    this.searchQuery = '';
+    this.expandedCards.clear();
+  }
+
   getFilteredTransfers() {
-    const list = getTransfersSpools();
+    const list = getTransfersSpools(this.processo);
     const query = this.searchQuery.trim().toLowerCase();
 
     if (!query) return list;
@@ -54,15 +71,16 @@ export class TransferenciaSpoolView {
 
   handleCreateTransfer() {
     if (typeof this.options.onNavigate === 'function') {
-      this.options.onNavigate('nova-transferencia-spool');
+      this.options.onNavigate('nova-transferencia-spool', { processo: this.processo });
     }
   }
 
   render() {
     if (!this.container) return;
 
-    // Define o título oficial na pill do header conforme copilot-image-554851.png
-    PageTitle.setTitle('Caldeiraria');
+    // Define o título oficial na pill do header conforme o processo ativo
+    const pillTitle = PROCESSO_PILL_MAP[this.processo] || 'Caldeiraria';
+    PageTitle.setTitle(pillTitle);
 
     const transfers = this.getFilteredTransfers();
 

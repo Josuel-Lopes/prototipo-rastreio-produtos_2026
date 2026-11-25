@@ -24,8 +24,11 @@ export class TransferCard {
     const isComponente = tipo === 'componente';
     const itemsLabel = isComponente ? 'Componente:' : 'Spools:';
 
-    const statusCor = transfer.statusCor || '#f59e0b';
     const etapaAtual = Number(transfer.etapaAtual || 1);
+    const rawStatus = String(transfer.status || '').toLowerCase();
+    const isConcluido = rawStatus.includes('conclu') || etapaAtual === 5;
+    const badgeStatus = isConcluido ? 'Concluído' : 'Em Trânsito';
+    const badgeColor = isConcluido ? '#22c55e' : '#f59e0b';
 
     // Itens vinculados (suporta itens ou spools)
     const itens = Array.isArray(transfer.itens) && transfer.itens.length > 0
@@ -89,8 +92,8 @@ export class TransferCard {
         <!-- Linha 1: Sequencial + Badge de Status Geral -->
         <div class="transfer-item-top">
           <span class="transfer-badge-seq">${transfer.sequencial || '0001'}</span>
-          <span class="transfer-badge-status" style="background-color: ${statusCor};">
-            ${transfer.status || 'Em Trânsito'}
+          <span class="transfer-badge-status" style="background-color: ${badgeColor};">
+            ${badgeStatus}
           </span>
         </div>
 

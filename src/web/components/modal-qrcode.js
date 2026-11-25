@@ -102,6 +102,7 @@ export class ModalQrCodeComponent {
     this.container = document.getElementById(containerId);
     this.isOpen = false;
     this.mode = 'cadastro'; // 'cadastro', 'caldeiraria' ou 'validar-qrcode'
+    this.processo = 'caldeiraria-revestimento'; // Usado quando mode === 'transferencia-spool'
     this.spool = null;
     this.isScanned = false;
     this.validarScanIndex = 0;
@@ -115,8 +116,9 @@ export class ModalQrCodeComponent {
     this.handleKeyDown = this.handleKeyDown.bind(this);
   }
 
-  open({ mode = 'cadastro', spool = null, isScanned = false, onScan, onClose, onAction, onStart, defaultCode = null } = {}) {
+  open({ mode = 'cadastro', spool = null, isScanned = false, processo = 'caldeiraria-revestimento', onScan, onClose, onAction, onStart, defaultCode = null } = {}) {
     this.mode = mode;
+    this.processo = processo || 'caldeiraria-revestimento';
     this.spool = spool;
     this.isScanned = Boolean(isScanned);
     this.onScanCallback = onScan;
@@ -130,10 +132,21 @@ export class ModalQrCodeComponent {
       this.isScanned = false;
     } else if (this.isTransferMode()) {
       this.isScanned = false;
+      let defOrigemCode = '000052';
+      let defDestinoCode = '003385';
+      if (this.mode === 'transferencia-spool') {
+        if (this.processo === 'revestimento-pintura') {
+          defOrigemCode = '003385';
+          defDestinoCode = '004120';
+        } else if (this.processo === 'pintura-faturamento') {
+          defOrigemCode = '004120';
+          defDestinoCode = '000052';
+        }
+      }
       this.transferData = {
         realizador: 'terceiro',
-        origem: { codigo: '', loja: '', nome: '' },
-        destino: { codigo: '', loja: '', nome: '' },
+        origem: { ...(FORNECEDORES_MAP[defOrigemCode] || { codigo: '', loja: '', nome: '' }) },
+        destino: { ...(FORNECEDORES_MAP[defDestinoCode] || { codigo: '', loja: '', nome: '' }) },
         terceiro: 'SIM',
         componentes: [],
         ultimoLido: '',
@@ -163,12 +176,24 @@ export class ModalQrCodeComponent {
       const hasComponentes = this.transferData && this.transferData.componentes && this.transferData.componentes.length > 0;
       let payload = null;
       if (hasComponentes) {
+        let defOrigemCode = '000052';
+        let defDestinoCode = '003385';
+        if (isSpool) {
+          if (this.processo === 'revestimento-pintura') {
+            defOrigemCode = '003385';
+            defDestinoCode = '004120';
+          } else if (this.processo === 'pintura-faturamento') {
+            defOrigemCode = '004120';
+            defDestinoCode = '000052';
+          }
+        }
+
         const origem = (this.transferData.origem && this.transferData.origem.codigo)
           ? { ...this.transferData.origem }
-          : { ...FORNECEDORES_MAP['000052'] };
+          : { ...(FORNECEDORES_MAP[defOrigemCode] || FORNECEDORES_MAP['000052']) };
         const destino = (this.transferData.destino && this.transferData.destino.codigo)
           ? { ...this.transferData.destino }
-          : { ...FORNECEDORES_MAP['003385'] };
+          : { ...(FORNECEDORES_MAP[defDestinoCode] || FORNECEDORES_MAP['003385']) };
 
         payload = {
           origem,
@@ -176,7 +201,8 @@ export class ModalQrCodeComponent {
           terceiro: this.transferData.realizador === 'terceiro' ? 'SIM' : 'NÃO',
           itens: [...this.transferData.componentes],
           componentes: [...this.transferData.componentes],
-          tipo: isSpool ? 'spool' : 'componente'
+          tipo: isSpool ? 'spool' : 'componente',
+          processo: this.processo
         };
       }
 
@@ -426,6 +452,16 @@ export class ModalQrCodeComponent {
     const isAlvenius = data.realizador === 'alvenius';
     const origemLabel = isAlvenius ? 'Origem Alvenius:' : 'Origem Terceiro:';
 
+    const DESTINO_ETAPAS = {
+      'caldeiraria-revestimento': 'Revestimento',
+      'revestimento-pintura': 'Pintura',
+      'pintura-faturamento': 'Faturamento'
+    };
+    const etapaDestinoNome = isSpool ? (DESTINO_ETAPAS[this.processo] || 'serviço') : 'serviço';
+    const step3Text = isSpool
+      ? `3 - Ler o QRCode do Spool para ${etapaDestinoNome}.`
+      : '3 - Ler o QRCode do Componente para serviço.';
+
     this.container.innerHTML = `
       <div class="modal-backdrop qrcode-backdrop-fullscreen" id="qrcode-modal-backdrop">
         <div class="qrcode-container-wrapper" role="dialog" aria-modal="true" aria-labelledby="qrcode-floating-pill-title">
@@ -458,7 +494,7 @@ export class ModalQrCodeComponent {
               <div class="qrcode-instr-transfer-title">Ler QRCode do ${isSpool ? 'Spool' : 'Componente'}.</div>
               <div class="qrcode-instr-transfer-step">1 - Selecione realizador.</div>
               <div class="qrcode-instr-transfer-step">2 - Selecione o fornecedor.</div>
-              <div class="qrcode-instr-transfer-step">3 - Ler o QRCode do ${isSpool ? 'Spool' : 'Componente'} para serviço.</div>
+              <div class="qrcode-instr-transfer-step">${step3Text}</div>
             </div>
 
             <!-- Linha horizontal com degradê azul luminoso -->
@@ -509,6 +545,8 @@ export class ModalQrCodeComponent {
                 <select class="qrcode-transfer-select" id="qrcode-select-origem">
                   <option value="" ${!data.origem.codigo ? 'selected' : ''}>Selecione...</option>
                   <option value="000052" ${data.origem.codigo === '000052' ? 'selected' : ''}>000052 - 01 - ALVENIUS TUBOS E CONEXOES LTDA</option>
+                  <option value="003385" ${data.origem.codigo === '003385' ? 'selected' : ''}>003385 - 01 - PETROPASY TECNOLOGIA E SERVICOS</option>
+                  <option value="004120" ${data.origem.codigo === '004120' ? 'selected' : ''}>004120 - 02 - USINAGEM E MONTAGEM VALE</option>
                   <option value="005436" ${data.origem.codigo === '005436' ? 'selected' : ''}>005436 - 01 - TUBOS BRASIL LTDA</option>
                 </select>
                 <div class="qrcode-select-arrow" aria-hidden="true">
@@ -525,6 +563,7 @@ export class ModalQrCodeComponent {
               <div class="qrcode-select-wrapper">
                 <select class="qrcode-transfer-select" id="qrcode-select-destino">
                   <option value="" ${!data.destino.codigo ? 'selected' : ''}>Selecione...</option>
+                  <option value="000052" ${data.destino.codigo === '000052' ? 'selected' : ''}>000052 - 01 - ALVENIUS TUBOS E CONEXOES LTDA</option>
                   <option value="003385" ${data.destino.codigo === '003385' ? 'selected' : ''}>003385 - 01 - PETROPASY TECNOLOGIA E SERVICOS</option>
                   <option value="004120" ${data.destino.codigo === '004120' ? 'selected' : ''}>004120 - 02 - USINAGEM E MONTAGEM VALE</option>
                 </select>

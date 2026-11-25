@@ -27,6 +27,7 @@ class App {
   constructor() {
     this.currentUser = getCurrentUser();
     this.currentRoute = 'login'; // Inicia na tela de login conforme wireframe
+    this.activeSpoolProcess = 'caldeiraria-revestimento'; // Processo ativo de spool
     
     // Inicialização dos componentes modais e globais
     this.header = new HeaderComponent('app-header', {
@@ -68,16 +69,17 @@ class App {
         onSpoolSelected: (code) => this.handleSpoolSelected(code)
       }),
       transferenciaComponente: new TransferenciaComponenteView('app-view', {
-        onNavigate: (route) => this.navigateTo(route)
+        onNavigate: (route, params) => this.navigateTo(route, params)
       }),
       transferenciaSpool: new TransferenciaSpoolView('app-view', {
-        onNavigate: (route) => this.navigateTo(route)
+        onNavigate: (route, params) => this.navigateTo(route, params)
       }),
       novaTransferencia: new NovaTransferenciaView('app-view', {
-        onNavigate: (route) => this.navigateTo(route),
-        onOpenQrCode: (callback, mode) => {
+        onNavigate: (route, params) => this.navigateTo(route, params),
+        onOpenQrCode: (callback, mode, processo) => {
           const actualMode = mode || (this.views?.novaTransferencia?.tipo === 'spool' ? 'transferencia-spool' : 'transferencia-componente');
-          this.openQrCodeScanner(callback, actualMode);
+          const actualProcess = processo || this.activeSpoolProcess;
+          this.openQrCodeScanner(callback, actualMode, actualProcess);
         }
       })
     };
@@ -94,6 +96,11 @@ class App {
       } catch (e) {
         this.currentUser = null;
       }
+    }
+
+    const savedProcess = sessionStorage.getItem('app_spool_process');
+    if (savedProcess) {
+      this.activeSpoolProcess = savedProcess;
     }
 
     const savedRoute = sessionStorage.getItem('app_current_route');
@@ -143,7 +150,7 @@ class App {
     this.navigateTo('login');
   }
 
-  navigateTo(route) {
+  navigateTo(route, params = {}) {
     const isAuthed = !!(this.currentUser && this.currentUser.isLoggedIn);
     if (isAuthed && route !== 'validar-qrcode' && route !== 'transferencia') {
       sessionStorage.setItem('app_current_route', route);
@@ -152,6 +159,11 @@ class App {
       this.currentRoute = 'login';
       this.render();
       return;
+    }
+
+    if (params && params.processo) {
+      this.activeSpoolProcess = params.processo;
+      sessionStorage.setItem('app_spool_process', this.activeSpoolProcess);
     }
 
     // Rotas de modais diretos
@@ -185,6 +197,7 @@ class App {
 
     if (route === 'transferencia-spool') {
       this.currentRoute = 'transferencia-spool';
+      this.views.transferenciaSpool.setProcesso(this.activeSpoolProcess);
       this.render();
       return;
     }
@@ -192,6 +205,7 @@ class App {
     if (route === 'nova-transferencia-spool') {
       this.currentRoute = 'nova-transferencia-spool';
       this.views.novaTransferencia.setTipo('spool');
+      this.views.novaTransferencia.setProcesso(this.activeSpoolProcess);
       this.render();
       return;
     }
@@ -208,6 +222,12 @@ class App {
   }
 
   getPillLabel(route) {
+    const SPOOL_PILL_MAP = {
+      'caldeiraria-revestimento': 'Caldeiraria',
+      'revestimento-pintura': 'Revestimento',
+      'pintura-faturamento': 'Pintura'
+    };
+
     switch (route) {
       case 'cadastro': return 'Cadastro';
       case 'caldeiraria': return 'Caldeiraria';
@@ -217,7 +237,8 @@ class App {
       case 'transferencia-componente':
       case 'nova-transferencia': return 'Transferência';
       case 'nova-transferencia-spool':
-      case 'transferencia-spool': return 'Caldeiraria';
+      case 'transferencia-spool':
+        return SPOOL_PILL_MAP[this.activeSpoolProcess] || 'Caldeiraria';
       case 'validar-qrcode': return 'Validar QRCode';
       default: return 'Rastreio de produtos';
     }
@@ -306,9 +327,11 @@ class App {
     }
   }
 
-  openQrCodeScanner(onScanSuccess, mode = 'cadastro') {
+  openQrCodeScanner(onScanSuccess, mode = 'cadastro', processo = null) {
+    const actualProcesso = processo || this.activeSpoolProcess;
     this.modalQrCode.open({
       mode,
+      processo: actualProcesso,
       onScan: (codeOrData, extra) => {
         if (typeof onScanSuccess === 'function') {
           onScanSuccess(codeOrData, extra);
@@ -336,30 +359,9 @@ class App {
           setTimeout(() => {
             this.modalProcessoTransferencia.open({
               onSelect: (processo) => {
-                if (processo === 'caldeiraria-revestimento') {
-                  this.navigateTo('transferencia-spool');
-                  return;
-                }
-
-                const PROCESSO_LABELS = {
-                  'caldeiraria-revestimento': 'CALDEIRARIA → REVESTIMENTO',
-                  'revestimento-pintura': 'REVESTIMENTO → PINTURA',
-                  'pintura-faturamento': 'PINTURA → FATURAMENTO'
-                };
-                const label = PROCESSO_LABELS[processo] || processo;
-                toast.info(
-                  'Processo Selecionado',
-                  `Transferência de Spool: ${label}. Aponte o leitor para o QRCode.`
-                );
-                // Em seguida abre o leitor de QR Code para continuar o processo
-                setTimeout(() => {
-                  this.openQrCodeScanner((code) => {
-                    toast.success(
-                      'Transferência Concluída',
-                      `Registro de movimentação do SPOOL (${code}) gerado para ${label}.`
-                    );
-                  }, 'transferencia');
-                }, 350);
+                this.activeSpoolProcess = processo || 'caldeiraria-revestimento';
+                sessionStorage.setItem('app_spool_process', this.activeSpoolProcess);
+                this.navigateTo('transferencia-spool', { processo: this.activeSpoolProcess });
               }
             });
           }, 150);
@@ -384,28 +386,9 @@ class App {
           setTimeout(() => {
             this.modalProcessoTransferencia.open({
               onSelect: (processo) => {
-                if (processo === 'caldeiraria-revestimento') {
-                  this.navigateTo('transferencia-spool');
-                  return;
-                }
-
-                const PROCESSO_LABELS = {
-                  'caldeiraria-revestimento': 'CALDEIRARIA → REVESTIMENTO',
-                  'revestimento-pintura': 'REVESTIMENTO → PINTURA',
-                  'pintura-faturamento': 'PINTURA → FATURAMENTO'
-                };
-                const label = PROCESSO_LABELS[processo] || processo;
-                toast.success(
-                  'Avanço de Processo',
-                  `Spool ${spool.codigo} avançou para ${label}.`
-                );
-                if (this.currentRoute === 'caldeiraria') {
-                  this.views.caldeiraria.render();
-                } else if (this.currentRoute === 'revestimento') {
-                  this.views.revestimento.render();
-                } else if (this.currentRoute === 'pintura') {
-                  this.views.pintura.render();
-                }
+                this.activeSpoolProcess = processo || 'caldeiraria-revestimento';
+                sessionStorage.setItem('app_spool_process', this.activeSpoolProcess);
+                this.navigateTo('transferencia-spool', { processo: this.activeSpoolProcess });
               }
             });
           }, 150);

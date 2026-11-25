@@ -252,10 +252,14 @@ jobs:
 
 Este projeto adota as convenções do [Semantic Versioning (SemVer)](https://semver.org/lang/pt-BR/):
 
-- Versão Atual: **`v2.8.0`**
+- Versão Atual: **`v2.9.0`**
 
 ##### Histórico Recente
 
+- **`v2.9.0`**:
+  - Implementação da tela **Transferência - Spool** e criação de nova transferência para Spool:
+    - Listagem de transferências de Spool com cards reativos, status chevron e visualização de spools vinculados.
+    - Tela **Criar Nova Transferência** unificada para Componente e Spool com leitor QRCode integrado.
 - **`v2.8.0`**:
   - Implementação da tela **Criar Nova Transferência** (`copilot-image-3a2fe1.png`):
     - Acesso direto pelo botão azul "Criar Nova Transferência" na listagem de transferências de componentes.

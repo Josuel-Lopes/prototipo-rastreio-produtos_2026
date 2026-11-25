@@ -1,0 +1,37 @@
+{
+  "entity": "spool-management-by-project",
+  "version": "2.9.0",
+  "lastUpdated": "2026-11-25T04:33:00Z",
+  "decisions": [
+    {
+      "id": "DEC-001",
+      "date": "2026-11-25",
+      "subject": "versionamento-centralizado",
+      "summary": "Ponto único de verdade para versão em src/web/version.js (APP_VERSION), consumido dinamicamente por Header, Login e logs."
+    },
+    {
+      "id": "DEC-002",
+      "date": "2026-11-25",
+      "subject": "status-transferencia",
+      "summary": "Cards de transferência exibem exclusivamente os status 'Em Trânsito' (#f59e0b) e 'Concluído' (#22c55e) em todos os processos (componentes e spools)."
+    },
+    {
+      "id": "DEC-003",
+      "date": "2026-11-25",
+      "subject": "processos-transferencia-spool",
+      "summary": "Implementação dos três processos de transferência de spool (Caldeiraria → Revestimento, Revestimento → Pintura, Pintura → Faturamento) reutilizando TransferenciaSpoolView e NovaTransferenciaView de forma componentizada com parametrização de processo."
+    },
+    {
+      "id": "DEC-004",
+      "date": "2026-11-25",
+      "subject": "remocao-botao-voltar",
+      "summary": "Remoção permanente de botões de rodapé 'Voltar ao Menu' em todas as telas, padronizando a navegação exclusivamente pelo menu superior e tabs."
+    },
+    {
+      "id": "DEC-005",
+      "date": "2026-11-25",
+      "subject": "leitor-qrcode-centralizado",
+      "summary": "ModalQrCodeComponent unificado e reativo para modos cadastro, caldeiraria, validar-qrcode, transferencia-componente e transferencia-spool (com contexto por processo de destino)."
+    }
+  ]
+}

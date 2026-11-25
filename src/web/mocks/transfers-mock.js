@@ -35,8 +35,8 @@ let transfersComponentesData = [
     sequencial: '0002',
     codigo: '000002',
     tipo: 'componente',
-    status: 'Aguardando PV',
-    statusCor: '#06b6d4',
+    status: 'Em Trânsito',
+    statusCor: '#f59e0b',
     etapaAtual: 2, // Aguardando PV
     fornecedorOrigem: '000052 - 01 - ALVENIUS',
     fornecedorDestino: '004410 - 02 - VALE MINERAÇÃO',
@@ -52,8 +52,8 @@ let transfersComponentesData = [
     sequencial: '0003',
     codigo: '000003',
     tipo: 'componente',
-    status: 'Aguardando NF',
-    statusCor: '#84cc16',
+    status: 'Em Trânsito',
+    statusCor: '#f59e0b',
     etapaAtual: 4, // Aguardando NF
     fornecedorOrigem: '000052 - 01 - ALVENIUS',
     fornecedorDestino: '001290 - 03 - BRASKEN PETROQUÍMICA',
@@ -87,8 +87,8 @@ let transfersComponentesData = [
     sequencial: '0005',
     codigo: '000005',
     tipo: 'componente',
-    status: 'Aguardando SC',
-    statusCor: '#f97316',
+    status: 'Em Trânsito',
+    statusCor: '#f59e0b',
     etapaAtual: 1, // Aguardando SC
     fornecedorOrigem: '000052 - 01 - ALVENIUS',
     fornecedorDestino: '005520 - 01 - USIMINAS SIDERURGIA',
@@ -118,16 +118,18 @@ let transfersComponentesData = [
 ];
 
 let transfersSpoolsData = [
+  // --- Processo 1: Caldeiraria -> Revestimento ---
   {
     id: 'tr-spool-001',
     sequencial: '0001',
     codigo: '000001',
     tipo: 'spool',
+    processo: 'caldeiraria-revestimento',
     status: 'Em Trânsito',
     statusCor: '#f59e0b',
     etapaAtual: 3, // Aguardando ROM
-    fornecedorOrigem: '000052 - 01 - ALVENIUS',
-    fornecedorDestino: '003385 - 01 - PETROPASY TECNOLOGIA',
+    fornecedorOrigem: '000052 - 01 - ALVENIUS TUBOS E CONEXOES LTDA',
+    fornecedorDestino: '003385 - 01 - PETROPASY TECNOLOGIA E SERVICOS',
     inicio: '21/08/2026 às 00:00h',
     finalizado: '-- / -- / ---- às -- : --',
     spools: [
@@ -150,12 +152,13 @@ let transfersSpoolsData = [
     sequencial: '0002',
     codigo: '000002',
     tipo: 'spool',
+    processo: 'caldeiraria-revestimento',
     status: 'Em Trânsito',
     statusCor: '#f59e0b',
-    etapaAtual: 3, // Aguardando ROM
-    fornecedorOrigem: '000052 - 01 - ALVENIUS',
-    fornecedorDestino: '003385 - 01 - PETROPASY TECNOLOGIA',
-    inicio: '03/09/2026 às 00:00h',
+    etapaAtual: 4, // Aguardando NF
+    fornecedorOrigem: '000052 - 01 - ALVENIUS TUBOS E CONEXOES LTDA',
+    fornecedorDestino: '003385 - 01 - PETROPASY TECNOLOGIA E SERVICOS',
+    inicio: '03/09/2026 às 08:30h',
     finalizado: '-- / -- / ---- às -- : --',
     spools: [
       { codigo: 'SP041400038038' },
@@ -170,17 +173,136 @@ let transfersSpoolsData = [
     sequencial: '0003',
     codigo: '000003',
     tipo: 'spool',
-    status: 'Em Trânsito',
-    statusCor: '#f59e0b',
-    etapaAtual: 3, // Aguardando ROM
-    fornecedorOrigem: '000052 - 01 - ALVENIUS',
-    fornecedorDestino: '003385 - 01 - PETROPASY TECNOLOGIA',
-    inicio: '10/09/2026 às 00:00h',
-    finalizado: '-- / -- / ---- às -- : --',
+    processo: 'caldeiraria-revestimento',
+    status: 'Concluído',
+    statusCor: '#22c55e',
+    etapaAtual: 5, // Nota Emitida
+    fornecedorOrigem: '000052 - 01 - ALVENIUS TUBOS E CONEXOES LTDA',
+    fornecedorDestino: '003385 - 01 - PETROPASY TECNOLOGIA E SERVICOS',
+    inicio: '10/09/2026 às 14:00h',
+    finalizado: '11/09/2026 às 16:30h',
     spools: [
       { codigo: 'SP041400039001' },
       { codigo: 'SP041400039002' },
       { codigo: 'SP041400039003' }
+    ]
+  },
+
+  // --- Processo 2: Revestimento -> Pintura ---
+  {
+    id: 'tr-spool-004',
+    sequencial: '0004',
+    codigo: '000004',
+    tipo: 'spool',
+    processo: 'revestimento-pintura',
+    status: 'Em Trânsito',
+    statusCor: '#f59e0b',
+    etapaAtual: 3, // Aguardando ROM
+    fornecedorOrigem: '003385 - 01 - PETROPASY TECNOLOGIA E SERVICOS',
+    fornecedorDestino: '004120 - 02 - VALE PINTURA E ACABAMENTO LTDA',
+    inicio: '12/09/2026 às 09:15h',
+    finalizado: '-- / -- / ---- às -- : --',
+    spools: [
+      { codigo: 'SP041400041001' },
+      { codigo: 'SP041400041002' },
+      { codigo: 'SP041400041005' },
+      { codigo: 'SP041400041012' }
+    ]
+  },
+  {
+    id: 'tr-spool-005',
+    sequencial: '0005',
+    codigo: '000005',
+    tipo: 'spool',
+    processo: 'revestimento-pintura',
+    status: 'Em Trânsito',
+    statusCor: '#f59e0b',
+    etapaAtual: 3, // Aguardando ROM
+    fornecedorOrigem: '003385 - 01 - PETROPASY TECNOLOGIA E SERVICOS',
+    fornecedorDestino: '004120 - 02 - VALE PINTURA E ACABAMENTO LTDA',
+    inicio: '14/09/2026 às 11:30h',
+    finalizado: '-- / -- / ---- às -- : --',
+    spools: [
+      { codigo: 'SP041400042008' },
+      { codigo: 'SP041400042009' },
+      { codigo: 'SP041400042010' }
+    ]
+  },
+  {
+    id: 'tr-spool-006',
+    sequencial: '0006',
+    codigo: '000006',
+    tipo: 'spool',
+    processo: 'revestimento-pintura',
+    status: 'Em Trânsito',
+    statusCor: '#f59e0b',
+    etapaAtual: 4, // Aguardando NF
+    fornecedorOrigem: '003385 - 01 - PETROPASY TECNOLOGIA E SERVICOS',
+    fornecedorDestino: '004120 - 02 - VALE PINTURA E ACABAMENTO LTDA',
+    inicio: '15/09/2026 às 16:00h',
+    finalizado: '-- / -- / ---- às -- : --',
+    spools: [
+      { codigo: 'SP041400043003' },
+      { codigo: 'SP041400043004' }
+    ]
+  },
+
+  // --- Processo 3: Pintura -> Faturamento ---
+  {
+    id: 'tr-spool-007',
+    sequencial: '0007',
+    codigo: '000007',
+    tipo: 'spool',
+    processo: 'pintura-faturamento',
+    status: 'Em Trânsito',
+    statusCor: '#f59e0b',
+    etapaAtual: 3, // Aguardando ROM
+    fornecedorOrigem: '004120 - 02 - VALE PINTURA E ACABAMENTO LTDA',
+    fornecedorDestino: '000052 - 01 - ALVENIUS FATURAMENTO / EXPEDICAO',
+    inicio: '18/09/2026 às 08:00h',
+    finalizado: '-- / -- / ---- às -- : --',
+    spools: [
+      { codigo: 'SP041400045010' },
+      { codigo: 'SP041400045011' },
+      { codigo: 'SP041400045012' },
+      { codigo: 'SP041400045015' }
+    ]
+  },
+  {
+    id: 'tr-spool-008',
+    sequencial: '0008',
+    codigo: '000008',
+    tipo: 'spool',
+    processo: 'pintura-faturamento',
+    status: 'Em Trânsito',
+    statusCor: '#f59e0b',
+    etapaAtual: 4, // Aguardando NF
+    fornecedorOrigem: '004120 - 02 - VALE PINTURA E ACABAMENTO LTDA',
+    fornecedorDestino: '000052 - 01 - ALVENIUS FATURAMENTO / EXPEDICAO',
+    inicio: '19/09/2026 às 10:20h',
+    finalizado: '-- / -- / ---- às -- : --',
+    spools: [
+      { codigo: 'SP041400046001' },
+      { codigo: 'SP041400046002' }
+    ]
+  },
+  {
+    id: 'tr-spool-009',
+    sequencial: '0009',
+    codigo: '000009',
+    tipo: 'spool',
+    processo: 'pintura-faturamento',
+    status: 'Concluído',
+    statusCor: '#22c55e',
+    etapaAtual: 5, // Nota Emitida
+    fornecedorOrigem: '004120 - 02 - VALE PINTURA E ACABAMENTO LTDA',
+    fornecedorDestino: '000052 - 01 - ALVENIUS FATURAMENTO / EXPEDICAO',
+    inicio: '20/09/2026 às 09:00h',
+    finalizado: '20/09/2026 às 15:45h',
+    spools: [
+      { codigo: 'SP041400047020' },
+      { codigo: 'SP041400047021' },
+      { codigo: 'SP041400047022' }
     ]
   }
 ];
@@ -193,7 +315,10 @@ export function getTransferComponenteById(id) {
   return transfersComponentesData.find(item => item.id === id);
 }
 
-export function getTransfersSpools() {
+export function getTransfersSpools(processo = null) {
+  if (processo) {
+    return transfersSpoolsData.filter(item => item.processo === processo);
+  }
   return [...transfersSpoolsData];
 }
 
@@ -205,17 +330,30 @@ export function addTransferSpool(dados = {}) {
   const nextSeqNum = transfersSpoolsData.length + 1;
   const sequencial = String(nextSeqNum).padStart(4, '0');
   const codigo = String(nextSeqNum).padStart(6, '0');
+  const processo = dados.processo || 'caldeiraria-revestimento';
+
+  let defaultOrigem = '000052 - 01 - ALVENIUS TUBOS E CONEXOES LTDA';
+  let defaultDestino = '003385 - 01 - PETROPASY TECNOLOGIA E SERVICOS';
+
+  if (processo === 'revestimento-pintura') {
+    defaultOrigem = '003385 - 01 - PETROPASY TECNOLOGIA E SERVICOS';
+    defaultDestino = '004120 - 02 - VALE PINTURA E ACABAMENTO LTDA';
+  } else if (processo === 'pintura-faturamento') {
+    defaultOrigem = '004120 - 02 - VALE PINTURA E ACABAMENTO LTDA';
+    defaultDestino = '000052 - 01 - ALVENIUS FATURAMENTO / EXPEDICAO';
+  }
 
   const novaTransferencia = {
     id: `tr-spool-${Date.now()}`,
     sequencial,
     codigo,
     tipo: 'spool',
+    processo,
     status: dados.status || 'Em Trânsito',
     statusCor: dados.statusCor || '#f59e0b',
     etapaAtual: dados.etapaAtual || 3,
-    fornecedorOrigem: dados.fornecedorOrigem || '000052 - 01 - ALVENIUS',
-    fornecedorDestino: dados.fornecedorDestino || '003385 - 01 - PETROPASY TECNOLOGIA',
+    fornecedorOrigem: dados.fornecedorOrigem || defaultOrigem,
+    fornecedorDestino: dados.fornecedorDestino || defaultDestino,
     terceiro: dados.terceiro || 'SIM',
     inicio: dados.inicio || new Intl.DateTimeFormat('pt-BR', {
       day: '2-digit', month: '2-digit', year: 'numeric',
@@ -241,8 +379,8 @@ export function addTransferComponente(dados = {}) {
     sequencial,
     codigo,
     tipo: dados.tipo || 'componente',
-    status: dados.status || 'Aguardando SC',
-    statusCor: dados.statusCor || '#f97316',
+    status: dados.status || 'Em Trânsito',
+    statusCor: dados.statusCor || '#f59e0b',
     etapaAtual: dados.etapaAtual || 1,
     fornecedorOrigem: dados.fornecedorOrigem || '000052 - 01 - ALVENIUS',
     fornecedorDestino: dados.fornecedorDestino || '003385 - 01 - PETROPASY TECNOLOGIA',
