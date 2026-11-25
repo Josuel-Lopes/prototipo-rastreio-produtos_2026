@@ -394,7 +394,8 @@ export class PropostaView {
 
         ${data ? `
           <div class="demo-print-watermark print-only" aria-hidden="true">
-            <span>Ambiente de</span><span>demonstração</span>
+            <span class="demo-print-watermark__line">${id} · Versão ${t(data.meta.version)}</span>
+            <span class="demo-print-watermark__brand"><img src="assets/logo-maxcode42-horizontal.png" alt="" class="demo-print-watermark__logo" decoding="async"></span>
           </div>
           <div class="demo-print-footer print-only" aria-hidden="true">
             Ambiente de demonstração · Proposta comercial ${id} · v${t(data.meta.version)} · MAXCODE42 → Alvenius

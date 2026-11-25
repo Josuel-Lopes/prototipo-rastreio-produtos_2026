@@ -189,4 +189,22 @@ body.route-proposta .demo-ribbon__proposal-only:not([hidden]) {
     pointer-events: none;
     user-select: none;
   }
+
+  .demo-print-watermark__line {
+    font-size: 36pt;
+    line-height: 1.1;
+  }
+
+  .demo-print-watermark__brand {
+    display: block;
+    margin-top: 10pt;
+  }
+
+  .demo-print-watermark__logo {
+    display: block;
+    height: 70pt;
+    width: auto;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }
