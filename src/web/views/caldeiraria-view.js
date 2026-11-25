@@ -5,12 +5,13 @@
  * Fidelidade visual absoluta a copilot-image-177404.png
  */
 
-import { getSpools, getCounters, statusDefinitions } from '../mocks/spools-mock.js';
+import { getSpools, getCounters, statusDefinitions, getSpoolByCode, updateSpoolStatus } from '../mocks/spools-mock.js';
 import { toast } from '../components/toast.js';
 import { lucide } from '../components/icons.js';
 import { PageContainer } from '../components/page-container.js';
 import { PageTitle } from '../components/page-title.js';
 import { SpoolCard } from '../components/spool-card.js';
+import { ModalQrCodeComponent } from '../components/modal-qrcode.js';
 
 export class CaldeirariaView {
   constructor(containerId = 'app-view', options = {}) {
@@ -20,6 +21,7 @@ export class CaldeirariaView {
     this.selectedStatusFilter = null;
     this.isAccordionOpen = false; // Fechado por padrão conforme print de referência
     this.showScrapHistory = false;
+    this.modalQrCode = new ModalQrCodeComponent('modal-root');
   }
 
   render() {
@@ -215,6 +217,25 @@ export class CaldeirariaView {
     return list;
   }
 
+  getEligibleSpool() {
+    const spools = this.getFilteredSpools();
+    const priority = ['reservado', 'execucao', 'pausado', 'continua', 'finalizado', 'reversivel'];
+    for (const st of priority) {
+      const found = spools.find(s => s.status === st);
+      if (found) return found;
+    }
+    const all = getSpools();
+    for (const st of priority) {
+      const found = all.find(s => s.status === st);
+      if (found) return found;
+    }
+    return spools[0] || all[0] || {
+      codigo: 'SP-0414-00003-001',
+      descricao: 'Carretel Reto 24pol x 12.7mm x 3200mm c/ Flange Pescoço',
+      status: 'reservado'
+    };
+  }
+
   bindEvents() {
     // Busca em tempo real
     const searchInput = this.container.querySelector('#caldeiraria-search-input');
@@ -233,14 +254,8 @@ export class CaldeirariaView {
     const btnQrCode = this.container.querySelector('#btn-caldeiraria-qrcode');
     if (btnQrCode) {
       btnQrCode.addEventListener('click', () => {
-        if (typeof this.options.onOpenQrCode === 'function') {
-          this.options.onOpenQrCode((scannedCode, spool) => {
-            this.searchQuery = scannedCode;
-            const input = this.container.querySelector('#caldeiraria-search-input');
-            if (input) input.value = scannedCode;
-            this.render();
-          });
-        }
+        const eligibleSpool = this.getEligibleSpool();
+        this.openCaldeirariaQrCodeModal(eligibleSpool);
       });
     }
 
@@ -306,8 +321,47 @@ export class CaldeirariaView {
     this.bindCardClicks();
   }
 
+  openCaldeirariaQrCodeModal(spool) {
+    const targetSpool = spool || this.getEligibleSpool();
+    if (!targetSpool) return;
+
+    if (!this.modalQrCode) {
+      this.modalQrCode = new ModalQrCodeComponent('modal-root');
+    }
+
+    this.modalQrCode.open({
+      mode: 'caldeiraria',
+      spool: targetSpool,
+      isScanned: false,
+      onAction: (target, actionConfig) => {
+        const nextStatus = actionConfig?.nextStatus || 'execucao';
+        updateSpoolStatus(target.codigo, nextStatus);
+
+        const title = actionConfig?.toastTitle || 'Processo Atualizado';
+        const msg = typeof actionConfig?.toastMessage === 'function'
+          ? actionConfig.toastMessage(target.codigo)
+          : `Spool ${target.codigo} avançou para ${nextStatus}.`;
+
+        toast.success(title, msg);
+        this.render();
+      },
+      onStart: (target, actionConfig) => {
+        const nextStatus = actionConfig?.nextStatus || 'execucao';
+        updateSpoolStatus(target.codigo, nextStatus);
+
+        const title = actionConfig?.toastTitle || 'Processo Iniciado';
+        const msg = typeof actionConfig?.toastMessage === 'function'
+          ? actionConfig.toastMessage(target.codigo)
+          : `Spool ${target.codigo} avançou para ${nextStatus}.`;
+
+        toast.success(title, msg);
+        this.render();
+      }
+    });
+  }
+
   bindCardClicks() {
-    // Clique em qualquer parte do Card de Spool
+    // Clique em qualquer parte do Card de Spool (sem disparar toast flutuante)
     const cards = this.container.querySelectorAll('.spool-item-card');
     cards.forEach(card => {
       const handleCardAction = () => {
@@ -315,19 +369,13 @@ export class CaldeirariaView {
         const status = card.getAttribute('data-spool-status');
 
         if (status === 'romaneio') {
-          // Status Romaneio: Alert/Modal customizado com design industrial Alvenius
+          // Status Romaneio: Modal customizado com design industrial Alvenius
           this.showRomaneioModal();
           return;
         }
 
-        // Demais status: executa continuidade e seleção do Spool
-        toast.info(
-          `Spool ${code}`,
-          'Clique no botão Ler QRCode para validar ou avance para transferência.'
-        );
-        if (typeof this.options.onSpoolSelected === 'function') {
-          this.options.onSpoolSelected(code);
-        }
+        const spool = getSpoolByCode(code);
+        this.openCaldeirariaQrCodeModal(spool);
       };
 
       card.addEventListener('click', handleCardAction);
@@ -346,10 +394,7 @@ export class CaldeirariaView {
    */
   showRomaneioModal() {
     const modalRoot = document.getElementById('modal-root');
-    if (!modalRoot) {
-      toast.warning('Romaneio', 'Processo concluido aguardando Romaneio');
-      return;
-    }
+    if (!modalRoot) return;
 
     modalRoot.classList.add('has-modal');
     modalRoot.innerHTML = `

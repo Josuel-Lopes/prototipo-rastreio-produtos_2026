@@ -301,6 +301,35 @@
   z-index: 2;
 }
 
+/* Linha horizontal animada de scan laser azul brilhante */
+.qrcode-viewfinder-laser-line {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #38bdf8, #60a5fa, #38bdf8, transparent);
+  box-shadow: 0 0 10px #38bdf8, 0 0 20px #2563eb;
+  border-radius: 2px;
+  animation: scanLaserLine 2s ease-in-out infinite alternate;
+  z-index: 4;
+  pointer-events: none;
+}
+
+@keyframes scanLaserLine {
+  0% {
+    top: 15%;
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 14px #38bdf8, 0 0 24px #2563eb;
+  }
+  100% {
+    top: 85%;
+    opacity: 0.7;
+  }
+}
+
 /* Moldura de enquadramento centralizada que envolve diretamente o QRCode SVG */
 .qrcode-scanner-frame {
   position: relative;
@@ -563,6 +592,250 @@
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Modal Leitor de QRCode - Caldeiraria (copilot-image-1e0375.png & 447bdb.png)
+   ========================================================================== */
+.qrcode-floating-pill-header {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 0 0 14px 0;
+}
+
+.qrcode-floating-pill {
+  background-color: #334155;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 6px 22px;
+  border-radius: 9999px;
+  letter-spacing: 0.3px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  display: inline-block;
+}
+
+.qrcode-camera-viewfinder {
+  cursor: pointer;
+}
+
+/* Botão Ler QRCode na Modal de Caldeiraria */
+.qrcode-scan-action-wrap {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.qrcode-btn-modal-scan {
+  width: 100%;
+  height: 46px;
+  background-color: #0284c7;
+  color: #ffffff !important;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.qrcode-btn-modal-scan:hover:not(:disabled) {
+  background-color: #0369a1;
+}
+
+.qrcode-btn-modal-scan:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.qrcode-btn-modal-scan.is-scanned,
+.qrcode-btn-modal-scan:disabled {
+  background-color: #16a34a !important;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.35);
+  cursor: default !important;
+  opacity: 1 !important;
+}
+
+.qrcode-waiting-text {
+  color: #9ca3af;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.qrcode-placeholder-text {
+  color: #94a3b8;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.qrcode-card-instruction-caldeiraria {
+  background: #ffffff !important;
+  border-radius: 8px;
+  padding: 16px 16px 14px 16px;
+  margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.qrcode-status-badge {
+  display: inline-block;
+  padding: 4px 16px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.qrcode-instr-caldeiraria-line1 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+  text-align: center;
+  margin-bottom: 3px;
+}
+
+.qrcode-instr-caldeiraria-line2 {
+  font-size: 14px;
+  color: #1e293b;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.qrcode-instr-caldeiraria-line2 strong {
+  font-weight: 800;
+  color: #0f172a;
+  text-transform: uppercase;
+}
+
+.qrcode-spool-info-block {
+  width: 100%;
+  margin-top: 10px;
+  text-align: left;
+}
+
+.qrcode-spool-info-heading {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 6px;
+}
+
+.qrcode-spool-info-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.qrcode-spool-info-label {
+  font-weight: 700;
+  color: #1e293b;
+  white-space: nowrap;
+}
+
+.qrcode-spool-info-code {
+  font-weight: 700;
+  color: #0284c7;
+  word-break: break-word;
+}
+
+.qrcode-spool-info-desc {
+  font-weight: 500;
+  color: #475569;
+  word-break: break-word;
+}
+
+.qrcode-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.qrcode-btn-iniciar {
+  width: 100%;
+  height: 48px;
+  background-color: #f59e0b;
+  color: #ffffff !important;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  box-sizing: border-box;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.qrcode-btn-iniciar:hover:not(:disabled):not(.is-disabled) {
+  opacity: 0.92;
+}
+
+.qrcode-btn-iniciar:active:not(:disabled):not(.is-disabled) {
+  transform: scale(0.98);
+}
+
+.qrcode-btn-iniciar.is-disabled,
+.qrcode-btn-iniciar:disabled {
+  background-color: #e5e7eb !important;
+  color: #9ca3af !important;
+  border-color: #e5e7eb !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.qrcode-btn-close-red-caldeiraria {
+  width: 100%;
+  height: 48px;
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.qrcode-btn-close-red-caldeiraria:hover {
+  background: #b91c1c !important;
+}
+
+.qrcode-btn-close-red-caldeiraria:active {
+  transform: scale(0.98);
 }
 
 /* ==========================================================================

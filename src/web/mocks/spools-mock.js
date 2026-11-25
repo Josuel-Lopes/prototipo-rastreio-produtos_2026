@@ -290,7 +290,7 @@ export function getSpoolByCode(codigo) {
 }
 
 export function getCounters() {
-  // Recalcula contadores baseado no array de spools somando com os totais industriais
+  // Contadores industriais base sincronizados com o wireframe
   const base = {
     reservado: 52,
     execucao: 7,
@@ -301,7 +301,20 @@ export function getCounters() {
     sucata: 0,
     romaneio: 976
   };
-  
+
+  // Ajusta dinamicamente a contagem conforme transições de status no mock em memória
+  initialSpools.forEach(initSpool => {
+    const currentSpool = state.spools.find(s => s.id === initSpool.id || s.codigo === initSpool.codigo);
+    if (currentSpool && currentSpool.status !== initSpool.status) {
+      if (base[initSpool.status] !== undefined && base[initSpool.status] > 0) {
+        base[initSpool.status]--;
+      }
+      if (base[currentSpool.status] !== undefined) {
+        base[currentSpool.status]++;
+      }
+    }
+  });
+
   // Total geral oficial do wireframe = 1099
   const total = Object.values(base).reduce((acc, curr) => acc + curr, 0);
 
@@ -352,7 +365,7 @@ export function updateSpoolStatus(codigo, novoStatus) {
   if (novoStatus === 'execucao' && spool.inicio.includes('--')) {
     spool.inicio = dataFormatada;
   }
-  if (novoStatus === 'finalizado') {
+  if ((novoStatus === 'finalizado' || novoStatus === 'romaneio') && spool.finalizado.includes('--')) {
     spool.finalizado = dataFormatada;
   }
   if (novoStatus === 'sucata') {

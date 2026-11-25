@@ -53,7 +53,7 @@ class App {
   }
 
   init() {
-    console.log('Alvenius Spool Management v2.1.0 iniciado.');
+    console.log('Alvenius Spool Management v2.2.0 iniciado.');
     
     const savedUser = sessionStorage.getItem('app_user');
     if (savedUser) {

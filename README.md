@@ -244,7 +244,21 @@ jobs:
 
 Este projeto adota as convenções do [Semantic Versioning (SemVer)](https://semver.org/lang/pt-BR/):
 
-- Versão Atual: **`v2.1.0`**
+- Versão Atual: **`v2.2.0`**
+
+##### Histórico Recente
+
+- **`v2.2.0`**:
+  - Tela de Caldeiraria com fidelidade milimétrica a prints
+  - Componente reutilizável SpoolCard com status e datas em 2 colunas
+  - Acordeão expansível de processos com contadores
+  - Histórico de sucata in-line controlado pelo toggle
+  - Modal de leitura de QRCode da Caldeiraria com dados dinâmicos do Spool
+  - Modal customizado para Romaneio
+- **`v2.1.0`**:
+  - Ajustes de conformidade visual, drawer de navegação e componentes modais
+- **`v2.0.0`**:
+  - Nova identidade visual, arquitetura modular e layout mobile-first industrial
 
 <br/>
 
