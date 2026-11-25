@@ -252,10 +252,19 @@ jobs:
 
 Este projeto adota as convenções do [Semantic Versioning (SemVer)](https://semver.org/lang/pt-BR/):
 
-- Versão Atual: **`v2.5.0`**
+- Versão Atual: **`v2.6.0`**
 
 ##### Histórico Recente
 
+- **`v2.6.0`**:
+  - Implementação da tela de **Transferência - Componente** (`copilot-image-fc3082.png`, `copilot-image-85fa22.png` e `copilot-image-93dd6b.png`):
+    - Abertura direta a partir da seleção de "COMPONENTE" na Modal de Transferência.
+    - PageTitle "Transferência" e PageContainer padrão Alvenius com banner informativo "Transferência - Componente".
+    - Linha de ação superior com busca em tempo real por código, status, fornecedor ou data e botão azul "Criar Nova Transferência" com ícone circular de adição.
+    - Componente modular e reutilizável `TransferCard`, projetado para suportar tanto transferências de "componente" quanto de "spool".
+    - Expansão e colapso reativo da lista de itens vinculados (`codigo: ...`), com alternância fluida do ícone chevron (`v` e `^`).
+    - Pipeline de progresso de status com 5 etapas encadeadas em formato chevron com clip-path CSS (`Aguardando SC`, `Aguardando PV`, `Aguardando ROM`, `Aguardando NF`, `Nota Emitida`), destacando visualmente a etapa corrente com preenchimento cromático e tipografia dedicada.
+    - Mock de dados de transferências `transfers-mock.js` com múltiplas movimentações industriais e suporte à adição imediata de novos romaneios.
 - **`v2.5.0`**:
   - Refinamento visual e funcional de alta fidelidade da Modal de Transferência (`copilot-image-d3e025.png`):
     - Diálogo retangular centralizado com bordas arredondadas (`border-radius: 8px`), sombra suave e botão 'X' vermelho superior direito.

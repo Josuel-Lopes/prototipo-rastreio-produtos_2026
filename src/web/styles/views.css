@@ -1217,3 +1217,153 @@
   font-size: 12px;
   margin: 0;
 }
+
+/* ==========================================================================
+   5. Tela de Transferência - Componente (Fidelidade copilot-image-fc3082.png)
+   ========================================================================== */
+.view-transferencia-componente-container {
+  width: 100%;
+}
+
+.card-transferencia-componente {
+  /* Segue o card padrão industrial branco Alvenius */
+}
+
+/* 5.1 Linha de Ação: Busca + Botão Criar Nova Transferência */
+.transfer-action-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  margin-top: 2px;
+  margin-bottom: 12px;
+  height: 44px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.transfer-search-box {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 44px;
+}
+
+.transfer-search-icon {
+  position: absolute;
+  left: 10px;
+  color: #9ca3af;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+}
+
+.transfer-search-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 10px 0 34px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #111827;
+  background-color: #ffffff;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.transfer-search-input::placeholder {
+  color: #9ca3af;
+  font-size: 12.5px;
+}
+
+.transfer-search-input:focus {
+  border-color: #1956ce;
+  box-shadow: 0 0 0 2px rgba(25, 86, 206, 0.15);
+}
+
+.btn-transfer-create {
+  height: 44px;
+  background-color: #1956ce;
+  color: #ffffff;
+  border: none;
+  border-radius: 0px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  transition: background-color 0.15s ease;
+  user-select: none;
+}
+
+.btn-transfer-create:hover {
+  background-color: #1545a8;
+}
+
+.btn-transfer-create:active {
+  background-color: #0f3484;
+}
+
+.btn-transfer-create-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-transfer-create-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: -0.2px;
+}
+
+/* 5.2 Lista de Cards e Estado Vazio */
+.transfer-cards-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 4px;
+}
+
+.transfer-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 16px;
+  text-align: center;
+  color: #6b7280;
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 6px;
+  margin: 10px 0;
+  gap: 8px;
+}
+
+.transfer-empty-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.transfer-empty-subtitle {
+  font-size: 12px;
+  color: #9ca3af;
+  max-width: 260px;
+}
+

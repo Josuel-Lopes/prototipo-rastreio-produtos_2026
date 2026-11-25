@@ -1,5 +1,5 @@
 /**
- * Componente Header Global & Navbar - Alvenius (v2.5.0)
+ * Componente Header Global & Navbar - Alvenius (v2.6.0)
  * Responsabilidade Única: Identidade da marca, status de autenticação, pill e rotas de topo
  * Arquitetura Unificada e Condicional sem recriação destrutiva no expandir/colapsar.
  */

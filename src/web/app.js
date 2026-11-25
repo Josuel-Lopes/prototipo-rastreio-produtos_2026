@@ -15,6 +15,7 @@ import { CadastroView } from './views/cadastro-view.js';
 import { CaldeirariaView } from './views/caldeiraria-view.js';
 import { RevestimentoView } from './views/revestimento-view.js';
 import { PinturaView } from './views/pintura-view.js';
+import { TransferenciaComponenteView } from './views/transferencia-componente-view.js';
 
 import { getCurrentUser, setCurrentUser, logoutUser, getSpoolByCode } from './mocks/spools-mock.js';
 
@@ -60,12 +61,15 @@ class App {
         onNavigate: (route) => this.navigateTo(route),
         onOpenQrCode: (callback) => this.openQrCodeScanner(callback),
         onSpoolSelected: (code) => this.handleSpoolSelected(code)
+      }),
+      transferenciaComponente: new TransferenciaComponenteView('app-view', {
+        onNavigate: (route) => this.navigateTo(route)
       })
     };
   }
 
   init() {
-    console.log('Alvenius Spool Management v2.5.0 iniciado.');
+    console.log('Alvenius Spool Management v2.6.0 iniciado.');
     
     const savedUser = sessionStorage.getItem('app_user');
     if (savedUser) {
@@ -158,6 +162,12 @@ class App {
       return;
     }
 
+    if (route === 'transferencia-componente') {
+      this.currentRoute = 'transferencia-componente';
+      this.render();
+      return;
+    }
+
     this.currentRoute = route;
     this.render();
   }
@@ -168,7 +178,8 @@ class App {
       case 'caldeiraria': return 'Caldeiraria';
       case 'revestimento': return 'Revestimento';
       case 'pintura': return 'Pintura';
-      case 'transferencia': return 'Transferência';
+      case 'transferencia':
+      case 'transferencia-componente': return 'Transferência';
       case 'validar-qrcode': return 'Validar QRCode';
       default: return 'Rastreio de produtos';
     }
@@ -195,6 +206,8 @@ class App {
       this.views.revestimento.render();
     } else if (this.currentRoute === 'pintura') {
       this.views.pintura.render();
+    } else if (this.currentRoute === 'transferencia-componente') {
+      this.views.transferenciaComponente.render();
     }
 
     // Scroll para o topo
@@ -275,7 +288,12 @@ class App {
   openModalTransferencia() {
     this.modalTransferencia.open({
       onSelect: (tipo) => {
-        const tipoLabel = tipo === 'componente' ? 'COMPONENTE' : 'SPOOL';
+        if (tipo === 'componente') {
+          this.navigateTo('transferencia-componente');
+          return;
+        }
+
+        const tipoLabel = tipo === 'spool' ? 'SPOOL' : 'COMPONENTE';
         toast.info(
           'Transferência Selecionada',
           `Fluxo de transferência de ${tipoLabel} iniciado. Aponte o leitor para escanear a etiqueta de romaneio.`
@@ -299,6 +317,11 @@ class App {
 
     this.modalTransferencia.open({
       onSelect: (tipo) => {
+        if (tipo === 'componente') {
+          this.navigateTo('transferencia-componente');
+          return;
+        }
+
         toast.success(
           'Avanço de Processo',
           `Spool ${spool.codigo} avançou para a próxima etapa via transferência de ${tipo.toUpperCase()}.`
