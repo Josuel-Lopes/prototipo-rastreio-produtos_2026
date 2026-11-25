@@ -125,19 +125,12 @@ export class TransferenciaComponenteView {
       </div>
     `;
 
-    const footerActionsHtml = `
-      <button class="btn-footer-action btn-footer-voltar" id="btn-transfer-voltar" type="button" style="grid-column: 1 / -1;">
-        ${lucide('arrow-left', { size: 18, stroke: '#1956ce', strokeWidth: 2.2 })}
-        <span>Voltar ao Menu</span>
-      </button>
-    `;
-
     // Envelope no PageContainer padrão da Alvenius
     this.container.innerHTML = PageContainer.render({
       bannerTitle: 'Transferência - Componente',
       bannerDescription: '<span class="banner-line-1" style="white-space: nowrap; display: block;">Lista e criar o registro do processo de transferência.</span>',
       content: contentHtml,
-      footerActions: footerActionsHtml,
+      footerActions: '',
       containerClass: 'view-transferencia-componente-container',
       cardClass: 'card-transferencia-componente'
     });
@@ -183,17 +176,7 @@ export class TransferenciaComponenteView {
       });
     }
 
-    // 3. Botão Voltar ao Menu
-    const btnVoltar = this.container.querySelector('#btn-transfer-voltar');
-    if (btnVoltar) {
-      btnVoltar.addEventListener('click', () => {
-        if (typeof this.options.onNavigate === 'function') {
-          this.options.onNavigate('menu');
-        }
-      });
-    }
-
-    // 4. Delegação de eventos dos cards
+    // 3. Delegação de eventos dos cards
     const listContainer = this.container.querySelector('#transfer-cards-list');
     if (listContainer) {
       this.bindCardEvents(listContainer);

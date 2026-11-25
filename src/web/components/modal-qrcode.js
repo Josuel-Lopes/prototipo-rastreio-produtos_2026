@@ -81,6 +81,15 @@ export const MOCK_TRANSFER_POOL = [
   }
 ];
 
+export const MOCK_SPOOL_TRANSFER_POOL = [
+  { codigo: 'SP041400035004', qtd: '1 UN', desc: 'Spool Curva 90° 4" SCH 40', rawQr: 'SPOOL: SP041400035004 | PROJ: ALV-2026 | ETAPA: CALDEIRARIA' },
+  { codigo: 'SP041400035007', qtd: '1 UN', desc: 'Spool Reta 4" SCH 40', rawQr: 'SPOOL: SP041400035007 | PROJ: ALV-2026 | ETAPA: CALDEIRARIA' },
+  { codigo: 'SP041400035046', qtd: '1 UN', desc: 'Spool Curva 45° 4" SCH 80', rawQr: 'SPOOL: SP041400035046 | PROJ: ALV-2026 | ETAPA: CALDEIRARIA' },
+  { codigo: 'SP041400035047', qtd: '1 UN', desc: 'Spool Tee 4x2" ANSI 150#', rawQr: 'SPOOL: SP041400035047 | PROJ: ALV-2026 | ETAPA: CALDEIRARIA' },
+  { codigo: 'SP041400035051', qtd: '1 UN', desc: 'Spool Redução Excêntrica 6x4"', rawQr: 'SPOOL: SP041400035051 | PROJ: ALV-2026 | ETAPA: CALDEIRARIA' },
+  { codigo: 'SP041400035057', qtd: '1 UN', desc: 'Spool Coletor 8" Caldeiraria', rawQr: 'SPOOL: SP041400035057 | PROJ: ALV-2026 | ETAPA: CALDEIRARIA' }
+];
+
 export const FORNECEDORES_MAP = {
   '000052': { codigo: '000052', loja: '01', nome: 'ALVENIUS TUBOS E CONEXOES LTDA' },
   '005436': { codigo: '005436', loja: '01', nome: 'TUBOS BRASIL LTDA' },
@@ -119,7 +128,7 @@ export class ModalQrCodeComponent {
       this.lastScannedItem = null;
       this.showingSuccessModal = false;
       this.isScanned = false;
-    } else if (this.mode === 'transferencia-componente' || this.mode === 'transferencia') {
+    } else if (this.isTransferMode()) {
       this.isScanned = false;
       this.transferData = {
         realizador: 'terceiro',
@@ -136,6 +145,10 @@ export class ModalQrCodeComponent {
     document.addEventListener('keydown', this.handleKeyDown);
   }
 
+  isTransferMode() {
+    return this.mode === 'transferencia-componente' || this.mode === 'transferencia-spool' || this.mode === 'transferencia';
+  }
+
   close() {
     if (!this.isOpen) return;
     this.isOpen = false;
@@ -145,7 +158,8 @@ export class ModalQrCodeComponent {
     }
     document.removeEventListener('keydown', this.handleKeyDown);
 
-    if (this.mode === 'transferencia-componente' || this.mode === 'transferencia') {
+    if (this.isTransferMode()) {
+      const isSpool = this.mode === 'transferencia-spool';
       const hasComponentes = this.transferData && this.transferData.componentes && this.transferData.componentes.length > 0;
       let payload = null;
       if (hasComponentes) {
@@ -160,7 +174,9 @@ export class ModalQrCodeComponent {
           origem,
           destino,
           terceiro: this.transferData.realizador === 'terceiro' ? 'SIM' : 'NÃO',
-          componentes: [...this.transferData.componentes]
+          itens: [...this.transferData.componentes],
+          componentes: [...this.transferData.componentes],
+          tipo: isSpool ? 'spool' : 'componente'
         };
       }
 
@@ -379,7 +395,7 @@ export class ModalQrCodeComponent {
 
     this.container.classList.add('has-modal');
 
-    if (this.mode === 'transferencia-componente' || this.mode === 'transferencia') {
+    if (this.isTransferMode()) {
       this.renderTransferenciaMode();
     } else if (this.mode === 'validar-qrcode') {
       if (this.showingSuccessModal) {
@@ -397,6 +413,7 @@ export class ModalQrCodeComponent {
   }
 
   renderTransferenciaMode() {
+    const isSpool = this.mode === 'transferencia-spool';
     const data = this.transferData || {
       realizador: 'terceiro',
       origem: { codigo: '', loja: '', nome: '' },
@@ -438,10 +455,10 @@ export class ModalQrCodeComponent {
           <div class="qrcode-card-transferencia">
             <!-- Cabeçalho de texto instrucional -->
             <div class="qrcode-instr-transfer-header">
-              <div class="qrcode-instr-transfer-title">Ler QRCode do Componente.</div>
+              <div class="qrcode-instr-transfer-title">Ler QRCode do ${isSpool ? 'Spool' : 'Componente'}.</div>
               <div class="qrcode-instr-transfer-step">1 - Selecione realizador.</div>
               <div class="qrcode-instr-transfer-step">2 - Selecione o fornecedor.</div>
-              <div class="qrcode-instr-transfer-step">3 - Ler o QRCode do Componente para serviço.</div>
+              <div class="qrcode-instr-transfer-step">3 - Ler o QRCode do ${isSpool ? 'Spool' : 'Componente'} para serviço.</div>
             </div>
 
             <!-- Linha horizontal com degradê azul luminoso -->
@@ -519,9 +536,9 @@ export class ModalQrCodeComponent {
               </div>
             </div>
 
-            <!-- Tabela de Componentes adicionados -->
+            <!-- Tabela de Spools ou Componentes adicionados -->
             <div class="qrcode-transfer-comp-section">
-              <div class="qrcode-transfer-comp-title">Componente</div>
+              <div class="qrcode-transfer-comp-title">${isSpool ? 'Spools' : 'Componente'}</div>
               <div class="qrcode-transfer-table-box">
                 <table class="qrcode-transfer-table">
                   <thead>
@@ -537,7 +554,7 @@ export class ModalQrCodeComponent {
                         <td class="col-transfer-item">${comp.item || String(idx + 1).padStart(2, '0')}</td>
                         <td class="col-transfer-cod">${comp.codigo}</td>
                         <td class="col-transfer-action">
-                          <button type="button" class="btn-remove-transfer-comp" data-index="${idx}" title="Remover componente ${comp.codigo}">
+                          <button type="button" class="btn-remove-transfer-comp" data-index="${idx}" title="Remover ${isSpool ? 'spool' : 'componente'} ${comp.codigo}">
                             ${lucide('trash-2', { size: 16, stroke: '#ef4444', strokeWidth: 1.8 })}
                           </button>
                         </td>
@@ -974,15 +991,17 @@ export class ModalQrCodeComponent {
         handleTriggerScanValidar(e);
         return;
       }
-      if (this.mode === 'transferencia-componente' || this.mode === 'transferencia') {
-        const pool = MOCK_TRANSFER_POOL;
+      if (this.isTransferMode()) {
+        const isSpool = this.mode === 'transferencia-spool';
+        const pool = isSpool ? MOCK_SPOOL_TRANSFER_POOL : MOCK_TRANSFER_POOL;
         const nextItem = pool[this.transferData.scanIndex % pool.length];
         this.transferData.scanIndex++;
         const nextNum = String(this.transferData.componentes.length + 1).padStart(2, '0');
         this.transferData.componentes.push({
           item: nextNum,
           codigo: nextItem.codigo,
-          qtd: nextItem.qtd
+          qtd: nextItem.qtd,
+          desc: nextItem.desc
         });
         this.transferData.ultimoLido = nextItem.rawQr;
         this.isScanned = true;
@@ -1008,15 +1027,17 @@ export class ModalQrCodeComponent {
       viewfinder.addEventListener('click', handleTriggerScanGeneral);
     }
 
-    // Eventos específicos do modo Transferência de Componente
-    if (this.mode === 'transferencia-componente' || this.mode === 'transferencia') {
+    // Eventos específicos do modo Transferência (Spool ou Componente)
+    if (this.isTransferMode()) {
+      const isSpool = this.mode === 'transferencia-spool';
+      const pool = isSpool ? MOCK_SPOOL_TRANSFER_POOL : MOCK_TRANSFER_POOL;
       const removeBtns = this.container.querySelectorAll('.btn-remove-transfer-comp');
       removeBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           const idx = parseInt(btn.dataset.index, 10);
           if (!isNaN(idx) && this.transferData && this.transferData.componentes[idx]) {
-            const removed = this.transferData.componentes.splice(idx, 1);
+            this.transferData.componentes.splice(idx, 1);
             this.transferData.componentes.forEach((comp, i) => {
               comp.item = String(i + 1).padStart(2, '0');
             });
@@ -1026,7 +1047,7 @@ export class ModalQrCodeComponent {
             } else {
               // Atualiza o último lido para o último item restante na lista
               const lastRemaining = this.transferData.componentes[this.transferData.componentes.length - 1];
-              const poolItem = MOCK_TRANSFER_POOL.find(p => p.codigo === lastRemaining.codigo);
+              const poolItem = pool.find(p => p.codigo === lastRemaining.codigo);
               if (poolItem) {
                 this.transferData.ultimoLido = poolItem.rawQr;
               }

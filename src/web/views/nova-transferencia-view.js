@@ -8,7 +8,7 @@ import { toast } from '../components/toast.js';
 import { lucide } from '../components/icons.js';
 import { PageContainer } from '../components/page-container.js';
 import { PageTitle } from '../components/page-title.js';
-import { addTransferComponente } from '../mocks/transfers-mock.js';
+import { addTransferComponente, addTransferSpool } from '../mocks/transfers-mock.js';
 
 export const MOCK_TRANSFERENCIA_DADOS = {
   origem: {
@@ -33,6 +33,7 @@ export class NovaTransferenciaView {
   constructor(containerId = 'app-view', options = {}) {
     this.container = document.getElementById(containerId);
     this.options = options;
+    this.tipo = options.tipo || 'componente';
     this.origem = { codigo: '', loja: '', nome: '' };
     this.destino = { codigo: '', loja: '', nome: '' };
     this.terceiro = '';
@@ -40,21 +41,36 @@ export class NovaTransferenciaView {
     this.isPreenchido = false;
   }
 
+  setTipo(tipo = 'componente') {
+    if (this.tipo !== tipo) {
+      this.tipo = tipo;
+      this.limparFormulario(false);
+    }
+  }
+
   render(initialData = {}) {
     if (!this.container) return;
+
+    if (initialData && initialData.tipo) {
+      this.tipo = initialData.tipo;
+    }
 
     if (initialData && initialData.origem) {
       this.origem = { ...initialData.origem };
       this.destino = { ...initialData.destino };
       this.terceiro = initialData.terceiro || '';
-      this.componentes = initialData.componentes ? [...initialData.componentes] : [];
+      const list = initialData.itens || initialData.componentes;
+      this.componentes = list ? [...list] : [];
       this.isPreenchido = Boolean(this.origem.codigo);
     }
 
-    // Define o título padronizado na pill central flutuante
-    PageTitle.setTitle('Transferência');
+    const isSpool = this.tipo === 'spool';
+
+    // Define o título padronizado na pill central flutuante: Caldeiraria para spool, Transferência para componente
+    PageTitle.setTitle(isSpool ? 'Caldeiraria' : 'Transferência');
 
     const isPreenchido = this.isPreenchido;
+    const tableTitle = isSpool ? 'SPOOLS' : 'COMPONENTES';
 
     // Conteúdo principal da seção FORNECEDOR, Terceiro e tabela de componentes
     const content = `
@@ -118,9 +134,9 @@ export class NovaTransferenciaView {
         </div>
       </div>
 
-      <!-- Quadro COMPONENTES -->
+      <!-- Quadro COMPONENTES / SPOOLS -->
       <div class="cadastro-table-box">
-        <div class="cadastro-table-header-title">COMPONENTES</div>
+        <div class="cadastro-table-header-title">${tableTitle}</div>
         <div class="cadastro-table-wrapper">
           <table class="table-components-cadastro table-components-transferencia">
             <thead>
@@ -190,6 +206,7 @@ export class NovaTransferenciaView {
   }
 
   atualizarEstadoBotoes(habilitados) {
+    if (!this.container) return;
     const btnLimpar = this.container.querySelector('#btn-transf-limpar');
     const btnGravar = this.container.querySelector('#btn-transf-gravar');
 
@@ -222,14 +239,18 @@ export class NovaTransferenciaView {
     this.origem = data.origem ? { ...data.origem } : { ...this.origem };
     this.destino = data.destino ? { ...data.destino } : { ...this.destino };
     this.terceiro = data.terceiro !== undefined ? data.terceiro : (this.terceiro || 'SIM');
-    this.componentes = (data.componentes && Array.isArray(data.componentes))
-      ? data.componentes.map((comp, idx) => ({
+    const list = data.itens || data.componentes || [];
+    this.componentes = Array.isArray(list)
+      ? list.map((comp, idx) => ({
           item: comp.item || String(idx + 1).padStart(2, '0'),
           codigo: comp.codigo,
-          qtd: comp.qtd || '1 UN'
+          qtd: comp.qtd || '1 UN',
+          desc: comp.desc || ''
         }))
       : [];
     this.isPreenchido = Boolean(this.origem.codigo && this.componentes.length > 0);
+
+    if (!this.container) return;
 
     // Atualização reativa do DOM
     const elOrigemCodigo = this.container.querySelector('#transf-origem-codigo');
@@ -307,22 +328,28 @@ export class NovaTransferenciaView {
     if (emptyPlaceholder) {
       if (this.componentes.length > 0) {
         emptyPlaceholder.classList.add('is-hidden');
-        emptyPlaceholder.style.setProperty('display', 'none', 'important');
+        if (emptyPlaceholder.style) {
+          emptyPlaceholder.style.setProperty('display', 'none', 'important');
+        }
       } else {
         emptyPlaceholder.classList.remove('is-hidden');
-        emptyPlaceholder.style.removeProperty('display');
+        if (emptyPlaceholder.style) {
+          emptyPlaceholder.style.removeProperty('display');
+        }
       }
     }
 
     this.atualizarEstadoBotoes(this.componentes.length > 0);
   }
 
-  limparFormulario() {
+  limparFormulario(showToast = false) {
     this.origem = { codigo: '', loja: '', nome: '' };
     this.destino = { codigo: '', loja: '', nome: '' };
     this.terceiro = '';
     this.componentes = [];
     this.isPreenchido = false;
+
+    if (!this.container) return;
 
     const elOrigemCodigo = this.container.querySelector('#transf-origem-codigo');
     const elOrigemLoja = this.container.querySelector('#transf-origem-loja');
@@ -370,40 +397,70 @@ export class NovaTransferenciaView {
     if (tbody) tbody.innerHTML = '';
     if (emptyPlaceholder) {
       emptyPlaceholder.classList.remove('is-hidden');
-      emptyPlaceholder.style.removeProperty('display');
+      if (emptyPlaceholder.style) {
+        emptyPlaceholder.style.removeProperty('display');
+      }
     }
 
     this.atualizarEstadoBotoes(false);
-    toast.info('Formulário', 'Campos limpos');
+    if (showToast) {
+      toast.info('Formulário', 'Campos limpos');
+    }
   }
 
   gravarTransferencia() {
+    if (!this.container) return;
     const btnGravar = this.container.querySelector('#btn-transf-gravar');
     if (btnGravar && btnGravar.disabled) return;
 
-    // Registra a nova transferência no mock
-    const novaTransferencia = addTransferComponente({
-      tipo: 'componente',
-      status: 'Em Trânsito',
-      statusCor: '#f59e0b',
-      etapaAtual: 3, // Aguardando ROM
-      fornecedorOrigem: `${this.origem.codigo || '000052'} - ${this.origem.loja || '01'} - ${this.origem.nome || 'ALVENIUS TUBOS E CONEXOES LTDA'}`,
-      fornecedorDestino: `${this.destino.codigo || '003385'} - ${this.destino.loja || '01'} - ${this.destino.nome || 'PETROPASY TECNOLOGIA E SERVICOS'}`,
-      terceiro: this.terceiro || 'SIM',
-      itens: this.componentes.map(comp => ({
-        codigo: comp.codigo,
-        descricao: `Item ${comp.item} - Peça Industrial Transferida`,
-        quantidade: comp.qtd
-      }))
-    });
+    const isSpool = this.tipo === 'spool';
 
-    toast.success('Sucesso', 'Transferência criada com sucesso!');
+    if (isSpool) {
+      addTransferSpool({
+        tipo: 'spool',
+        status: 'Em Trânsito',
+        statusCor: '#f59e0b',
+        etapaAtual: 3, // Aguardando ROM
+        fornecedorOrigem: `${this.origem.codigo || '000052'} - ${this.origem.loja || '01'} - ${this.origem.nome || 'ALVENIUS TUBOS E CONEXOES LTDA'}`,
+        fornecedorDestino: `${this.destino.codigo || '003385'} - ${this.destino.loja || '01'} - ${this.destino.nome || 'PETROPASY TECNOLOGIA E SERVICOS'}`,
+        terceiro: this.terceiro || 'SIM',
+        spools: this.componentes.map(comp => ({
+          codigo: comp.codigo,
+          descricao: comp.desc || `Spool ${comp.codigo}`,
+          quantidade: comp.qtd || '1 UN'
+        }))
+      });
 
-    // Retorna navegando para a tela de lista de transferências
-    if (typeof this.options.onNavigate === 'function') {
-      setTimeout(() => {
-        this.options.onNavigate('transferencia-componente');
-      }, 500);
+      toast.success('Sucesso', 'Transferência de Spool criada com sucesso!');
+
+      if (typeof this.options.onNavigate === 'function') {
+        setTimeout(() => {
+          this.options.onNavigate('transferencia-spool');
+        }, 500);
+      }
+    } else {
+      addTransferComponente({
+        tipo: 'componente',
+        status: 'Em Trânsito',
+        statusCor: '#f59e0b',
+        etapaAtual: 3, // Aguardando ROM
+        fornecedorOrigem: `${this.origem.codigo || '000052'} - ${this.origem.loja || '01'} - ${this.origem.nome || 'ALVENIUS TUBOS E CONEXOES LTDA'}`,
+        fornecedorDestino: `${this.destino.codigo || '003385'} - ${this.destino.loja || '01'} - ${this.destino.nome || 'PETROPASY TECNOLOGIA E SERVICOS'}`,
+        terceiro: this.terceiro || 'SIM',
+        itens: this.componentes.map(comp => ({
+          codigo: comp.codigo,
+          descricao: comp.desc || `Item ${comp.item} - Peça Industrial Transferida`,
+          quantidade: comp.qtd
+        }))
+      });
+
+      toast.success('Sucesso', 'Transferência criada com sucesso!');
+
+      if (typeof this.options.onNavigate === 'function') {
+        setTimeout(() => {
+          this.options.onNavigate('transferencia-componente');
+        }, 500);
+      }
     }
   }
 
@@ -416,11 +473,13 @@ export class NovaTransferenciaView {
     if (btnQrCode) {
       btnQrCode.addEventListener('click', () => {
         if (typeof this.options.onOpenQrCode === 'function') {
+          const mode = this.tipo === 'spool' ? 'transferencia-spool' : 'transferencia-componente';
           this.options.onOpenQrCode((dados) => {
-            if (dados && dados.componentes && dados.componentes.length > 0) {
+            const list = dados?.itens || dados?.componentes;
+            if (dados && Array.isArray(list) && list.length > 0) {
               this.preencherDadosTransferencia(dados);
             }
-          });
+          }, mode);
         }
       });
     }
@@ -429,7 +488,7 @@ export class NovaTransferenciaView {
     if (btnLimpar) {
       btnLimpar.addEventListener('click', () => {
         if (btnLimpar.disabled) return;
-        this.limparFormulario();
+        this.limparFormulario(true);
       });
     }
 

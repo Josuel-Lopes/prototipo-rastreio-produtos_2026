@@ -75,7 +75,10 @@ class App {
       }),
       novaTransferencia: new NovaTransferenciaView('app-view', {
         onNavigate: (route) => this.navigateTo(route),
-        onOpenQrCode: (callback) => this.openQrCodeScanner(callback, 'transferencia-componente')
+        onOpenQrCode: (callback, mode) => {
+          const actualMode = mode || (this.views?.novaTransferencia?.tipo === 'spool' ? 'transferencia-spool' : 'transferencia-componente');
+          this.openQrCodeScanner(callback, actualMode);
+        }
       })
     };
   }
@@ -186,8 +189,16 @@ class App {
       return;
     }
 
+    if (route === 'nova-transferencia-spool') {
+      this.currentRoute = 'nova-transferencia-spool';
+      this.views.novaTransferencia.setTipo('spool');
+      this.render();
+      return;
+    }
+
     if (route === 'nova-transferencia') {
       this.currentRoute = 'nova-transferencia';
+      this.views.novaTransferencia.setTipo('componente');
       this.render();
       return;
     }
@@ -205,6 +216,7 @@ class App {
       case 'transferencia':
       case 'transferencia-componente':
       case 'nova-transferencia': return 'Transferência';
+      case 'nova-transferencia-spool':
       case 'transferencia-spool': return 'Caldeiraria';
       case 'validar-qrcode': return 'Validar QRCode';
       default: return 'Rastreio de produtos';
@@ -236,7 +248,7 @@ class App {
       this.views.transferenciaComponente.render();
     } else if (this.currentRoute === 'transferencia-spool') {
       this.views.transferenciaSpool.render();
-    } else if (this.currentRoute === 'nova-transferencia') {
+    } else if (this.currentRoute === 'nova-transferencia' || this.currentRoute === 'nova-transferencia-spool') {
       this.views.novaTransferencia.render();
     }
 
@@ -274,9 +286,6 @@ class App {
                 ${lucide('qr-code', { size: 20, strokeWidth: 2 })}
                 <span>Ler QRCode de Spool</span>
               </button>
-              <button class="btn btn-outline btn-lg" id="btn-stage-back-menu">
-                <span>Voltar ao Menu</span>
-              </button>
             </div>
           </div>
         </div>
@@ -284,7 +293,6 @@ class App {
     `;
 
     const btnScan = mainContainer.querySelector('#btn-stage-scan-qrcode');
-    const btnBack = mainContainer.querySelector('#btn-stage-back-menu');
 
     if (btnScan) {
       btnScan.addEventListener('click', () => {
@@ -294,12 +302,6 @@ class App {
             `Spool ${code} registrado com sucesso na etapa de ${stageTitle.toLowerCase()}!`
           );
         });
-      });
-    }
-
-    if (btnBack) {
-      btnBack.addEventListener('click', () => {
-        this.navigateTo('menu');
       });
     }
   }
@@ -313,7 +315,7 @@ class App {
         }
       },
       onClose: (data) => {
-        if ((mode === 'transferencia-componente' || mode === 'transferencia') && data) {
+        if ((mode === 'transferencia-componente' || mode === 'transferencia-spool' || mode === 'transferencia') && data) {
           if (typeof onScanSuccess === 'function') {
             onScanSuccess(data);
           }
