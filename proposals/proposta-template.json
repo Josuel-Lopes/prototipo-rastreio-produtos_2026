@@ -929,7 +929,7 @@
           "type": "diagram",
           "caption": "Fluxo Login → Seleção → Projeto → Menu",
           "annotation": "Destacar etapas novas (Seleção e Projeto ativo)",
-          "src": null
+          "src": "assets/diagrams/fase7-login-selecao-projeto-menu.svg"
         }
       ],
       "correlationScenario": "A+B",
@@ -1290,7 +1290,7 @@
           "type": "diagram",
           "caption": "Cadastro → Protheus com vínculo de projeto",
           "annotation": "Destacar envio do código do projeto no payload",
-          "src": null
+          "src": "assets/diagrams/fase8-cadastro-protheus-projeto.svg"
         }
       ],
       "correlationScenario": "A+B",
@@ -1658,7 +1658,7 @@
           "type": "diagram",
           "caption": "Etapa → Protheus com projeto na movimentação",
           "annotation": "Destacar validação spool×projeto e envio do projeto",
-          "src": null
+          "src": "assets/diagrams/fase9-etapa-protheus-projeto.svg"
         }
       ],
       "correlationScenario": "A+B",
@@ -2030,7 +2030,7 @@
           "type": "diagram",
           "caption": "Transferência → Protheus com projeto",
           "annotation": "Destacar envio e validação do projeto",
-          "src": null
+          "src": "assets/diagrams/fase10-transferencia-protheus-projeto.svg"
         }
       ],
       "correlationScenario": "A+B",
