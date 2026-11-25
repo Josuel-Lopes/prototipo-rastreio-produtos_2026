@@ -3,6 +3,8 @@
  * Responsabilidade Única: Seleção do tipo de transferência (COMPONENTE ou SPOOL)
  */
 
+import { lucide } from './icons.js';
+
 export class ModalTransferenciaComponent {
   constructor(containerId = 'modal-root') {
     this.container = document.getElementById(containerId);
@@ -50,7 +52,7 @@ export class ModalTransferenciaComponent {
               Selecione qual TIPO de TRANSFERÊNCIA
             </h3>
             <button class="modal-close-btn-red" id="transfer-btn-close-x" aria-label="Fechar" title="Fechar modal">
-              ✕
+              ${lucide('x', { size: 18, strokeWidth: 2.5 })}
             </button>
           </div>
 
@@ -59,7 +61,7 @@ export class ModalTransferenciaComponent {
               <!-- Opção 1: COMPONENTE -->
               <div class="transfer-option-card" data-transfer-type="componente" tabindex="0" role="button">
                 <div class="transfer-icon-box">
-                  <img src="assets/icon-componente.png" class="transfer-box-icon" alt="Componente">
+                  ${lucide('layers', { size: 28, stroke: '#0070ba', strokeWidth: 2 })}
                 </div>
                 <div class="transfer-info">
                   <div class="transfer-info-title">COMPONENTE</div>
@@ -70,7 +72,7 @@ export class ModalTransferenciaComponent {
               <!-- Opção 2: SPOOL -->
               <div class="transfer-option-card" data-transfer-type="spool" tabindex="0" role="button">
                 <div class="transfer-icon-box">
-                  <img src="assets/icon-spool.png" class="transfer-box-icon" alt="Spool">
+                  ${lucide('box', { size: 28, stroke: '#0070ba', strokeWidth: 2 })}
                 </div>
                 <div class="transfer-info">
                   <div class="transfer-info-title">SPOOL</div>
@@ -82,12 +84,7 @@ export class ModalTransferenciaComponent {
 
           <div class="modal-footer">
             <button class="btn btn-danger" id="transfer-btn-close-bottom">
-              <!-- Ícone [⊗] Fechar -->
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="15" y1="9" x2="9" y2="15"></line>
-                <line x1="9" y1="9" x2="15" y2="15"></line>
-              </svg>
+              ${lucide('circle-x', { size: 16, strokeWidth: 2.2 })}
               <span>Fechar</span>
             </button>
           </div>

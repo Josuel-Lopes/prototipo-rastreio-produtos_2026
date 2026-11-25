@@ -6,6 +6,7 @@
 
 import { getSpools, getCounters, statusDefinitions, updateSpoolStatus } from '../mocks/spools-mock.js';
 import { toast } from '../components/toast.js';
+import { lucide } from '../components/icons.js';
 
 export class CaldeirariaView {
   constructor(containerId = 'app-view', options = {}) {
@@ -37,9 +38,7 @@ export class CaldeirariaView {
             
             <!-- Barra de Mensagem Informativa (i) -->
             <div class="info-box">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-              </svg>
+              ${lucide('info', { size: 18, strokeWidth: 2 })}
               <span>Leitura Spool, iniciar, finalizar e executar processo produção.</span>
             </div>
             <div class="accent-line"></div>
@@ -48,10 +47,7 @@ export class CaldeirariaView {
             <div class="caldeiraria-search-bar">
               <div class="caldeiraria-search-input-wrapper">
                 <span class="search-icon-left">
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                  </svg>
+                  ${lucide('search', { size: 18, strokeWidth: 2 })}
                 </span>
                 <input 
                   type="text" 
@@ -62,28 +58,16 @@ export class CaldeirariaView {
                 />
               </div>
 
-              <!-- Botão Azul: [:#:] Ler QRCode -->
+              <!-- Botão Azul: Ler QRCode -->
               <button class="btn btn-primary" id="btn-caldeiraria-qrcode">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="3" width="7" height="7"/>
-                  <rect x="14" y="3" width="7" height="7"/>
-                  <rect x="3" y="14" width="7" height="7"/>
-                  <rect x="14" y="14" width="3" height="3" fill="currentColor"/>
-                  <rect x="18" y="18" width="3" height="3" fill="currentColor"/>
-                  <line x1="14" y1="18" x2="14" y2="21"/>
-                  <line x1="18" y1="14" x2="21" y2="14"/>
-                </svg>
+                ${lucide('qr-code', { size: 18, strokeWidth: 2 })}
                 <span>Ler QRCode</span>
               </button>
             </div>
 
             <!-- Banner de Instrução em Destaque -->
             <div class="instruction-banner-highlight">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-              </svg>
+              ${lucide('info', { size: 18, strokeWidth: 2 })}
               <span>Clique no código SPOOL para continuar</span>
             </div>
 
@@ -92,10 +76,7 @@ export class CaldeirariaView {
               <button class="accordion-header ${this.isAccordionOpen ? 'is-open' : ''}" id="btn-toggle-accordion" aria-expanded="${this.isAccordionOpen}">
                 <div class="accordion-header-left">
                   <span class="accordion-icon-toggle">
-                    <!-- Ícone [^] quando aberto e [v] quando fechado -->
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="18 15 12 9 6 15"></polyline>
-                    </svg>
+                    ${this.isAccordionOpen ? lucide('chevron-up', { size: 16, strokeWidth: 2.5 }) : lucide('chevron-down', { size: 16, strokeWidth: 2.5 })}
                   </span>
                   <span class="accordion-title">PROCESSOS | QTD.</span>
                 </div>
@@ -212,10 +193,10 @@ export class CaldeirariaView {
               </a>
             </div>
 
-            <!-- Linha de Datas com Ícones de Calendário -->
+            <!-- Linha de Datas com Ícones de Calendário Oficiais Lucide -->
             <div class="spool-dates-row">
-              <span class="spool-date-item">📅 <strong>Início:</strong> ${spool.inicio}</span>
-              <span class="spool-date-item">📅 <strong>Finalizado:</strong> ${spool.finalizado}</span>
+              <span class="spool-date-item">${lucide('calendar', { size: 14, strokeWidth: 2 })} <strong>Início:</strong> ${spool.inicio}</span>
+              <span class="spool-date-item">${lucide('calendar', { size: 14, strokeWidth: 2 })} <strong>Finalizado:</strong> ${spool.finalizado}</span>
             </div>
 
             <!-- Descrição Técnica -->
@@ -231,11 +212,7 @@ export class CaldeirariaView {
             ${(this.showScrapHistory && hasScrap) ? `
               <div class="spool-scrap-history">
                 <div class="spool-scrap-title">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                  </svg>
+                  ${lucide('circle-alert', { size: 14, strokeWidth: 2 })}
                   <span>Registro de Não-Conformidade / Sucata:</span>
                 </div>
                 ${spool.historicoSucata.map(h => `

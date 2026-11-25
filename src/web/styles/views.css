@@ -111,32 +111,37 @@
   border: 1px solid #71889e;
   border-radius: 0px;
   box-shadow: var(--shadow-card);
-  padding: 24px 28px;
-  margin: 50px auto 30px auto;
+  margin-top: 20px;
+  padding: 42px 28px 24px 28px;
+  margin-bottom: 30px;
+  position: relative;
 }
 
 .menu-title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   color: #111827;
   text-align: center;
-  margin-top: 4px;
-  margin-bottom: 14px;
+  margin-top: 0;
+  margin-bottom: 8px;
+  letter-spacing: -0.2px;
 }
 
-.menu-title::after {
-  content: "";
-  display: block;
+/* Linha divisória degradê única centralizada (fidelidade absoluta a 70c79d.png) */
+.menu-divider {
   height: 2px;
-  margin: 14px 0 0;
-  background: linear-gradient(90deg, transparent, #1956ce 40%, #00bcd4 60%, transparent);
+  width: 85%;
+  max-width: 440px;
+  margin: 0 auto 20px auto;
+  background: linear-gradient(90deg, transparent, #1956ce 30%, #00bcd4 70%, transparent);
+  border: none;
 }
 
 .menu-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
-  margin-top: 20px;
+  margin-top: 0;
 }
 
 .menu-grid > .menu-card:last-child:nth-child(odd) {
@@ -146,23 +151,25 @@
 /* Card de módulo (componente ModuleCard) */
 .menu-card {
   width: 100%;
-  min-height: 105px;
+  min-height: 108px;
   border: 1px solid #71889e;
   border-radius: 0px;
   background: #ffffff;
-  padding: 18px 14px 14px;
+  padding: 20px 16px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .menu-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #1956ce;
 }
 
 .menu-card:focus-visible {
@@ -174,48 +181,74 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 44px;
+  height: 40px;
+  margin-bottom: 8px;
+}
+
+.menu-card-icon-svg {
+  width: 36px;
+  height: 36px;
+  max-width: 38px;
+  max-height: 38px;
+  display: block;
 }
 
 .menu-card-icon-img {
-  height: 38px;
+  height: 36px;
   width: auto;
-  max-width: 46px;
+  max-width: 44px;
   object-fit: contain;
-  margin-bottom: 10px;
   display: block;
 }
 
 .menu-card-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: #0a2540;
   text-transform: uppercase;
-  margin: 0 0 4px;
-  letter-spacing: 0.3px;
+  margin: 0 0 5px 0;
+  letter-spacing: 0.4px;
 }
 
 .menu-card-subtitle {
-  font-size: 11px;
+  font-size: 12px;
   color: #374151;
   line-height: 1.35;
   margin: 0;
+  max-width: 340px;
+  text-align: center;
 }
 
 @media (max-width: 768px) {
   .view-menu-container {
-    width: calc(100% - 24px);
+    width: 100%;
     max-width: 440px;
     margin: 0 auto;
   }
   .menu-panel {
     width: 100%;
-    margin: 40px auto 20px auto;
-    background: #ffffff;
-    padding: 20px 14px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background: #f8f9fb;
+    border: 1px solid #71889e;
+    padding: 42px 14px 20px 14px;
+  }
+  .menu-title {
+    font-size: 22px;
+    margin-top: 0;
+    margin-bottom: 8px;
+  }
+  .menu-divider {
+    margin: 0 auto 18px auto;
   }
   .menu-grid {
     grid-template-columns: 1fr;
-    gap: 14px;
+    gap: 12px;
+  }
+  .menu-card {
+    min-height: 106px;
+    padding: 18px 14px 14px;
   }
 }
 
@@ -275,7 +308,7 @@
 .view-caldeiraria-container {
   width: 100%;
   max-width: 1100px;
-  margin: 0 auto;
+  margin: 24px auto 0 auto;
 }
 
 .caldeiraria-search-bar {

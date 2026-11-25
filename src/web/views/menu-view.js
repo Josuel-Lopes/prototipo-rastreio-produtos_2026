@@ -30,7 +30,7 @@ export class MenuView {
       <div class="view-menu-container">
         <div class="menu-panel">
           <h2 class="menu-title">Clique no que deseja fazer</h2>
-          <div class="accent-divider-center"></div>
+          <div class="menu-divider"></div>
           <div class="menu-grid">
             ${MODULES.map(renderModuleCard).join('')}
           </div>

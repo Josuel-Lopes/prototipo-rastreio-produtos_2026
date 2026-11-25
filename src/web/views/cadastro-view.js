@@ -5,6 +5,7 @@
 
 import { addSpool, getSpoolByCode } from '../mocks/spools-mock.js';
 import { toast } from '../components/toast.js';
+import { lucide } from '../components/icons.js';
 
 export class CadastroView {
   constructor(containerId = 'app-view', options = {}) {
@@ -41,9 +42,7 @@ export class CadastroView {
             
             <!-- Barra de Mensagem Informativa (i) -->
             <div class="info-box">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-              </svg>
+              ${lucide('info', { size: 18, strokeWidth: 2 })}
               <span>Realiza o cadastro de Spool e componentes iniciar processo produção.</span>
             </div>
             <div class="accent-line"></div>
@@ -99,7 +98,8 @@ export class CadastroView {
               <input type="text" id="add-item-desc" class="form-input" placeholder="Descrição do componente (tubo, flange, luva...)" />
               <input type="text" id="add-item-qtd" class="form-input" placeholder="Ex: 1 UN / 500 MM" />
               <button class="btn btn-outline" id="btn-add-item-row" style="padding: 9px 16px;">
-                + Adicionar Item
+                ${lucide('plus', { size: 16, strokeWidth: 2 })}
+                <span>Adicionar Item</span>
               </button>
             </div>
 
@@ -107,36 +107,21 @@ export class CadastroView {
 
           <!-- Barra de Ações (Footer do Card) -->
           <div class="card-footer-actions">
-            <!-- Botão Azul: [:#:] Ler QRCode -->
+            <!-- Botão Azul: Ler QRCode -->
             <button class="btn btn-primary" id="btn-cadastro-qrcode">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7" height="7"/>
-                <rect x="14" y="3" width="7" height="7"/>
-                <rect x="3" y="14" width="7" height="7"/>
-                <rect x="14" y="14" width="3" height="3" fill="currentColor"/>
-                <rect x="18" y="18" width="3" height="3" fill="currentColor"/>
-                <line x1="14" y1="18" x2="14" y2="21"/>
-                <line x1="18" y1="14" x2="21" y2="14"/>
-              </svg>
+              ${lucide('qr-code', { size: 18, strokeWidth: 2 })}
               <span>Ler QRCode</span>
             </button>
 
-            <!-- Botão Cinza: [lixeira] Limpar -->
+            <!-- Botão Cinza: Limpar -->
             <button class="btn btn-gray-action" id="btn-cadastro-limpar">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              </svg>
+              ${lucide('trash-2', { size: 18, strokeWidth: 2 })}
               <span>Limpar</span>
             </button>
 
-            <!-- Botão Cinza: [disquete] Gravar -->
+            <!-- Botão Cinza: Gravar -->
             <button class="btn btn-gray-action" id="btn-cadastro-gravar">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                <polyline points="7 3 7 8 15 8"></polyline>
-              </svg>
+              ${lucide('save', { size: 18, strokeWidth: 2 })}
               <span>Gravar</span>
             </button>
           </div>

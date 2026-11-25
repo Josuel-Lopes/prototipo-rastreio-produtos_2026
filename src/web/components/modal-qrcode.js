@@ -5,6 +5,7 @@
 
 import { getSpoolByCode, getSpools, updateSpoolStatus } from '../mocks/spools-mock.js';
 import { toast } from './toast.js';
+import { lucide } from './icons.js';
 
 export class ModalQrCodeComponent {
   constructor(containerId = 'modal-root') {
@@ -121,7 +122,7 @@ export class ModalQrCodeComponent {
               </span>
             </div>
             <button class="modal-close-btn-red" id="qrcode-btn-close-x" aria-label="Fechar" title="Fechar leitor">
-              ✕
+              ${lucide('x', { size: 18, strokeWidth: 2.5 })}
             </button>
           </div>
 
@@ -159,9 +160,7 @@ export class ModalQrCodeComponent {
             <!-- Painel Interativo de Simulação para Coletor / Demonstração -->
             <div class="scanner-simulation-actions">
               <button class="btn btn-primary btn-block" id="btn-simulate-instant-scan" style="font-size: 13px;">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                </svg>
+                ${lucide('zap', { size: 16, strokeWidth: 2 })}
                 <span>Simular Leitura Automática</span>
               </button>
             </div>
@@ -183,12 +182,7 @@ export class ModalQrCodeComponent {
 
           <div class="modal-footer">
             <button class="btn btn-danger" id="qrcode-btn-close-bottom">
-              <!-- Ícone [⊗] Fechar -->
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="15" y1="9" x2="9" y2="15"></line>
-                <line x1="9" y1="9" x2="15" y2="15"></line>
-              </svg>
+              ${lucide('circle-x', { size: 16, strokeWidth: 2.2 })}
               <span>Fechar</span>
             </button>
           </div>

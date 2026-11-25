@@ -7,6 +7,7 @@ import { HeaderComponent } from './components/header.js';
 import { toast } from './components/toast.js';
 import { ModalTransferenciaComponent } from './components/modal-transferencia.js';
 import { ModalQrCodeComponent } from './components/modal-qrcode.js';
+import { lucide } from './components/icons.js';
 
 import { LoginView } from './views/login-view.js';
 import { MenuView } from './views/menu-view.js';
@@ -202,7 +203,7 @@ class App {
           </div>
           <div class="card-body" style="text-align: center; padding: 48px 24px;">
             <div class="info-box" style="display: inline-flex; text-align: left; margin-bottom: 24px;">
-              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+              ${lucide('info', { size: 18, strokeWidth: 2 })}
               <span>${stageDescription}</span>
             </div>
             <h3 style="font-size: 20px; color: var(--color-navy); margin-bottom: 12px;">Etapa de Produção: ${stageTitle}</h3>
@@ -211,12 +212,7 @@ class App {
             </p>
             <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
               <button class="btn btn-primary btn-lg" id="btn-stage-scan-qrcode">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="3" width="7" height="7"></rect>
-                  <rect x="14" y="3" width="7" height="7"></rect>
-                  <rect x="14" y="14" width="7" height="7"></rect>
-                  <rect x="3" y="14" width="7" height="7"></rect>
-                </svg>
+                ${lucide('qr-code', { size: 20, strokeWidth: 2 })}
                 <span>Ler QRCode de Spool</span>
               </button>
               <button class="btn btn-outline btn-lg" id="btn-stage-back-menu">

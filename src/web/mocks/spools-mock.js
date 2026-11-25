@@ -4,8 +4,8 @@
  */
 
 export const defaultUserData = {
-  username: 'josuel',
-  name: 'Josuel Lopes',
+  username: 'josuellopes',
+  name: 'josuellopes',
   role: 'Operador de Caldeiraria / Inspetor',
   matricula: 'ALV-2026-0414',
   departamento: 'Chão de Fábrica - Spools',
@@ -147,7 +147,7 @@ export const initialSpools = [
       {
         data: '23/11/2026 às 15:30',
         motivo: 'Rebordo de bisel fora da tolerância dimensional (3.2mm vs 1.6mm especificado). Aguardando retífica e esmerilhamento.',
-        usuario: 'josuel',
+        usuario: 'josuellopes',
         acao: 'Pausado para retrabalho dimensional'
       }
     ],
@@ -304,12 +304,12 @@ export function setCurrentUser(user) {
     state.user = null;
     return;
   }
-  const username = user.username || 'josuel';
+  const username = user.username || 'josuellopes';
   state.user = {
     ...defaultUserData,
     ...user,
     username,
-    name: user.name || (username.charAt(0).toUpperCase() + username.slice(1)),
+    name: user.name || (username === 'josuellopes' ? 'josuellopes' : (username.charAt(0).toUpperCase() + username.slice(1))),
     isLoggedIn: user.isLoggedIn !== undefined ? Boolean(user.isLoggedIn) : true
   };
 }
