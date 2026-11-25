@@ -368,14 +368,22 @@ export class PropostaView {
     const client = d.client || {};
     const summary = d.executiveSummary || {};
     const features = Array.isArray(d.features) ? d.features : [];
+    this.deliveryPhase = this.resolveDeliveryPhase(d);
     const validUntil = addDays(meta.issuedAt, meta.validityDays);
     const withAreas = features.find(f => Array.isArray(f.breakdown) || Array.isArray(f.disciplines));
     this.areaNames = withAreas
       ? getBreakdownRows(withAreas, meta.hourlyRate).map(r => r.area)
       : DEFAULT_AREAS;
     const issuedYear = /^(\d{4})/.exec(String(meta.issuedAt || ''))?.[1] || '';
-    const phaseNums = features.map(f => f.phase).filter(p => p !== undefined);
-    const phaseRange = phaseNums.length ? ` (Fases ${Math.min(...phaseNums)} a ${Math.max(...phaseNums)})` : '';
+    // Intervalo das fases desta proposta (novas): funcionalidades novas + fases de investimento não existentes.
+    const invPhaseList = (Array.isArray(d.investment?.phases) ? d.investment.phases : []).filter(p => !isSuperseded(p));
+    const phaseNums = [
+      ...features.filter(f => !isExisting(f)).map(f => f.phase),
+      ...invPhaseList.filter(p => !isExisting(p)).map(p => p.phase)
+    ].map(Number).filter(n => Number.isFinite(n));
+    const phaseRange = phaseNums.length
+      ? ` (${Math.min(...phaseNums) === Math.max(...phaseNums) ? `Fase ${Math.min(...phaseNums)}` : `Fases ${Math.min(...phaseNums)} a ${Math.max(...phaseNums)}`})`
+      : '';
 
     return `
       <article class="proposal-sheet">
@@ -529,6 +537,7 @@ export class PropostaView {
 
           <div class="features-list" data-collapsible-list>
             ${features.map(f => this.renderFeatureCard(f, meta)).join('')}
+            ${this.renderDeliveryPhaseCard(d)}
           </div>
           </div>
         </section>
@@ -692,9 +701,9 @@ export class PropostaView {
 
           ${Array.isArray(feature.disciplines) && feature.disciplines.length ? this.renderDisciplines(feature) : ''}
 
-          ${feature.testsAdjustDeploy ? this.renderTestsAdjustDeploy(feature.testsAdjustDeploy, 'Testes / Ajustes / Deploy', `tad-${feature.id}`) : ''}
+          ${!existing && feature.deliveryNote ? this.renderDeliveryNote(feature) : ''}
 
-          ${!existing && (feature.development || feature.testsAdjustDeploy) ? `
+          ${!existing && feature.development ? `
             <div class="feature-total-box" role="group" aria-label="Total da funcionalidade">
               <span class="feature-total-label">Total da funcionalidade</span>
               <span class="feature-total-values">
@@ -990,6 +999,91 @@ export class PropostaView {
           </table>
         </div>
       </div>
+    `;
+  }
+
+  /** Nota discreta (mesmo padrão do deliveredNote): testes/ajustes/deploy cobrados na fase de entrega final. */
+  renderDeliveryNote(feature) {
+    const delivery = this.deliveryPhase?.phase;
+    const seal = delivery ? `Entrega final · Fase ${t(delivery.phase)}` : 'Entrega final';
+    return `
+      <div class="feature-delivered-note is-delivery" role="note" id="entrega-${t(feature.id)}">
+        <span class="feature-delivered-seal">${lucide('calendar', { size: 14, strokeWidth: 2.4 })}${seal}</span>
+        <span class="feature-delivered-text">${t(feature.deliveryNote)}</span>
+      </div>
+    `;
+  }
+
+  /**
+   * Fase de entrega final (testes/ajustes/deploy cobrados uma única vez): fase de investimento nova,
+   * sem funcionalidade vinculada (featureId null), preferindo a indicada em investment.testsAdjustDeploy.phase.
+   */
+  resolveDeliveryPhase(d = {}) {
+    const inv = d.investment || {};
+    const phases = (Array.isArray(inv.phases) ? inv.phases : []).filter(p => !isSuperseded(p));
+    const featurePhases = new Set((d.features || []).map(f => f.phase));
+    const tad = inv.testsAdjustDeploy && typeof inv.testsAdjustDeploy === 'object' ? inv.testsAdjustDeploy : null;
+    const candidates = phases.filter(p => !isExisting(p) && !featurePhases.has(p.phase) && !p.featureId);
+    const phase = (tad && tad.phase !== undefined ? phases.find(p => p.phase === tad.phase) : null)
+      || candidates.find(p => /teste|ajuste|deploy/i.test(p.name || ''))
+      || null;
+    if (!phase && !tad) return null;
+    return { phase, tad };
+  }
+
+  /** Card destacado da fase de entrega final (Fase 11): breakdown testes + ajustes + deploy. */
+  renderDeliveryPhaseCard(d = {}) {
+    const info = this.deliveryPhase;
+    if (!info) return '';
+    const { phase = {}, tad } = { phase: info.phase || {}, tad: info.tad };
+    const key = 'entrega-final';
+    const expanded = this.isCollapsibleExpanded(key, false);
+    const num_ = phase.phase ?? tad?.phase;
+    const name = String(phase.name || 'Testes, ajustes e deploy para produção (entrega final)').replace(/^\s*Fase\s+\d+\s*[–-]\s*/i, '');
+    const hours = phase.hours ?? tad?.total?.hours;
+    const price = phase.price ?? tad?.total?.price;
+    const covered = (d.features || []).filter(f => !isExisting(f)).map(f => f.phase).filter(n => n !== undefined);
+    const coveredLabel = covered.length ? (covered.length === 1 ? `Fase ${covered[0]}` : `Fases ${Math.min(...covered)} a ${Math.max(...covered)}`) : '';
+    // Breakdown: investment.testsAdjustDeploy; fallback para phase.breakdown (tests/adjustments/deploy)
+    let breakdown = tad;
+    if (!breakdown && Array.isArray(phase.breakdown)) {
+      breakdown = {};
+      phase.breakdown.forEach(r => { if (['tests', 'adjustments', 'deploy'].includes(r.area)) breakdown[r.area] = { hours: r.hours, price: r.price }; });
+    }
+    const composition = (Array.isArray(phase.breakdown) ? phase.breakdown : []).filter(r => r.note);
+    const tableTitle = `Fase ${t(num_)} – Testes, ajustes e deploy (entrega final, cobrança única)`;
+    return `
+      <article class="proposal-feature-card is-new is-delivery-phase ${expanded ? '' : 'is-collapsed'}" id="card-${key}" tabindex="-1" data-feature-card="${key}">
+        <header class="feature-card-header" data-feature-toggle-area>
+          <div class="feature-header-left">
+            <span class="feature-phase-badge">Fase ${t(num_)}</span>
+            <span class="feature-delivery-badge">${lucide('calendar', { size: 12, strokeWidth: 2.4 })}Entrega final</span>
+            <h3 class="feature-title" id="feature-title-${key}">${t(name)}</h3>
+          </div>
+          <div class="feature-metrics-badges">
+            <span class="prop-badge">${lucide('calendar', { size: 14, strokeWidth: 2 })}${num(hours)} h</span>
+            ${phase.businessDays !== undefined ? `<span class="prop-badge">${num(phase.businessDays)} dias úteis</span>` : ''}
+            <span class="prop-badge price">${brl(price)}</span>
+          </div>
+          ${this.renderCollapseToggle(key, expanded)}
+        </header>
+        <div class="feature-card-collapse" id="feature-body-${key}" role="region" aria-labelledby="feature-title-${key}" ${expanded ? '' : 'inert'}>
+          <div class="feature-card-body">
+            <div class="delivery-phase-intro">
+              ${lucide('info', { size: 16, strokeWidth: 2 })}
+              <p>${(phase.note || tad?.note)
+                ? t(phase.note || tad.note)
+                : `<strong>Cobrança única${coveredLabel ? ` cobrindo as ${coveredLabel}` : ''}.</strong>`}</p>
+            </div>
+            ${breakdown ? this.renderTestsAdjustDeploy(breakdown, tableTitle, 'tad-entrega-final') : ''}
+            ${composition.length ? `
+              <ul class="delivery-phase-composition" aria-label="Composição das horas">
+                ${composition.map(r => `<li><strong>${t(r.label || r.area)}:</strong> ${t(r.note)}</li>`).join('')}
+              </ul>
+            ` : ''}
+          </div>
+        </div>
+      </article>
     `;
   }
 
@@ -1327,7 +1421,8 @@ export class PropostaView {
         </div>
 
         ${(() => {
-          const others = phases.filter(p => !isSuperseded(p) && !featurePhases.has(p.phase));
+          const deliveryNum = this.deliveryPhase?.phase?.phase;
+          const others = phases.filter(p => !isSuperseded(p) && !featurePhases.has(p.phase) && p.phase !== deliveryNum);
           if (!others.length) return '';
           return `
             <div class="area-sheets-group" id="topico-planilhas-fases" tabindex="-1" data-collapsible-scope>
@@ -1342,7 +1437,7 @@ export class PropostaView {
           `;
         })()}
 
-        ${inv.testsAdjustDeploy ? this.renderTestsAdjustDeploy(inv.testsAdjustDeploy, 'Consolidado de Testes / Ajustes / Deploy (novas funcionalidades)', 'tad-consolidado') : ''}
+        ${inv.testsAdjustDeploy && !this.deliveryPhase ? this.renderTestsAdjustDeploy(inv.testsAdjustDeploy, 'Testes, ajustes e deploy (entrega final, cobrança única)', 'tad-consolidado') : ''}
 
         ${sprints.length ? this.renderSprints(sprints, phases) : ''}
 
@@ -1429,6 +1524,7 @@ export class PropostaView {
                         ${!existing ? `<div class="sprint-price">${brl(pr)}</div>` : ''}
                         ${sp.startDate || sp.endDate ? `<div class="sprint-dates">${formatShortRange(sp.startDate, sp.endDate)}</div>` : ''}
                         ${sp.deliverables || deliverables.length ? `<div class="sprint-deliverables">${t(sp.deliverables || deliverables.join('; '))}</div>` : ''}
+                        ${sp.note ? `<div class="sprint-note">${lucide('info', { size: 13, strokeWidth: 2 })}<span>${t(sp.note)}</span></div>` : ''}
                       </div>
                     `;
                   }).join('')}
@@ -1556,7 +1652,6 @@ export class PropostaView {
     const features = Array.isArray(d.features) ? d.features : [];
     const inv = d.investment || {};
     const invPhases = (Array.isArray(inv.phases) ? inv.phases : []).filter(p => !isSuperseded(p));
-    const featurePhases = new Set(features.map(f => f.phase));
     const exists = (id) => Boolean(id && this.container.querySelector(`#${CSS.escape(id)}`));
     const item = (id, label, extra = {}) => (exists(id) ? { id, label, ...extra } : null);
     const clean = (list) => list.filter(Boolean);
@@ -1565,19 +1660,13 @@ export class PropostaView {
       if (!list.length) return '';
       return list.length === 1 ? `Fase ${list[0]}` : `Fases ${list[0]}–${list[list.length - 1]}`;
     };
-    const plainName = (name) => t(stripExistingSuffix(name)).replace(/\s*\([^)]*\)\s*$/, '');
 
     const existingFeatures = features.filter(f => isExisting(f));
     const newFeatures = features.filter(f => !isExisting(f));
     const existingPhaseNums = invPhases.filter(p => isExisting(p)).map(p => p.phase);
     const existingRange = phaseRangeLabel(existingPhaseNums.length ? existingPhaseNums : existingFeatures.map(f => f.phase));
-    const newPhases = newFeatures.map(f => f.phase).filter(n => n !== undefined);
-
-    /** Fase de testes/ajustes/deploy vinculada à feature (próxima fase sem feature própria). */
-    const tadPhaseOf = (f) => invPhases
-      .filter(p => toNumber(p.phase) > toNumber(f.phase) && !featurePhases.has(p.phase))
-      .sort((a, b) => a.phase - b.phase)
-      .find(p => /teste|ajuste|deploy/i.test(p.name || '') && (p.featureId ? p.featureId === f.id : true));
+    const deliveryNum = this.deliveryPhase?.phase?.phase ?? this.deliveryPhase?.tad?.phase;
+    const newPhases = [...newFeatures.map(f => f.phase), deliveryNum].filter(n => n !== undefined && n !== null);
 
     const erpItem = (d.outOfScope || []).find(o => CLIENT_ERP_RE.test(o));
 
@@ -1611,19 +1700,20 @@ export class PropostaView {
         key: 'novas',
         label: `Novas funcionalidades${newPhases.length ? ` (Fases ${newPhases.join(', ')})` : ''}`,
         chip: 'Novas funcionalidades',
-        items: clean(newFeatures.map(f => {
-          const tad = tadPhaseOf(f);
+        items: clean([...newFeatures.map(f => {
           const printsCount = this.container.querySelectorAll(`#prints-${CSS.escape(f.id)} .print-item`).length;
           return item(`card-${f.id}`, t(f.label || f.title), {
             dot: 'new',
             prefix: f.label ? '' : (f.phase !== undefined ? `F${t(f.phase)}` : ''),
             children: clean([
-              tad ? item(`tad-${f.id}`, `Fase ${t(tad.phase)} – ${plainName(tad.name)}`) : null,
               item(`prints-${f.id}`, `Prints anotados${printsCount ? ` (${printsCount})` : ''}`),
               item(`incluso-${f.id}`, 'Inclusos sem custo')
             ])
           });
-        }))
+        }), item('card-entrega-final', deliveryNum !== undefined ? `Fase ${t(deliveryNum)} – Testes, ajustes e deploy (entrega final)` : 'Testes, ajustes e deploy (entrega final)', {
+          dot: 'new',
+          children: clean([item('tad-entrega-final', 'Breakdown testes / ajustes / deploy')])
+        })])
       },
       {
         key: 'investimento', label: 'Investimento', chip: 'Investimento',

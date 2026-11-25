@@ -1,7 +1,7 @@
 {
   "meta": {
     "id": "PROP-2026-011",
-    "version": "1.1",
+    "version": "1.2",
     "issuedAt": "2026-11-25",
     "validityDays": 30,
     "startDate": "2026-12-01",
@@ -18,10 +18,10 @@
       "features[].disciplines": "Lista por disciplina (backend, frontend, designer, database, tests) com reused/new/adjusted (textos), baseHours, reusedHours (subtraídas), adjustmentHours (somadas), hours e price finais",
       "features[].reuseRatio": "reusedHours / baseHours do desenvolvimento (0–1)",
       "features[].development": "Subtotal do desenvolvimento (soma das disciplinas)",
-      "features[].testsAdjustDeploy": "Itens tests, adjustments, deploy (hours, price) + total, separados do desenvolvimento",
+      "features[].testsAdjustDeploy": "Removido nas funcionalidades novas (v1.2): Testes/Ajustes/Deploy passam a ser cobrados uma única vez em investment.phases[phase=11] (featureId null). features[].hours/price refletem somente o desenvolvimento.",
       "features[].visuals[].annotation": "Destaque obrigatório a marcar no print",
-      "investment.phases[].featureId": "Vínculo da fase com a funcionalidade",
-      "investment.testsAdjustDeploy": "Consolidado de Testes/Ajustes/Deploy das novas funcionalidades",
+      "investment.phases[].featureId": "Vínculo da fase com a funcionalidade. Pode ser null para fases transversais (ex.: fase 11 – entrega final).",
+      "investment.testsAdjustDeploy": "Consolidado único de Testes/Ajustes/Deploy (fase 11 – entrega final); chargedOnce=true, phase=11, note.",
       "investment.payment[].scope": "existing | new-features",
       "features[].note": "Observação de status (ex.: já existente)",
       "investment.phases[].note": "Observação de status da fase",
@@ -33,7 +33,7 @@
       "estimationMethod": "Objeto com fórmulas (hours, price, duration, testsAdjustDeploy), definições das colunas, fonte da estimativa, nota de transparência e status de validação por área (validationByArea[].status)",
       "features[].breakdown / investment.phases[].breakdown": "Array uniforme por área: {area, label, fromScratch, reused, adjustments, hours, price, validation, note?}. reused é negativo (horas subtraídas); hours = fromScratch + reused + adjustments; price = hours × hourlyRate; validation ∈ estimationMethod.validationStatusValues",
       "features[].breakdownTotal / investment.phases[].breakdownTotal": "Soma das colunas do breakdown {fromScratch, reused, adjustments, hours, price}",
-      "features[].testsAdjustDeployBreakdown(+Total)": "Mesmo formato de breakdown para Testes/Ajustes/Deploy (areas: tests, adjustments, deploy)",
+      "features[].testsAdjustDeployBreakdown(+Total)": "Removido (v1.2); ver investment.phases[phase=11].breakdown (tests, adjustments, deploy).",
       "estimationMethod.sourceRepository": "URL do repositório real usado como base da estimativa",
       "estimationMethod.referenceDocs": "Documentos internos de referência (levantamentos detalhados; não compõem o preço)",
       "features[].dependsOn": "IDs de funcionalidades das quais esta depende",
@@ -42,7 +42,9 @@
       "features[].includedItems": "Itens complementares inclusos sem cobrança: [{title, hours: 0, price: 0, note, files?, prints?}]",
       "features[].inventory": "Inventário real do MVP: {new[], reused[], adjusted[], outOfScope[], source}",
       "features[].breakdown[].note": "Observação da área (ex.: justificativa de ajuste fino)",
-      "features[].deliveredNote": "Texto curto exibido no lugar dos visuais em funcionalidades 'existing' (já entregues); quando presente, não renderizar placeholders de print/diagrama pendente. visuals fica [] nessas features."
+      "features[].deliveredNote": "Texto curto exibido no lugar dos visuais em funcionalidades 'existing' (já entregues); quando presente, não renderizar placeholders de print/diagrama pendente. visuals fica [] nessas features.",
+      "features[].deliveryNote": "Texto curto informando que testes/ajustes/deploy da funcionalidade são cobrados na fase de entrega final (11).",
+      "investment.sprints[].note": "Observação opcional da sprint (ex.: sprint de entrega final e recesso)."
     }
   },
   "theme": {
@@ -113,7 +115,7 @@
       "hours": "Horas (por área) = Do zero − Reaproveitado + Ajustes",
       "price": "Valor = Horas × R$ 90,00",
       "duration": "Prazo (dias úteis) = Horas ÷ 8 h/dia útil",
-      "testsAdjustDeploy": "Testes, Ajustes e Deploy para produção são estimados e apresentados em separado, com total próprio, e somados ao total da funcionalidade"
+      "testsAdjustDeploy": "Testes, Ajustes e Deploy para produção são cobrados uma única vez, na entrega final (Fase 11): Testes = soma dos testes de homologação/E2E/regressão de cada funcionalidade; Ajustes e Deploy = média das funcionalidades (arredondada). Os testes de desenvolvimento permanecem no breakdown de cada fase."
     },
     "definitions": {
       "fromScratch": "Do zero: horas para construir a entrega da área como se nada existisse",
@@ -130,7 +132,7 @@
       "Testes"
     ],
     "source": "Estimativa elaborada pelo comercial com base exclusivamente no escopo inicial da proposta e no código do repositório real (https://github.com/maxcode42/client-alvenius-rastreabilidade-produtos): tecnologias (NextJS pages router, React, TailwindCSS, Node, PostgreSQL + node-pg-migrate, Jest, integração ERP Protheus via API externa) e código que deverá ser gerado, reaproveitado ou ajustado. Referências de mercado não são base desta proposta.",
-    "transparencyNote": "Horas validadas apenas pelo escopo inicial e pelo código do repositório real. O levantamento ampliado por área (incluindo referências opcionais de mercado) está registrado nesta proposta. Mantém-se a estimativa inicial de 37 h para a Seleção de Projetos. Com base nas solicitações e no levantamento realizados em reunião com o cliente em 24/11/2026, foram adicionadas as demais fases e etapas do desenvolvimento, com a participação do desenvolvedor e do cliente. Qualquer alteração de valor só será aplicada mediante aprovação prévia e aceite do cliente Alvenius.",
+    "transparencyNote": "Horas validadas apenas pelo escopo inicial e pelo código do repositório real. O levantamento ampliado por área (incluindo referências opcionais de mercado) está registrado nesta proposta. Mantém-se a estimativa inicial de 37 h para a Seleção de Projetos (28 h de desenvolvimento na Fase 7 + parcela de testes, ajustes e deploy consolidada na Fase 11 de entrega final, onde esses itens são cobrados uma única vez). Com base nas solicitações e no levantamento realizados em reunião com o cliente em 24/11/2026, foram adicionadas as demais fases e etapas do desenvolvimento, com a participação do desenvolvedor e do cliente. Qualquer alteração de valor só será aplicada mediante aprovação prévia e aceite do cliente Alvenius.",
     "validationStatusValues": [
       "estimado pelo comercial",
       "validado",
@@ -746,27 +748,9 @@
         "hours": 28,
         "price": 2520
       },
-      "testsAdjustDeploy": {
-        "tests": {
-          "hours": 4,
-          "price": 360
-        },
-        "adjustments": {
-          "hours": 3,
-          "price": 270
-        },
-        "deploy": {
-          "hours": 2,
-          "price": 180
-        },
-        "total": {
-          "hours": 9,
-          "price": 810
-        }
-      },
-      "hours": 37,
-      "businessDays": 4.625,
-      "price": 3330,
+      "hours": 28,
+      "businessDays": 3.5,
+      "price": 2520,
       "assumptions": [
         "Backend estimado pelo comercial com base no escopo inicial e no código do repositório real (NodeJS + PostgreSQL; padrões infra/provider/api-protheus, adapters/api-protheus, models, pages/api/v1).",
         "Contador de spools obtido da API externa (ou agregado no backend sem persistência).",
@@ -834,45 +818,6 @@
         "adjustments": 6,
         "hours": 28,
         "price": 2520
-      },
-      "testsAdjustDeployBreakdown": [
-        {
-          "area": "tests",
-          "label": "Testes (homologação/E2E/regressão)",
-          "fromScratch": 4,
-          "reused": 0,
-          "adjustments": 0,
-          "hours": 4,
-          "price": 360,
-          "validation": "estimado pelo comercial"
-        },
-        {
-          "area": "adjustments",
-          "label": "Ajustes (pós-homologação)",
-          "fromScratch": 3,
-          "reused": 0,
-          "adjustments": 0,
-          "hours": 3,
-          "price": 270,
-          "validation": "estimado pelo comercial"
-        },
-        {
-          "area": "deploy",
-          "label": "Deploy para produção",
-          "fromScratch": 2,
-          "reused": 0,
-          "adjustments": 0,
-          "hours": 2,
-          "price": 180,
-          "validation": "estimado pelo comercial"
-        }
-      ],
-      "testsAdjustDeployBreakdownTotal": {
-        "fromScratch": 9,
-        "reused": 0,
-        "adjustments": 0,
-        "hours": 9,
-        "price": 810
       },
       "prints": [
         {
@@ -992,7 +937,7 @@
           "title": "Trocar projeto + projeto ativo no menu lateral",
           "hours": 0,
           "price": 0,
-          "note": "Complemento da Fase 7 – Seleção de Projetos (incluso, sem cobrança adicional); 0 h, não altera horas/valor das Fases 7–8.",
+          "note": "Complemento da Fase 7 – Seleção de Projetos (incluso, sem cobrança adicional); 0 h, não altera horas/valor das Fase 7.",
           "files": [
             "header.js",
             "header.css",
@@ -1003,14 +948,15 @@
             "proposals/prints/fase-1/06-drawer-home-trocar-projeto-mobile.png"
           ]
         }
-      ]
+      ],
+      "deliveryNote": "Testes de homologação/E2E/regressão, ajustes e deploy desta funcionalidade são cobrados uma única vez na Fase 11 – Testes, ajustes e deploy para produção (entrega final)."
     },
     {
       "id": "vincular-cadastro-projeto",
-      "phase": 9,
+      "phase": 8,
       "status": "new",
       "title": "Vincular Cadastro ao Projeto",
-      "label": "Fase 9 – Vincular Cadastro ao Projeto",
+      "label": "Fase 8 – Vincular Cadastro ao Projeto",
       "businessGoal": "Garantir que todo spool/componente cadastrado pertença ao projeto ativo, exibindo o projeto em cards, na leitura de QRCode e na validação, com listas sempre filtradas pelo projeto.",
       "steps": [
         "Com o projeto ativo selecionado (Fase 7), o usuário abre o Cadastro.",
@@ -1165,24 +1111,6 @@
         "hours": 23,
         "price": 2070
       },
-      "testsAdjustDeploy": {
-        "tests": {
-          "hours": 3,
-          "price": 270
-        },
-        "adjustments": {
-          "hours": 2,
-          "price": 180
-        },
-        "deploy": {
-          "hours": 2,
-          "price": 180
-        },
-        "total": {
-          "hours": 7,
-          "price": 630
-        }
-      },
       "breakdown": [
         {
           "area": "backend",
@@ -1244,54 +1172,15 @@
         "hours": 23,
         "price": 2070
       },
-      "testsAdjustDeployBreakdown": [
-        {
-          "area": "tests",
-          "label": "Testes (homologação/E2E/regressão do cadastro e módulos)",
-          "fromScratch": 3,
-          "reused": 0,
-          "adjustments": 0,
-          "hours": 3,
-          "price": 270,
-          "validation": "estimado pelo comercial"
-        },
-        {
-          "area": "adjustments",
-          "label": "Ajustes (pós-homologação)",
-          "fromScratch": 2,
-          "reused": 0,
-          "adjustments": 0,
-          "hours": 2,
-          "price": 180,
-          "validation": "estimado pelo comercial"
-        },
-        {
-          "area": "deploy",
-          "label": "Deploy para produção",
-          "fromScratch": 2,
-          "reused": 0,
-          "adjustments": 0,
-          "hours": 2,
-          "price": 180,
-          "validation": "estimado pelo comercial"
-        }
-      ],
-      "testsAdjustDeployBreakdownTotal": {
-        "fromScratch": 7,
-        "reused": 0,
-        "adjustments": 0,
-        "hours": 7,
-        "price": 630
-      },
-      "hours": 30,
-      "businessDays": 3.75,
-      "price": 2700,
+      "hours": 23,
+      "businessDays": 2.875,
+      "price": 2070,
       "assumptions": [
         "Estimativa do comercial com base no escopo inicial e no código do repositório real (models/register.js, pages/api/v1/register, components/container/process-register, components/ui/modal/qr-code-*, components/ui/card-item, pages/validates-qrcode).",
         "O Protheus aceita o código do projeto no payload de cadastro (wsrastreio) e retorna o projeto nas consultas de spool/componente — responsabilidade da Alvenius, fora do escopo.",
         "Sem persistência em banco local: o vínculo spool↔projeto é gravado e consultado no Protheus.",
         "Depende da Fase 7 (Seleção de Projetos); horas a ajustar após inventário real do MVP pelo frontend.",
-        "Ajuste fino com inventário real do MVP (frontend): horas mantidas em 30 h / R$ 2.700,00."
+        "Ajuste fino com inventário real do MVP (frontend): horas de desenvolvimento mantidas em 23 h / R$ 2.070,00 (testes, ajustes e deploy cobrados na Fase 11 – entrega final)."
       ],
       "prints": [
         {
@@ -1322,7 +1211,7 @@
               "text": "Projeto ativo no topo da modal de QRCode"
             }
           ],
-          "note": "Recapturado em 2026-11-25 após as Fases 11–12 (somente marcações das Fases 9–10)."
+          "note": "Recapturado em 2026-11-25 após a Fase 9 (somente marcações da Fase 8)."
         },
         {
           "id": "03-validar-qrcode-projeto-spool",
@@ -1370,7 +1259,7 @@
               "text": "Tag confirma o projeto de cada spool"
             }
           ],
-          "note": "Recapturado em 2026-11-25 após as Fases 11–12 (somente marcações das Fases 9–10)."
+          "note": "Recapturado em 2026-11-25 após a Fase 9 (somente marcações da Fase 8)."
         },
         {
           "id": "06-modal-cadastro-leitura-projeto",
@@ -1431,14 +1320,15 @@
           "Projeto nos cards de transferência"
         ],
         "source": "Inventário real do MVP reportado pelo frontend (2026-11-25)"
-      }
+      },
+      "deliveryNote": "Testes de homologação/E2E/regressão, ajustes e deploy desta funcionalidade são cobrados uma única vez na Fase 11 – Testes, ajustes e deploy para produção (entrega final)."
     },
     {
       "id": "vincular-etapas-projeto",
-      "phase": 11,
+      "phase": 9,
       "status": "new",
       "title": "Vincular Etapas ao Projeto",
-      "label": "Fase 11 – Vincular Etapas (Caldeiraria, Revestimento, Pintura) ao Projeto",
+      "label": "Fase 9 – Vincular Etapas (Caldeiraria, Revestimento, Pintura) ao Projeto",
       "businessGoal": "Garantir que as movimentações de Caldeiraria, Revestimento e Pintura ocorram somente para spools do projeto ativo, com contadores por projeto e bloqueio de spools de outro projeto.",
       "steps": [
         "Com o projeto ativo (Fase 7), o usuário abre uma etapa (Caldeiraria, Revestimento ou Pintura).",
@@ -1469,7 +1359,7 @@
         }
       ],
       "correlationScenario": "A+B",
-      "correlationNote": "A (reaproveitamento das Fases 7–10): ProjectTag, helpers de projeto, tag nos cards, getSpoolsByProject, projeto do spool retornado pelo Protheus, ProcessesAccordion, toasts. B (alteração): process-stage-view, modal-qrcode (modo etapa) e models das 3 etapas. As 3 etapas compartilham o mesmo componente e models de mesmo padrão (44 linhas cada), por isso o custo não triplica.",
+      "correlationNote": "A (reaproveitamento das Fases 7–8): ProjectTag, helpers de projeto, tag nos cards, getSpoolsByProject, projeto do spool retornado pelo Protheus, ProcessesAccordion, toasts. B (alteração): process-stage-view, modal-qrcode (modo etapa) e models das 3 etapas. As 3 etapas compartilham o mesmo componente e models de mesmo padrão (44 linhas cada), por isso o custo não triplica.",
       "dependsOn": [
         "selecao-projetos",
         "vincular-cadastro-projeto"
@@ -1481,7 +1371,7 @@
           "reused": [
             "Sessão/token Protheus e padrão next-connect (pages/api/v1/boilermaking|coating|painting)",
             "Provider infra/provider/api-protheus e adapters de resposta",
-            "Projeto do spool retornado pelo Protheus (Fase 9) e filtro por projectCode (Fase 7)"
+            "Projeto do spool retornado pelo Protheus (Fase 8) e filtro por projectCode (Fase 7)"
           ],
           "new": [
             "Validação spool×projeto ativo nas rotas de etapa: spool de outro projeto é rejeitado (409) com o projeto dele na resposta"
@@ -1500,7 +1390,7 @@
           "discipline": "frontend",
           "label": "Frontend (NextJS/React/Tailwind)",
           "reused": [
-            "ProjectTag e tag de projeto nos cards (Fase 9)",
+            "ProjectTag e tag de projeto nos cards (Fase 8)",
             "getProjectRef/getActiveProject, getSpoolsByProject",
             "ProcessesAccordion",
             "Toasts"
@@ -1526,7 +1416,7 @@
           "discipline": "designer",
           "label": "Designer",
           "reused": [
-            "Faixa e tag de projeto (Fases 7–10)",
+            "Faixa e tag de projeto (Fases 7–8)",
             "Cards e modal QRCode existentes"
           ],
           "new": [
@@ -1560,7 +1450,7 @@
           "label": "Testes (desenvolvimento)",
           "reused": [
             "Testes unit/integration de boilermaking, coating e painting",
-            "Mocks Protheus e de projetos (Fases 7–10)"
+            "Mocks Protheus e de projetos (Fases 7–8)"
           ],
           "new": [
             "Caso spool de outro projeto bloqueado (409)"
@@ -1582,24 +1472,6 @@
         "adjustmentHours": 6,
         "hours": 25,
         "price": 2250
-      },
-      "testsAdjustDeploy": {
-        "tests": {
-          "hours": 4,
-          "price": 360
-        },
-        "adjustments": {
-          "hours": 2,
-          "price": 180
-        },
-        "deploy": {
-          "hours": 2,
-          "price": 180
-        },
-        "total": {
-          "hours": 8,
-          "price": 720
-        }
       },
       "breakdown": [
         {
@@ -1661,48 +1533,9 @@
         "hours": 25,
         "price": 2250
       },
-      "testsAdjustDeployBreakdown": [
-        {
-          "area": "tests",
-          "label": "Testes (homologação/E2E/regressão das 3 etapas)",
-          "fromScratch": 4,
-          "reused": 0,
-          "adjustments": 0,
-          "hours": 4,
-          "price": 360,
-          "validation": "estimado pelo comercial"
-        },
-        {
-          "area": "adjustments",
-          "label": "Ajustes (pós-homologação)",
-          "fromScratch": 2,
-          "reused": 0,
-          "adjustments": 0,
-          "hours": 2,
-          "price": 180,
-          "validation": "estimado pelo comercial"
-        },
-        {
-          "area": "deploy",
-          "label": "Deploy para produção",
-          "fromScratch": 2,
-          "reused": 0,
-          "adjustments": 0,
-          "hours": 2,
-          "price": 180,
-          "validation": "estimado pelo comercial"
-        }
-      ],
-      "testsAdjustDeployBreakdownTotal": {
-        "fromScratch": 8,
-        "reused": 0,
-        "adjustments": 0,
-        "hours": 8,
-        "price": 720
-      },
-      "hours": 33,
-      "businessDays": 4.125,
-      "price": 2970,
+      "hours": 25,
+      "businessDays": 3.125,
+      "price": 2250,
       "inventory": {
         "new": [
           "getCountersByProject (contadores por projeto)",
@@ -1711,7 +1544,7 @@
           "updateSpoolStatus grava o projeto na movimentação"
         ],
         "reused": [
-          "ProjectTag e tag de projeto nos cards (Fase 9)",
+          "ProjectTag e tag de projeto nos cards (Fase 8)",
           "getProjectRef/getActiveProject, getSpoolsByProject",
           "ProcessesAccordion",
           "Toasts"
@@ -1857,14 +1690,15 @@
         "Estimativa do comercial com base no escopo inicial e no código do repositório real (models/boilermaking.js, coating.js, painting.js; pages/api/v1/boilermaking|coating|painting; components/container/process-flow; tests/unit|integration/api/v1/*).",
         "Validação spool×projeto e movimentação com projeto feitas no Protheus via backend; sem persistência em banco local.",
         "A Alvenius é responsável por o Protheus aceitar o código do projeto nas movimentações das etapas e retornar o projeto do spool — fora do escopo."
-      ]
+      ],
+      "deliveryNote": "Testes de homologação/E2E/regressão, ajustes e deploy desta funcionalidade são cobrados uma única vez na Fase 11 – Testes, ajustes e deploy para produção (entrega final)."
     },
     {
       "id": "vincular-transferencia-projeto",
-      "phase": 13,
+      "phase": 10,
       "status": "new",
       "title": "Vincular Projeto ao Fluxo de Transferência",
-      "label": "Fase 13 – Vincular Projeto ao Fluxo de Transferência",
+      "label": "Fase 10 – Vincular Projeto ao Fluxo de Transferência",
       "businessGoal": "Garantir que as transferências sejam registradas e acompanhadas por projeto, com listas e contadores do projeto ativo e bloqueio de itens de outro projeto.",
       "steps": [
         "Com o projeto ativo (Fase 7), o usuário abre Transferência.",
@@ -1895,7 +1729,7 @@
         }
       ],
       "correlationScenario": "A+B",
-      "correlationNote": "A (reaproveitamento das Fases 7–11): ProjectTag, helpers de projeto, guard PROJECT_ROUTES, visual/toast \"outro projeto\" (Fase 11) e payload com projeto (Fase 9). B (alteração): gravação e listas de transferência (models/transfer.js, process-transfer).",
+      "correlationNote": "A (reaproveitamento das Fases 7–9): ProjectTag, helpers de projeto, guard PROJECT_ROUTES, visual/toast \"outro projeto\" (Fase 9) e payload com projeto (Fase 8). B (alteração): gravação e listas de transferência (models/transfer.js, process-transfer).",
       "dependsOn": [
         "selecao-projetos",
         "vincular-cadastro-projeto",
@@ -1908,7 +1742,7 @@
           "reused": [
             "Sessão/token Protheus e next-connect (pages/api/v1/transfer/[process], supplier/[process])",
             "Provider/adapters Protheus",
-            "Validação item×projeto (padrão da Fase 11) e filtro por projectCode (Fase 7)"
+            "Validação item×projeto (padrão da Fase 9) e filtro por projectCode (Fase 7)"
           ],
           "new": [
             "Contadores Em Trânsito/Concluído/Total por projeto",
@@ -1931,8 +1765,8 @@
             "ProjectTag",
             "getActiveProject / getProjectRef",
             "Guard PROJECT_ROUTES (já cobria transferências)",
-            "Visual/toast \"outro projeto\" (Fase 11)",
-            "Payload da modal com projeto (Fase 9)"
+            "Visual/toast \"outro projeto\" (Fase 9)",
+            "Payload da modal com projeto (Fase 8)"
           ],
           "new": [
             "Vínculo do projeto nas transferências",
@@ -1959,8 +1793,8 @@
           "discipline": "designer",
           "label": "Designer",
           "reused": [
-            "Faixa e tag de projeto (Fases 7–9)",
-            "Alerta \"outro projeto\" (Fase 11)"
+            "Faixa e tag de projeto (Fases 7–8)",
+            "Alerta \"outro projeto\" (Fase 9)"
           ],
           "new": [
             "Contadores de transferência por projeto",
@@ -2016,24 +1850,6 @@
         "adjustmentHours": 6,
         "hours": 26,
         "price": 2340
-      },
-      "testsAdjustDeploy": {
-        "tests": {
-          "hours": 4,
-          "price": 360
-        },
-        "adjustments": {
-          "hours": 2,
-          "price": 180
-        },
-        "deploy": {
-          "hours": 2,
-          "price": 180
-        },
-        "total": {
-          "hours": 8,
-          "price": 720
-        }
       },
       "breakdown": [
         {
@@ -2095,48 +1911,9 @@
         "hours": 26,
         "price": 2340
       },
-      "testsAdjustDeployBreakdown": [
-        {
-          "area": "tests",
-          "label": "Testes (homologação/E2E/regressão de transferências)",
-          "fromScratch": 4,
-          "reused": 0,
-          "adjustments": 0,
-          "hours": 4,
-          "price": 360,
-          "validation": "estimado pelo comercial"
-        },
-        {
-          "area": "adjustments",
-          "label": "Ajustes (pós-homologação)",
-          "fromScratch": 2,
-          "reused": 0,
-          "adjustments": 0,
-          "hours": 2,
-          "price": 180,
-          "validation": "estimado pelo comercial"
-        },
-        {
-          "area": "deploy",
-          "label": "Deploy para produção",
-          "fromScratch": 2,
-          "reused": 0,
-          "adjustments": 0,
-          "hours": 2,
-          "price": 180,
-          "validation": "estimado pelo comercial"
-        }
-      ],
-      "testsAdjustDeployBreakdownTotal": {
-        "fromScratch": 8,
-        "reused": 0,
-        "adjustments": 0,
-        "hours": 8,
-        "price": 720
-      },
-      "hours": 34,
-      "businessDays": 4.25,
-      "price": 3060,
+      "hours": 26,
+      "businessDays": 3.25,
+      "price": 2340,
       "inventory": {
         "new": [
           "Vínculo do projeto nas transferências",
@@ -2151,8 +1928,8 @@
           "ProjectTag",
           "getActiveProject / getProjectRef",
           "Guard PROJECT_ROUTES (já cobria transferências)",
-          "Visual/toast \"outro projeto\" (Fase 11)",
-          "Payload da modal com projeto (Fase 9)"
+          "Visual/toast \"outro projeto\" (Fase 9)",
+          "Payload da modal com projeto (Fase 8)"
         ],
         "adjusted": [
           "Gravação de transferência envia o projeto + valida",
@@ -2342,7 +2119,8 @@
         "Vínculo e validação do projeto nas transferências feitos no Protheus via backend; sem persistência em banco local.",
         "A conclusão de transferência (Em Trânsito → Concluído) e o detalhe são responsabilidade da API externa Protheus ADVPL do cliente — fora do escopo.",
         "A Alvenius é responsável por o Protheus aceitar o código do projeto nas transferências e retorná-lo nas consultas — fora do escopo."
-      ]
+      ],
+      "deliveryNote": "Testes de homologação/E2E/regressão, ajustes e deploy desta funcionalidade são cobrados uma única vez na Fase 11 – Testes, ajustes e deploy para produção (entrega final)."
     }
   ],
   "investment": {
@@ -2921,54 +2699,7 @@
       },
       {
         "phase": 8,
-        "name": "Testes, ajustes e deploy para produção (Seleção de Projetos)",
-        "featureId": "selecao-projetos",
-        "hours": 9,
-        "businessDays": 1.125,
-        "price": 810,
-        "breakdown": [
-          {
-            "area": "tests",
-            "label": "Testes (homologação/E2E/regressão)",
-            "fromScratch": 4,
-            "reused": 0,
-            "adjustments": 0,
-            "hours": 4,
-            "price": 360,
-            "validation": "estimado pelo comercial"
-          },
-          {
-            "area": "adjustments",
-            "label": "Ajustes (pós-homologação)",
-            "fromScratch": 3,
-            "reused": 0,
-            "adjustments": 0,
-            "hours": 3,
-            "price": 270,
-            "validation": "estimado pelo comercial"
-          },
-          {
-            "area": "deploy",
-            "label": "Deploy para produção",
-            "fromScratch": 2,
-            "reused": 0,
-            "adjustments": 0,
-            "hours": 2,
-            "price": 180,
-            "validation": "estimado pelo comercial"
-          }
-        ],
-        "breakdownTotal": {
-          "fromScratch": 9,
-          "reused": 0,
-          "adjustments": 0,
-          "hours": 9,
-          "price": 810
-        }
-      },
-      {
-        "phase": 9,
-        "name": "Fase 9 – Vincular Cadastro ao Projeto – desenvolvimento",
+        "name": "Fase 8 – Vincular Cadastro ao Projeto – desenvolvimento",
         "featureId": "vincular-cadastro-projeto",
         "hours": 23,
         "businessDays": 2.875,
@@ -3035,55 +2766,8 @@
         }
       },
       {
-        "phase": 10,
-        "name": "Testes, ajustes e deploy para produção (Vincular Cadastro ao Projeto)",
-        "featureId": "vincular-cadastro-projeto",
-        "hours": 7,
-        "businessDays": 0.875,
-        "price": 630,
-        "breakdown": [
-          {
-            "area": "tests",
-            "label": "Testes (homologação/E2E/regressão do cadastro e módulos)",
-            "fromScratch": 3,
-            "reused": 0,
-            "adjustments": 0,
-            "hours": 3,
-            "price": 270,
-            "validation": "estimado pelo comercial"
-          },
-          {
-            "area": "adjustments",
-            "label": "Ajustes (pós-homologação)",
-            "fromScratch": 2,
-            "reused": 0,
-            "adjustments": 0,
-            "hours": 2,
-            "price": 180,
-            "validation": "estimado pelo comercial"
-          },
-          {
-            "area": "deploy",
-            "label": "Deploy para produção",
-            "fromScratch": 2,
-            "reused": 0,
-            "adjustments": 0,
-            "hours": 2,
-            "price": 180,
-            "validation": "estimado pelo comercial"
-          }
-        ],
-        "breakdownTotal": {
-          "fromScratch": 7,
-          "reused": 0,
-          "adjustments": 0,
-          "hours": 7,
-          "price": 630
-        }
-      },
-      {
-        "phase": 11,
-        "name": "Fase 11 – Vincular Etapas ao Projeto – desenvolvimento",
+        "phase": 9,
+        "name": "Fase 9 – Vincular Etapas ao Projeto – desenvolvimento",
         "featureId": "vincular-etapas-projeto",
         "hours": 25,
         "businessDays": 3.125,
@@ -3150,55 +2834,8 @@
         }
       },
       {
-        "phase": 12,
-        "name": "Testes, ajustes e deploy para produção (Vincular Etapas ao Projeto)",
-        "featureId": "vincular-etapas-projeto",
-        "hours": 8,
-        "businessDays": 1.0,
-        "price": 720,
-        "breakdown": [
-          {
-            "area": "tests",
-            "label": "Testes (homologação/E2E/regressão das 3 etapas)",
-            "fromScratch": 4,
-            "reused": 0,
-            "adjustments": 0,
-            "hours": 4,
-            "price": 360,
-            "validation": "estimado pelo comercial"
-          },
-          {
-            "area": "adjustments",
-            "label": "Ajustes (pós-homologação)",
-            "fromScratch": 2,
-            "reused": 0,
-            "adjustments": 0,
-            "hours": 2,
-            "price": 180,
-            "validation": "estimado pelo comercial"
-          },
-          {
-            "area": "deploy",
-            "label": "Deploy para produção",
-            "fromScratch": 2,
-            "reused": 0,
-            "adjustments": 0,
-            "hours": 2,
-            "price": 180,
-            "validation": "estimado pelo comercial"
-          }
-        ],
-        "breakdownTotal": {
-          "fromScratch": 8,
-          "reused": 0,
-          "adjustments": 0,
-          "hours": 8,
-          "price": 720
-        }
-      },
-      {
-        "phase": 13,
-        "name": "Fase 13 – Vincular Projeto ao Fluxo de Transferência – desenvolvimento",
+        "phase": 10,
+        "name": "Fase 10 – Vincular Projeto ao Fluxo de Transferência – desenvolvimento",
         "featureId": "vincular-transferencia-projeto",
         "hours": 26,
         "businessDays": 3.25,
@@ -3265,58 +2902,62 @@
         }
       },
       {
-        "phase": 14,
-        "name": "Testes, ajustes e deploy para produção (Vincular Projeto ao Fluxo de Transferência)",
-        "featureId": "vincular-transferencia-projeto",
-        "hours": 8,
-        "businessDays": 1.0,
-        "price": 720,
+        "phase": 11,
+        "name": "Fase 11 – Testes, ajustes e deploy para produção (entrega final)",
+        "featureId": null,
+        "hours": 19,
+        "businessDays": 2.375,
+        "price": 1710,
+        "note": "Cobrada uma única vez, na entrega final, cobrindo as Fases 7 a 10. Testes = soma dos testes de homologação/E2E/regressão das quatro funcionalidades (4 + 3 + 4 + 4 = 15 h); Ajustes = média das quatro funcionalidades (2,25 h → 2 h); Deploy = média (2 h).",
         "breakdown": [
           {
             "area": "tests",
-            "label": "Testes (homologação/E2E/regressão de transferências)",
-            "fromScratch": 4,
+            "label": "Testes (homologação/E2E/regressão – soma das Fases 7 a 10)",
+            "fromScratch": 15,
             "reused": 0,
             "adjustments": 0,
-            "hours": 4,
-            "price": 360,
-            "validation": "estimado pelo comercial"
+            "hours": 15,
+            "price": 1350,
+            "validation": "estimado pelo comercial",
+            "note": "Seleção de Projetos 4 h + Vincular Cadastro 3 h + Vincular Etapas 4 h + Transferência 4 h."
           },
           {
             "area": "adjustments",
-            "label": "Ajustes (pós-homologação)",
+            "label": "Ajustes (pós-homologação – média)",
             "fromScratch": 2,
             "reused": 0,
             "adjustments": 0,
             "hours": 2,
             "price": 180,
-            "validation": "estimado pelo comercial"
+            "validation": "estimado pelo comercial",
+            "note": "Média de 3, 2, 2 e 2 h = 2,25 h, arredondada para 2 h."
           },
           {
             "area": "deploy",
-            "label": "Deploy para produção",
+            "label": "Deploy para produção (média)",
             "fromScratch": 2,
             "reused": 0,
             "adjustments": 0,
             "hours": 2,
             "price": 180,
-            "validation": "estimado pelo comercial"
+            "validation": "estimado pelo comercial",
+            "note": "Média de 2, 2, 2 e 2 h = 2 h; deploy único de backend e frontend."
           }
         ],
         "breakdownTotal": {
-          "fromScratch": 8,
+          "fromScratch": 19,
           "reused": 0,
           "adjustments": 0,
-          "hours": 8,
-          "price": 720
+          "hours": 19,
+          "price": 1710
         }
       }
     ],
     "totals": {
-      "hours": 134,
-      "businessDays": 16.75,
-      "approxWeeks": 4,
-      "price": 12060
+      "hours": 121,
+      "businessDays": 15.125,
+      "approxWeeks": 3,
+      "price": 10890
     },
     "sprints": [
       {
@@ -3353,42 +2994,48 @@
       {
         "sprint": 5,
         "phases": [
-          7,
-          8
+          7
         ],
-        "businessDays": 4.625,
+        "businessDays": 3.5,
         "startDate": "2026-12-01",
-        "endDate": "2026-12-07"
+        "endDate": "2026-12-04"
       },
       {
         "sprint": 6,
         "phases": [
-          9,
-          10
+          8
         ],
-        "businessDays": 3.75,
-        "startDate": "2026-12-07",
-        "endDate": "2026-12-11"
+        "businessDays": 2.875,
+        "startDate": "2026-12-04",
+        "endDate": "2026-12-09"
       },
       {
         "sprint": 7,
         "phases": [
-          11,
-          12
+          9
         ],
-        "businessDays": 4.125,
-        "startDate": "2026-12-11",
-        "endDate": "2026-12-17"
+        "businessDays": 3.125,
+        "startDate": "2026-12-09",
+        "endDate": "2026-12-14"
       },
       {
         "sprint": 8,
         "phases": [
-          13,
-          14
+          10
         ],
-        "businessDays": 4.25,
-        "startDate": "2026-12-17",
-        "endDate": "2026-12-23"
+        "businessDays": 3.25,
+        "startDate": "2026-12-14",
+        "endDate": "2026-12-17"
+      },
+      {
+        "sprint": 9,
+        "phases": [
+          11
+        ],
+        "businessDays": 2.375,
+        "startDate": "2026-12-18",
+        "endDate": "2026-12-22",
+        "note": "Sprint dedicada à entrega final (homologação, ajustes e deploy em produção), iniciada em dia útil cheio após a Sprint 8; deploy concluído antes do recesso de 25/12, com 23–24/12 reservados como contingência."
       }
     ],
     "payment": [
@@ -3419,7 +3066,7 @@
       {
         "milestone": "1ª parcela – na aprovação da proposta (D+0)",
         "percent": 30,
-        "amount": 3618.0,
+        "amount": 3267,
         "scope": "new-features",
         "dueInDays": 0,
         "dueDate": "2026-12-01"
@@ -3427,7 +3074,7 @@
       {
         "milestone": "2ª parcela – 15 dias após a aprovação (D+15)",
         "percent": 40,
-        "amount": 4824.0,
+        "amount": 4356,
         "scope": "new-features",
         "dueInDays": 15,
         "dueDate": "2026-12-16"
@@ -3435,7 +3082,7 @@
       {
         "milestone": "3ª parcela – 30 dias após a aprovação (D+30)",
         "percent": 30,
-        "amount": 3618.0,
+        "amount": 3267,
         "scope": "new-features",
         "dueInDays": 30,
         "dueDate": "2026-12-31"
@@ -3447,17 +3094,20 @@
         "price": 1350
       },
       "adjustments": {
-        "hours": 9,
-        "price": 810
+        "hours": 2,
+        "price": 180
       },
       "deploy": {
-        "hours": 8,
-        "price": 720
+        "hours": 2,
+        "price": 180
       },
       "total": {
-        "hours": 32,
-        "price": 2880
-      }
+        "hours": 19,
+        "price": 1710
+      },
+      "phase": 11,
+      "chargedOnce": true,
+      "note": "Cobrado uma única vez na entrega final (Fase 11): testes somados; ajustes e deploy pela média das funcionalidades."
     }
   },
   "postDelivery": {

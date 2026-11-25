@@ -3928,3 +3928,93 @@ body.toc-sheet-open:has(.view-proposta-wrapper) {
   .signature-card { break-inside: avoid; page-break-inside: avoid; }
   .signatures-box { break-inside: avoid !important; page-break-inside: avoid !important; }
 }
+
+/* ==========================================================================
+   v1.2 – Entrega final (testes/ajustes/deploy cobrados uma única vez)
+   ========================================================================== */
+/* Nota discreta por funcionalidade (mesmo padrão do deliveredNote, tom azul informativo) */
+.feature-delivered-note.is-delivery {
+  background: #EFF4FF;
+  border-color: #C7D7FE;
+  border-left-color: #1F4FD8;
+  color: #1E3A8A;
+  margin-bottom: 14px;
+}
+.feature-delivered-note.is-delivery .feature-delivered-seal { background: #1F4FD8; }
+
+/* Card destacado da fase de entrega final */
+.proposal-feature-card.is-delivery-phase {
+  border: 1px solid #1F4FD8;
+  box-shadow: 0 0 0 3px rgba(31, 79, 216, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.proposal-feature-card.is-delivery-phase .feature-card-header {
+  background: linear-gradient(90deg, #EFF4FF 0%, #F8FAFC 100%);
+  border-bottom-color: #C7D7FE;
+}
+.feature-delivery-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #1F4FD8;
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+.feature-delivery-badge svg { stroke: currentColor; flex-shrink: 0; }
+.delivery-phase-intro {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  background: #F8FAFC;
+  border-left: 4px solid #1F4FD8;
+  border-radius: 8px;
+  color: #334155;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.delivery-phase-intro svg { flex-shrink: 0; margin-top: 2px; color: #1F4FD8; }
+.delivery-phase-intro p { margin: 0; }
+.delivery-phase-intro strong { color: var(--prop-navy); }
+.proposal-feature-card.is-delivery-phase .feature-tad { margin-top: 0; }
+.delivery-phase-composition {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: #475569;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.delivery-phase-composition li + li { margin-top: 4px; }
+.delivery-phase-composition strong { color: #334155; }
+
+/* Observação da sprint (sprints[].note) */
+.sprint-note {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--prop-border);
+  font-size: 11px;
+  line-height: 1.45;
+  color: #475569;
+  text-align: left;
+}
+.sprint-note svg { flex-shrink: 0; margin-top: 1px; color: #1F4FD8; }
+
+@media print {
+  .feature-delivered-note.is-delivery,
+  .proposal-feature-card.is-delivery-phase,
+  .proposal-feature-card.is-delivery-phase .feature-card-header,
+  .feature-delivery-badge {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .proposal-feature-card.is-delivery-phase { box-shadow: none; }
+}
