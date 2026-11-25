@@ -45,6 +45,7 @@
       "features[].deliveredNote": "Texto curto exibido no lugar dos visuais em funcionalidades 'existing' (já entregues); quando presente, não renderizar placeholders de print/diagrama pendente. visuals fica [] nessas features.",
       "features[].deliveryNote": "Texto curto informando que ajustes/deploy da funcionalidade são cobrados na fase de entrega final (11) e que testes limitam-se a smoke test (1 h).",
       "outOfScopeNotice": "Objeto {label, text} (aditivo v1.3) com aviso 'FORA DO ESCOPO' relativo a testes; label deve ser exibido em vermelho. Presente em: raiz (global), features[] 7–10, investment.phases[] 7–11 e investment.testsAdjustDeploy. Distinto do array raiz 'outOfScope' (lista de strings).",
+      "summaryView": "Bloco aditivo (visão 'Resumido'). sections[] ordenadas por order; cada seção traz source (dot-path ou 'text') e fields; textos novos ficam aqui, valores numéricos são sempre derivados dos campos referenciados. excluded[] lista o que não aparece no Resumido.",
       "investment.sprints[].note": "Observação opcional da sprint (ex.: sprint de entrega final e recesso)."
     }
   },
@@ -108,6 +109,136 @@
       "Menos retrabalho e perdas: cada peça tem histórico e responsável.",
       "Decisão rápida: painel único da fábrica para diretores e gerentes.",
       "Operação simples: uso por celular ou tablet no chão de fábrica."
+    ]
+  },
+  "summaryView": {
+    "enabled": true,
+    "label": "Resumido",
+    "detailedLabel": "Detalhado",
+    "defaultView": "detailed",
+    "conventions": {
+      "source": "Caminho no JSON (dot-path) ou \"text\" (usar o campo text da própria seção). Valores numéricos (horas, R$, dias, datas, percentuais) NUNCA são duplicados aqui: o frontend deve derivá-los dos campos referenciados.",
+      "phaseRef": "{ \"phase\": N } localiza investment.phases[] com phase == N; hours, price e name vêm de lá.",
+      "currencyFormat": "R$ pt-BR com 2 casas (meta.currency)"
+    },
+    "sections": [
+      {
+        "id": "valueProposition",
+        "order": 1,
+        "title": "Proposta de valor",
+        "source": "text",
+        "headline": "Cada spool rastreado por projeto, do cadastro à transferência.",
+        "text": "Sobre o sistema que a Alvenius já usa, o usuário passa a escolher o projeto logo após o login e toda a operação (cadastro, etapas e transferência) fica vinculada a ele, com menos erros de lançamento, rastreabilidade por projeto e decisão mais rápida.",
+        "fields": ["meta.title", "client.name", "meta.id", "meta.issuedAt"]
+      },
+      {
+        "id": "deliverables",
+        "order": 2,
+        "title": "O que será entregue",
+        "source": "text",
+        "items": [
+          { "phase": 7, "text": "Escolha do projeto após o login e troca de projeto a qualquer momento." },
+          { "phase": 8, "text": "Cadastro de spools vinculado ao projeto ativo." },
+          { "phase": 9, "text": "Etapas de produção (caldeiraria, revestimento, pintura) vinculadas ao projeto." },
+          { "phase": 10, "text": "Transferência de spools vinculada ao projeto." },
+          { "phase": 11, "text": "Smoke test, ajustes finais e deploy em produção." }
+        ],
+        "derive": {
+          "name": "investment.phases[phase=N].name (opcional; preferir o text)",
+          "hours": "investment.phases[phase=N].hours",
+          "price": "investment.phases[phase=N].price"
+        },
+        "render": "1 linha por item: text + horas + R$"
+      },
+      {
+        "id": "investment",
+        "order": 3,
+        "title": "Investimento total",
+        "source": "investment.totals",
+        "fields": ["investment.totals.hours", "investment.totals.price", "meta.hourlyRate"],
+        "note": "Destaque principal da página (95 h; R$ 8.550,00). Conferir: soma das linhas de 'deliverables' deve ser igual a investment.totals."
+      },
+      {
+        "id": "schedule",
+        "order": 4,
+        "title": "Prazo",
+        "source": "investment.sprints",
+        "fields": [
+          "meta.startDate",
+          "investment.totals.businessDays",
+          "investment.totals.approxWeeks",
+          "investment.sprints[sprint>=5].startDate",
+          "investment.sprints[sprint>=5].endDate",
+          "investment.sprints[sprint=9].endDate"
+        ],
+        "render": "Linha única: início (meta.startDate) → entrega em produção (endDate da sprint 9), em dias úteis e semanas. Opcional: mini-linha do tempo com as sprints 5–9 (apenas datas). Sprints 1–4 (businessDays 0) não aparecem."
+      },
+      {
+        "id": "payment",
+        "order": 5,
+        "title": "Condições de pagamento",
+        "source": "investment.payment",
+        "filter": "scope == 'new-features' && status != 'superseded'",
+        "fields": ["milestone", "percent", "amount", "dueDate"],
+        "render": "3 parcelas (30/40/30) com valor e vencimento. Marcos superseded são ocultados."
+      },
+      {
+        "id": "reuse",
+        "order": 6,
+        "title": "Base já entregue (sem custo)",
+        "source": "text",
+        "text": "Todo o sistema atual (rastreio por QR Code, gestão de spools, sucata/retrabalho, painel gerencial, integração com ERP e produção) já está entregue e é reaproveitado sem custo; apenas o que é novo ou ajustado é cobrado.",
+        "fields": ["investment.phases[phase<=6].name", "meta.pricingNote"],
+        "derive": { "hours": "soma de investment.phases[phase<=6].hours (= 0)", "price": "soma de investment.phases[phase<=6].price (= 0)" },
+        "render": "Frase + selo 'Fases 0–6: 0 h / R$ 0,00'."
+      },
+      {
+        "id": "assumptions",
+        "order": 7,
+        "title": "Principais premissas",
+        "source": "assumptions",
+        "include": [0, 1, 5],
+        "note": "Índices em assumptions[]: 0 projeto existente (só o novo é cobrado); 1 dados via APIs externas; 5 endpoint de projetos/filtro no Protheus é responsabilidade da Alvenius (dependência crítica). Demais ficam só no Detalhado."
+      },
+      {
+        "id": "outOfScope",
+        "order": 8,
+        "title": "Fora do escopo",
+        "source": "outOfScopeNotice",
+        "fields": ["outOfScopeNotice.label", "outOfScopeNotice.text", "outOfScope"],
+        "render": "label em vermelho + texto (testes limitados a smoke test de 1 h; sem suíte automatizada nem homologação ampliada) + lista outOfScope[] em bullets curtos."
+      },
+      {
+        "id": "warranty",
+        "order": 9,
+        "title": "Garantia",
+        "source": "postDelivery.warranty",
+        "fields": ["postDelivery.warranty.days", "postDelivery.warranty.coverage", "postDelivery.newRequests.hourlyRate"],
+        "render": "1 linha: 90 dias sem custo para desvios do escopo homologado; novas solicitações a R$ 90,00/h com aprovação prévia."
+      },
+      {
+        "id": "nextSteps",
+        "order": 10,
+        "title": "Próximos passos",
+        "source": "text",
+        "items": [
+          "Aprovar a proposta (aceite do cliente).",
+          "Pagar a 1ª parcela e confirmar o início do projeto.",
+          "Alvenius disponibilizar o endpoint de projetos e acessos ao Protheus antes do início.",
+          "Acompanhar as entregas por sprint até o deploy em produção."
+        ],
+        "fields": ["meta.validityDays", "meta.issuedAt", "meta.startDate", "proponent.responsible.name", "proponent.responsible.role", "proponent.responsible.url", "proponent.name", "proponent.url"],
+        "render": "Passos + 'Proposta válida por 30 dias (emitida em issuedAt)' + contato do responsável. Telefone/e-mail não existem no JSON: bloqueio/pendência (ver retorno)."
+      }
+    ],
+    "excluded": [
+      { "source": "estimationMethod", "reason": "Cálculo e metodologia; cliente decide pelo resultado, consulta no Detalhado." },
+      { "source": "features[]", "reason": "Detalhamento por funcionalidade (passos, regras, inventário) é técnico demais para a decisão." },
+      { "source": "features[].disciplines/breakdown, investment.phases[].breakdown", "reason": "Planilhas por área (5 disciplinas) e matriz A/B/C: não ajudam a decidir." },
+      { "source": "features[].visuals, features[].prints", "reason": "Prints anotados e diagramas: detalhamento." },
+      { "source": "investment.sprints (detalhe), testsAdjustDeploy", "reason": "Sprints detalhadas e consolidado de testes/ajustes/deploy: só datas de início/fim e total entram." },
+      { "source": "proponent.stats/pillars/engineering, theme", "reason": "Institucional; permanece no cabeçalho/rodapé comum às duas visões." },
+      { "source": "investment.payment[status=superseded], postDelivery.homologation", "reason": "Marcos obsoletos e regras de homologação: ruído." }
     ]
   },
   "estimationMethod": {

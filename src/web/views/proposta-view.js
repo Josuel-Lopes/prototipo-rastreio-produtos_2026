@@ -239,6 +239,14 @@ export class PropostaView {
     };
     document.addEventListener('visibilitychange', refresh);
     window.addEventListener('focus', refresh);
+    window.addEventListener('popstate', () => {
+      if (!this.isMounted() || !this.data) return;
+      const mode = this.getViewMode();
+      const shown = this.container.querySelector('.view-proposta-wrapper')?.classList.contains('is-summary') ? 'resumido' : 'detalhado';
+      if (mode === shown) return;
+      this.container.innerHTML = this.renderShell(this.data, this.renderBody(this.data));
+      this.bindEvents();
+    });
   }
 
   async refresh() {
@@ -250,7 +258,7 @@ export class PropostaView {
       const scrollY = window.scrollY;
       this.data = data;
       this.dataSignature = signature;
-      this.container.innerHTML = this.renderShell(data, this.renderSheet(data));
+      this.container.innerHTML = this.renderShell(data, this.renderBody(data));
       this.bindEvents();
       window.scrollTo(0, scrollY);
     } catch (err) {
@@ -273,7 +281,7 @@ export class PropostaView {
       if (token !== this.renderToken) return;
       this.data = data;
       this.dataSignature = signature;
-      this.container.innerHTML = this.renderShell(data, this.renderSheet(data));
+      this.container.innerHTML = this.renderShell(data, this.renderBody(data));
     } catch (err) {
       if (token !== this.renderToken) return;
       console.error('[proposta] Falha ao carregar dados da proposta:', err);
@@ -294,23 +302,66 @@ export class PropostaView {
 
   /* ----------------------------- Estrutura geral ---------------------------- */
 
+  /** Modo de visualização atual: lido da URL (?view=resumido|detalhado); padrão detalhado. */
+  getViewMode(data = this.data) {
+    if (!data?.summaryView || data.summaryView.enabled === false) return 'detalhado';
+    const v = String(new URLSearchParams(window.location.search).get('view') || '').toLowerCase();
+    return v === 'resumido' ? 'resumido' : 'detalhado';
+  }
+
+  /** Conteúdo da folha conforme a visão selecionada. */
+  renderBody(data) {
+    return this.getViewMode(data) === 'resumido' ? this.renderSummary(data) : this.renderSheet(data);
+  }
+
+  /** Atualiza a URL preservando os demais parâmetros (route, etc.). */
+  writeViewToUrl(mode) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('view', mode);
+    url.searchParams.delete('topico');
+    history.replaceState(history.state, '', url.toString());
+  }
+
+  setViewMode(mode) {
+    if (!this.data || mode === this.getViewMode()) return;
+    this.writeViewToUrl(mode);
+    this.closePrintLightbox?.();
+    this.container.innerHTML = this.renderShell(this.data, this.renderBody(this.data));
+    this.bindEvents();
+    window.scrollTo(0, 0);
+  }
+
+  renderViewSwitch(data) {
+    const sv = data?.summaryView;
+    if (!sv || sv.enabled === false) return '';
+    const mode = this.getViewMode(data);
+    const opt = (key, label, icon) => `<button type="button" class="view-switch-btn" data-view-mode="${key}" aria-pressed="${mode === key ? 'true' : 'false'}" aria-label="${t(label)}" title="${t(label)}"><span class="view-switch-icon" aria-hidden="true">${lucide(icon, { size: 16, strokeWidth: 2.2 })}</span><span class="view-switch-text">${t(label)}</span></button>`;
+    return `<div class="view-switch" role="group" aria-label="Modo de visualização da proposta">${opt('detalhado', sv.detailedLabel || 'Detalhado', 'file-text')}${opt('resumido', sv.label || 'Resumido', 'layout-list')}</div>`;
+  }
+
   renderShell(data, content) {
     const id = data?.meta?.id ? t(data.meta.id) : '';
     const tag = id ? `Proposta Comercial ${id} · Alvenius` : 'Proposta Comercial · Alvenius';
+    const summary = data ? this.getViewMode(data) === 'resumido' : false;
     return `
-      <div class="view-proposta-wrapper">
+      <div class="view-proposta-wrapper ${summary ? 'is-summary' : ''}">
         <header class="proposal-action-bar no-print" role="region" aria-label="Ações Rápidas da Proposta">
           <div class="proposal-bar-left">
-            <button class="btn-bar-nav" id="btn-back-menu" title="Voltar ao Menu Principal">
-              ${lucide('arrow-left', { size: 16, strokeWidth: 2 })}
-              <span>Voltar</span>
-            </button>
+            <a class="proposal-bar-logo" href="./" data-bar-home title="Acessar demo app" aria-label="MaxCode42 - Acessar demo app">
+              <picture>
+                <source media="(max-width: 767px)" srcset="assets/icon-maxcode42.png" width="180" height="180">
+                <img src="assets/logo-maxcode42-horizontal.png" alt="MaxCode42" class="proposal-bar-logo-img" width="800" height="227" decoding="async">
+              </picture>
+            </a>
+            <span class="proposal-bar-divider" aria-hidden="true"></span>
             <span class="proposal-bar-tag" title="${tag}">
               ${lucide('file-text', { size: 14, strokeWidth: 2 })}
               <span class="proposal-bar-tag-text">${tag}</span>
             </span>
           </div>
           <div class="proposal-bar-right">
+            <a class="proposal-bar-link" id="btn-back-menu" href="./" data-bar-home title="Acessar demo app" aria-label="Acessar demo app"><span class="proposal-bar-link-text">Acessar demo app</span><span class="proposal-bar-link-icon" aria-hidden="true">${lucide('external-link', { size: 16, strokeWidth: 2.2 })}</span></a>
+            ${this.renderViewSwitch(data)}
             <button class="btn-save-pdf" id="btn-save-pdf" title="Gerar e salvar proposta em formato PDF A4" aria-label="Salvar Proposta em PDF" ${data ? '' : 'disabled'}>
               ${lucide('printer', { size: 18, strokeWidth: 2 })}
               <span class="btn-label-full">Salvar Proposta em PDF</span>
@@ -319,16 +370,16 @@ export class PropostaView {
           </div>
         </header>
 
-        ${data ? '<nav class="proposal-toc-bar no-print" aria-label="Tópicos da proposta" data-toc-slot="bar"></nav>' : ''}
+        ${data && !summary ? '<nav class="proposal-toc-bar no-print" aria-label="Tópicos da proposta" data-toc-slot="bar"></nav>' : ''}
 
         <div class="proposal-layout">
-          ${data ? '<nav class="proposal-toc no-print" aria-label="Tópicos da proposta" data-toc-slot="side"></nav>' : ''}
+          ${data && !summary ? '<nav class="proposal-toc no-print" aria-label="Tópicos da proposta" data-toc-slot="side"></nav>' : ''}
           <main class="proposal-container">
             ${content}
           </main>
         </div>
 
-        ${data ? '<div class="proposal-toc-overlays no-print" data-toc-slot="overlays"></div>' : ''}
+        ${data && !summary ? '<div class="proposal-toc-overlays no-print" data-toc-slot="overlays"></div>' : ''}
 
         ${data ? `
           <div class="demo-print-watermark print-only" aria-hidden="true">
@@ -359,6 +410,323 @@ export class PropostaView {
         <p class="proposal-state-desc">Verifique sua conexão e tente novamente. Se o problema persistir, contate o responsável comercial.</p>
         <button type="button" class="btn-save-pdf" id="btn-retry-proposta">Tentar novamente</button>
       </div>
+    `;
+  }
+
+  /* --------------------------- Visão Resumida (summaryView) --------------------------- */
+
+  /** Visão objetiva para decisão: seções de `summaryView.sections[]` (ordem do JSON), valores derivados dos campos referenciados. */
+  renderSummary(d) {
+    const sv = d.summaryView || {};
+    const meta = d.meta || {};
+    const client = d.client || {};
+    const ctx = {
+      d, meta,
+      inv: d.investment || {},
+      phases: (Array.isArray(d.investment?.phases) ? d.investment.phases : []).filter(p => !isSuperseded(p))
+    };
+    const sections = [...(Array.isArray(sv.sections) ? sv.sections : [])].sort((a, b) => toNumber(a.order) - toNumber(b.order));
+    const body = sections.map((s, i) => {
+      const fn = this[`renderSum_${s.id}`];
+      const html = typeof fn === 'function' ? fn.call(this, s, ctx) : '';
+      if (!html) return '';
+      return `
+        <section class="proposal-section sum-section sum-section--${t(s.id)}" id="resumo-${t(s.id)}" aria-labelledby="resumo-${t(s.id)}-title">
+          <div class="proposal-section-header">
+            <span class="proposal-section-num">${i + 1}</span>
+            <h2 id="resumo-${t(s.id)}-title">${t(s.title)}</h2>
+          </div>
+          ${html}
+        </section>
+      `;
+    }).join('');
+
+    return `
+      <article class="proposal-sheet proposal-sheet--summary">
+        <header class="sum-hero">
+          <span class="sum-hero-kicker">${t(sv.label || 'Resumido')} · Proposta Comercial</span>
+          <h1 tabindex="-1">${t(meta.title)}</h1>
+          <p class="sum-hero-meta">
+            ${client.name ? `<span>${t(client.name)}</span>` : ''}
+            ${meta.id ? `<span>${t(meta.id)}${meta.version ? ` · v${t(meta.version)}` : ''}</span>` : ''}
+            ${meta.issuedAt ? `<span>Emitida em ${formatDate(meta.issuedAt)}</span>` : ''}
+          </p>
+        </header>
+        ${body}
+        ${this.renderSummaryFooter(d)}
+      </article>
+    `;
+  }
+
+  /** Iniciais (até 2 letras) para o avatar de fallback. */
+  initialsOf(name = '') {
+    const parts = String(name).replace(/[^\p{L}\s]/gu, ' ').split(/\s+/).filter(Boolean);
+    if (!parts.length) return '?';
+    return ((parts[0][0] || '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+  }
+
+  /** Avatar circular: usa `photo` (URL/caminho do JSON) se existir; senão, iniciais. */
+  renderPersonAvatar(name, photo) {
+    const safe = t(name);
+    return `
+      <span class="sum-avatar" role="img" aria-label="${photo ? `Foto de ${safe}` : safe}">
+        <span class="sum-avatar-fallback" aria-hidden="true">${t(this.initialsOf(name))}</span>
+        ${photo ? `<img class="sum-avatar-img" src="${t(photo)}" alt="" referrerpolicy="no-referrer" decoding="async">` : ''}
+      </span>
+    `;
+  }
+
+  /** Rodapé da visão Resumida: logo MaxCode42 + cartões do desenvolvedor e do cliente (dados do JSON). */
+  renderSummaryFooter(d) {
+    const proponent = d.proponent || {};
+    const resp = proponent.responsible || {};
+    const client = d.client || {};
+    const clientPerson = client.responsible || client.contact || {};
+    const link = (url, label) => (url ? `<a href="${t(url)}" target="_blank" rel="noopener noreferrer">${t(label)}</a>` : t(label));
+    const contact = (o = {}) => [
+      o.email ? `<a href="mailto:${t(o.email)}">${t(o.email)}</a>` : '',
+      o.phone ? `<a href="tel:${t(String(o.phone).replace(/[^\d+]/g, ''))}">${t(o.phone)}</a>` : ''
+    ].filter(Boolean).join('');
+    const devName = resp.name || proponent.name;
+    const devContact = contact(resp) + contact(proponent);
+    const clientPhoto = clientPerson.photo || client.photo || '';
+    const clientContact = contact(clientPerson) + contact(client);
+
+    return `
+      <footer class="sum-footer" aria-label="MaxCode42 e contatos">
+        <div class="sum-footer-brand">
+          <img src="assets/logo-maxcode42-horizontal.png" alt="MaxCode42" class="sum-footer-logo" width="800" height="227" decoding="async">
+          ${proponent.slogan ? `<p class="sum-footer-slogan">${t(proponent.slogan)}</p>` : ''}
+        </div>
+        <div class="sum-footer-cards">
+          ${devName ? `
+            <section class="sum-person-card" aria-label="Desenvolvedor">
+              <span class="sum-person-kicker">Desenvolvedor</span>
+              <div class="sum-person-main">
+                ${this.renderDevAvatar(devName, 'dev-avatar--lg')}
+                <div class="sum-person-info">
+                  <strong class="sum-person-name">${link(resp.url, devName)}</strong>
+                  ${resp.role ? `<span class="sum-person-role">${t(resp.role)}</span>` : ''}
+                  ${proponent.name ? `<span class="sum-person-org">${link(proponent.url, proponent.name)}</span>` : ''}
+                  ${devContact ? `<span class="sum-person-contact">${devContact}</span>` : ''}
+                </div>
+              </div>
+            </section>` : ''}
+          ${client.name ? `
+            <section class="sum-person-card" aria-label="Cliente">
+              <span class="sum-person-kicker">Cliente</span>
+              <div class="sum-person-main">
+                <img src="assets/logo-alvenius-rings-clean.png" alt="" class="sum-client-logo" width="56" height="56" decoding="async">
+                <div class="sum-person-info">
+                  <strong class="sum-person-name">${link(client.url, client.name)}</strong>
+                  ${clientPerson.name ? `
+                    <span class="sum-person-contact-person">
+                      ${this.renderPersonAvatar(clientPerson.name, clientPhoto)}
+                      <span><strong>${t(clientPerson.name)}</strong>${clientPerson.role ? `<br>${t(clientPerson.role)}` : ''}</span>
+                    </span>` : ''}
+                  ${clientContact ? `<span class="sum-person-contact">${clientContact}</span>` : ''}
+                </div>
+              </div>
+            </section>` : ''}
+        </div>
+      </footer>
+    `;
+  }
+
+  renderSum_valueProposition(s) {
+    if (!s.headline && !s.text) return '';
+    return `
+      <div class="sum-value">
+        ${s.headline ? `<p class="sum-headline">${t(s.headline)}</p>` : ''}
+        ${s.text ? `<p class="sum-text">${t(s.text)}</p>` : ''}
+      </div>
+    `;
+  }
+
+  renderSum_deliverables(s, ctx) {
+    const items = Array.isArray(s.items) ? s.items : [];
+    if (!items.length) return '';
+    return `
+      <ul class="sum-deliverables">
+        ${items.map(it => {
+          const p = ctx.phases.find(x => toNumber(x.phase) === toNumber(it.phase));
+          return `
+            <li class="sum-deliverable">
+              <span class="sum-phase">Fase ${t(it.phase)}</span>
+              <span class="sum-deliverable-text">${t(it.text || p?.name || '')}</span>
+              ${p ? `<span class="prop-badge prop-badge--hours"><span class="sr-only-inline">Horas: </span>${num(p.hours)} h</span><span class="prop-badge price prop-badge--price"><span class="sr-only-inline">Valor: </span>${brl(p.price)}</span>` : ''}
+            </li>
+          `;
+        }).join('')}
+      </ul>
+    `;
+  }
+
+  renderSum_investment(s, ctx) {
+    const totals = ctx.inv.totals;
+    if (!totals) return '';
+    return `
+      <div class="sum-invest">
+        ${ctx.meta.hourlyRate ? `
+          <div class="sum-invest-rate">
+            <span class="sum-invest-label">Valor/hora</span>
+            <strong class="sum-invest-rate-value">${brl(ctx.meta.hourlyRate)}</strong>
+          </div>` : ''}
+        <div class="sum-invest-cols">
+          <div class="sum-invest-col sum-invest-col--hours">
+            <span class="sum-invest-label">Horas</span>
+            <strong class="sum-invest-value">${num(totals.hours)} h</strong>
+          </div>
+          <div class="sum-invest-col sum-invest-col--price">
+            <span class="sum-invest-label">Valor total</span>
+            <strong class="sum-invest-value">${brl(totals.price)}</strong>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  renderSum_schedule(s, ctx) {
+    const totals = ctx.inv.totals || {};
+    const sprints = (Array.isArray(ctx.inv.sprints) ? ctx.inv.sprints : [])
+      .filter(sp => sp.startDate && sp.endDate && toNumber(sp.businessDays) > 0)
+      .sort((a, b) => toNumber(a.sprint) - toNumber(b.sprint));
+    const start = ctx.meta.startDate || sprints[0]?.startDate;
+    const end = sprints.length ? sprints[sprints.length - 1].endDate : '';
+    if (!start && !end) return '';
+    const weeks = toNumber(totals.approxWeeks);
+    return `
+      <p class="sum-schedule-line">
+        <strong>${formatDate(start)}</strong>${end ? ` <span aria-hidden="true">→</span><span class="sr-only-inline"> até </span> <strong>${formatDate(end)}</strong>` : ''}
+        ${totals.businessDays ? `<span class="sum-schedule-sub">${num(totals.businessDays)} dias úteis${weeks ? ` (~${num(weeks)} semana${weeks > 1 ? 's' : ''})` : ''}</span>` : ''}
+      </p>
+      ${sprints.length ? `
+        <h3 class="sum-subhead">A entregar</h3>
+        <ol class="sum-timeline" aria-label="Linha do tempo das sprints a entregar">
+          ${sprints.map(sp => `
+            <li class="sum-timeline-item">
+              <span class="sum-timeline-name">Sprint ${t(sp.sprint)}</span>
+              <span class="sum-timeline-phase">${t(joinPhases(sp.phases || []))}</span>
+              <span class="sum-timeline-date">${formatShortRange(sp.startDate, sp.endDate)}</span>
+            </li>
+          `).join('')}
+        </ol>
+      ` : ''}
+      ${this.renderSumDeliveredSprints(ctx)}
+    `;
+  }
+
+  /** Sprints já entregues (sem esforço/datas e só com fases existentes): derivadas dos dados de sprints e fases. */
+  renderSumDeliveredSprints(ctx) {
+    const done = (Array.isArray(ctx.inv.sprints) ? ctx.inv.sprints : [])
+      .filter(sp => !(sp.startDate && sp.endDate && toNumber(sp.businessDays) > 0))
+      .map(sp => {
+        const ps = (sp.phases || []).map(n => ctx.phases.find(p => toNumber(p.phase) === toNumber(n))).filter(Boolean);
+        return { sp, ps };
+      })
+      .filter(({ sp, ps }) => !toNumber(sp.businessDays) && ps.length && ps.every(p => isExisting(p)))
+      .sort((a, b) => toNumber(a.sp.sprint) - toNumber(b.sp.sprint));
+    if (!done.length) return '';
+    return `
+      <h3 class="sum-subhead sum-subhead--done">${lucide('circle-check', { size: 14, strokeWidth: 2.4 })}Já entregues</h3>
+      <ul class="sum-done-list" aria-label="Sprints já entregues">
+        ${done.map(({ sp, ps }) => {
+          const hours = ps.reduce((a, p) => a + toNumber(p.hours), 0);
+          const price = ps.reduce((a, p) => a + toNumber(p.price), 0);
+          return `
+            <li class="sum-done-item">
+              <span class="sum-done-icon" aria-hidden="true">${lucide('circle-check', { size: 16, strokeWidth: 2.4 })}</span>
+              <span class="sum-done-text">
+                <strong>Sprint ${t(sp.sprint)}</strong>
+                <span>${t(joinPhases(sp.phases || []))}</span>
+                <span class="sum-done-status">Concluída · ${num(hours)} h / ${brl(price)}</span>
+              </span>
+            </li>
+          `;
+        }).join('')}
+      </ul>
+    `;
+  }
+
+  renderSum_payment(s, ctx) {
+    const list = (Array.isArray(ctx.inv.payment) ? ctx.inv.payment : [])
+      .filter(p => p.scope === 'new-features' && !isSuperseded(p));
+    if (!list.length) return '';
+    return `
+      <div class="sum-payment-grid">
+        ${list.map(p => `
+          <div class="sum-payment-card">
+            <span class="sum-payment-percent">${num(p.percent)}%</span>
+            <span class="sum-payment-name">${t(p.milestone)}</span>
+            <strong class="sum-payment-amount">${brl(p.amount)}</strong>
+            <span class="sum-payment-due">${p.dueDate ? `Vencimento: ${formatDate(p.dueDate)}` : (p.dueInDays !== undefined ? dueLabel(p.dueInDays) : '')}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  renderSum_reuse(s, ctx) {
+    const base = ctx.phases.filter(p => toNumber(p.phase) <= 6);
+    const nums = base.map(p => toNumber(p.phase));
+    const range = nums.length ? (Math.min(...nums) === Math.max(...nums) ? `Fase ${Math.min(...nums)}` : `Fases ${Math.min(...nums)}-${Math.max(...nums)}`) : '';
+    const hours = base.reduce((a, p) => a + toNumber(p.hours), 0);
+    const price = base.reduce((a, p) => a + toNumber(p.price), 0);
+    return `
+      ${s.text ? `<p class="sum-text">${t(s.text)}</p>` : ''}
+      ${range ? `<p class="sum-seal"><span class="feature-delivered-badge">${lucide('circle-check', { size: 12, strokeWidth: 2.4 })}${t(range)}: ${num(hours)} h / ${brl(price)}</span></p>` : ''}
+      ${ctx.meta.pricingNote ? `<p class="sum-note">${t(ctx.meta.pricingNote)}</p>` : ''}
+    `;
+  }
+
+  renderSum_assumptions(s, ctx) {
+    const all = Array.isArray(ctx.d.assumptions) ? ctx.d.assumptions : [];
+    const picked = (Array.isArray(s.include) ? s.include : all.map((_, i) => i)).map(i => all[i]).filter(Boolean);
+    if (!picked.length) return '';
+    return `<ul class="sum-list">${picked.map(a => `<li>${t(a)}</li>`).join('')}</ul>`;
+  }
+
+  renderSum_outOfScope(s, ctx) {
+    const notice = ctx.d.outOfScopeNotice || {};
+    const list = Array.isArray(ctx.d.outOfScope) ? ctx.d.outOfScope : [];
+    if (!notice.label && !notice.text && !list.length) return '';
+    return `
+      <div class="sum-oos">
+        ${notice.label ? `<p class="sum-oos-label">${t(notice.label)}</p>` : ''}
+        ${notice.text ? `<p class="sum-text">${t(notice.text)}</p>` : ''}
+        ${list.length ? `<ul class="sum-list sum-list--oos">${list.map(i => `<li>${t(i)}</li>`).join('')}</ul>` : ''}
+      </div>
+    `;
+  }
+
+  renderSum_warranty(s, ctx) {
+    const w = ctx.d.postDelivery?.warranty;
+    if (!w) return '';
+    const rate = ctx.d.postDelivery?.newRequests?.hourlyRate;
+    return `
+      <p class="sum-text">
+        <strong>${num(w.days)} dias</strong> de garantia${w.coverage ? `: ${t(w.coverage).replace(/\.$/, '')}.` : '.'}
+        ${rate ? ` Novas solicitações a <strong>${brl(rate)}/h</strong>, com aprovação prévia.` : ''}
+      </p>
+    `;
+  }
+
+  renderSum_nextSteps(s, ctx) {
+    const items = Array.isArray(s.items) ? s.items : [];
+    const meta = ctx.meta;
+    const proponent = ctx.d.proponent || {};
+    const resp = proponent.responsible || {};
+    const validUntil = addDays(meta.issuedAt, meta.validityDays);
+    const link = (url, label) => (url ? `<a href="${t(url)}" target="_blank" rel="noopener noreferrer">${t(label)}</a>` : t(label));
+    return `
+      ${items.length ? `<ol class="sum-steps">${items.map(i => `<li>${t(i)}</li>`).join('')}</ol>` : ''}
+      ${meta.validityDays ? `<p class="sum-validity">Proposta válida por <strong>${num(meta.validityDays)} dias</strong>${meta.issuedAt ? ` (emitida em ${formatDate(meta.issuedAt)}${validUntil ? `, até ${formatDate(validUntil)}` : ''})` : ''}.</p>` : ''}
+      ${resp.name || proponent.name ? `
+        <p class="sum-contact">
+          ${resp.name ? `<span><strong>${link(resp.url, resp.name)}</strong>${resp.role ? ` · ${t(resp.role)}` : ''}</span>` : ''}
+          ${proponent.name ? `<span>${link(proponent.url, proponent.name)}</span>` : ''}
+        </p>
+      ` : ''}
     `;
   }
 
@@ -693,12 +1061,12 @@ export class PropostaView {
           </div>
           <div class="feature-metrics-badges">
             ${existing ? `
-              <span class="prop-badge">${lucide('calendar', { size: 14, strokeWidth: 2 })}0 h</span>
-              <span class="prop-badge price">${brl(0)}</span>
+              <span class="prop-badge prop-badge--hours">${lucide('calendar', { size: 14, strokeWidth: 2 })}0 h</span>
+              <span class="prop-badge price prop-badge--price">${brl(0)}</span>
             ` : `
-              <span class="prop-badge">${lucide('calendar', { size: 14, strokeWidth: 2 })}${num(feature.hours)} h</span>
-              <span class="prop-badge">${num(feature.businessDays)} dias úteis</span>
-              <span class="prop-badge price">${brl(feature.price)}</span>
+              <span class="prop-badge prop-badge--hours">${lucide('calendar', { size: 14, strokeWidth: 2 })}${num(feature.hours)} h</span>
+              <span class="prop-badge prop-badge--days">${num(feature.businessDays)} dias úteis</span>
+              <span class="prop-badge price prop-badge--price">${brl(feature.price)}</span>
             `}
           </div>
           ${this.renderCollapseToggle(fid, expanded)}
@@ -1109,9 +1477,9 @@ export class PropostaView {
             <h3 class="feature-title" id="feature-title-${key}">${t(name)}</h3>
           </div>
           <div class="feature-metrics-badges">
-            <span class="prop-badge">${lucide('calendar', { size: 14, strokeWidth: 2 })}${num(hours)} h</span>
-            ${phase.businessDays !== undefined ? `<span class="prop-badge">${num(phase.businessDays)} dias úteis</span>` : ''}
-            <span class="prop-badge price">${brl(price)}</span>
+            <span class="prop-badge prop-badge--hours">${lucide('calendar', { size: 14, strokeWidth: 2 })}${num(hours)} h</span>
+            ${phase.businessDays !== undefined ? `<span class="prop-badge prop-badge--days">${num(phase.businessDays)} dias úteis</span>` : ''}
+            <span class="prop-badge price prop-badge--price">${brl(price)}</span>
           </div>
           ${this.renderCollapseToggle(key, expanded)}
         </header>
@@ -2176,7 +2544,7 @@ export class PropostaView {
       <button type="button" class="delivered-group-toggle ${cls}" ${this.deliveredToggleAttrs(id, range)}>
         <span class="delivered-group-icon" aria-hidden="true">${lucide('circle-check', { size: 16, strokeWidth: 2.4 })}</span>
         <span class="delivered-group-label">${label}</span>
-        ${price !== null ? `<span class="prop-badge price delivered-group-price">${price}</span>` : ''}
+        ${price !== null ? `<span class="prop-badge price prop-badge--price delivered-group-price">${price}</span>` : ''}
         <span class="delivered-group-pill feature-toggle" aria-hidden="true">
           <span class="delivered-group-action">${open ? 'Recolher' : 'Expandir'}</span>
           <span class="delivered-group-chevron">${lucide('chevron-down', { size: 18, strokeWidth: 2.4 })}</span>
@@ -2236,8 +2604,8 @@ export class PropostaView {
             <h4 class="feature-title" id="feature-title-${key}">${title}</h4>
           </div>
           <div class="feature-metrics-badges">
-            <span class="prop-badge">${lucide('calendar', { size: 14, strokeWidth: 2 })}${existing ? 0 : num(p.hours)} h</span>
-            <span class="prop-badge price">${brl(existing ? 0 : p.price)}</span>
+            <span class="prop-badge prop-badge--hours">${lucide('calendar', { size: 14, strokeWidth: 2 })}${existing ? 0 : num(p.hours)} h</span>
+            <span class="prop-badge price prop-badge--price">${brl(existing ? 0 : p.price)}</span>
           </div>
           ${this.renderCollapseToggle(key, expanded)}
         </header>
@@ -2332,7 +2700,7 @@ export class PropostaView {
 
   bindEvents() {
     // 0. Fallback de iniciais "JL" caso a foto do GitHub não carregue
-    this.container.querySelectorAll('.dev-avatar-img').forEach(img => {
+    this.container.querySelectorAll('.dev-avatar-img, .sum-avatar-img').forEach(img => {
       const fallback = () => img.remove();
       if (img.complete && img.naturalWidth === 0) {
         fallback();
@@ -2379,6 +2747,12 @@ export class PropostaView {
     const btnPdf = this.container.querySelector('#btn-save-pdf');
     if (btnPdf && this.data) {
       btnPdf.addEventListener('click', async () => {
+        // Garante que o DOM reflete a visão ativa (?view=) antes de imprimir
+        const rendered = this.container.querySelector('.view-proposta-wrapper')?.classList.contains('is-summary') ? 'resumido' : 'detalhado';
+        if (rendered !== this.getViewMode()) {
+          this.container.innerHTML = this.renderShell(this.data, this.renderBody(this.data));
+          this.bindEvents();
+        }
         this.closePrintLightbox();
         await this.loadPrintImages();
         const previousTitle = document.title;
@@ -2414,20 +2788,26 @@ export class PropostaView {
       btnRetry.addEventListener('click', () => this.render());
     }
 
-    // 3. Voltar ao Menu ou Login
-    const btnBack = this.container.querySelector('#btn-back-menu');
-    if (btnBack) {
-      btnBack.addEventListener('click', () => {
+    // 3. Demo App (logo e link): mesmo destino do antigo "Voltar" (menu se logado, senão login)
+    this.container.querySelectorAll('[data-bar-home]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+        e.preventDefault();
         if (typeof this.options.onNavigate === 'function') {
           const savedUser = sessionStorage.getItem('app_user');
           let hasUser = false;
           try {
             hasUser = savedUser && JSON.parse(savedUser)?.isLoggedIn;
-          } catch (e) {}
+          } catch (err) {}
           this.options.onNavigate(hasUser ? 'menu' : 'login');
         }
       });
-    }
+    });
+
+    // 3.0 Seletor Detalhado/Resumido (persistido em ?view=)
+    this.container.querySelectorAll('[data-view-mode]').forEach(btn => {
+      btn.addEventListener('click', () => this.setViewMode(btn.dataset.viewMode));
+    });
 
     // 3.1 Expandir/recolher cards de funcionalidades
     this.bindFeatureToggles();
