@@ -59,13 +59,19 @@ export class ModalQrCodeComponent {
       return;
     }
 
-    const payload = { ...MOCK_SPOOL_CADASTRADO };
+    if (this.isScanned) {
+      const payload = { ...MOCK_SPOOL_CADASTRADO };
 
-    if (typeof this.onScanCallback === 'function') {
-      this.onScanCallback(payload.codigo, payload);
-    }
-    if (typeof this.onCloseCallback === 'function') {
-      this.onCloseCallback(payload.codigo, payload);
+      if (typeof this.onScanCallback === 'function') {
+        this.onScanCallback(payload.codigo, payload);
+      }
+      if (typeof this.onCloseCallback === 'function') {
+        this.onCloseCallback(payload.codigo, payload);
+      }
+    } else {
+      if (typeof this.onCloseCallback === 'function') {
+        this.onCloseCallback(null, null);
+      }
     }
   }
 
@@ -373,10 +379,26 @@ export class ModalQrCodeComponent {
             <div class="qrcode-top-divider"></div>
           </div>
 
-          <!-- Card 1: Visor da Câmera -->
-          ${this.renderViewfinder(true)}
+          <!-- Card 1: Visor da Câmera (Com ou sem desenho SVG do QRCode dependendo de isScanned) -->
+          ${this.renderViewfinder(this.isScanned)}
 
-          <!-- Card 1: Instruções e Dados do Spool e Componentes -->
+          <!-- Botão Azul "Simula Ler QRCode" posicionado logo abaixo do visor da câmera -->
+          <div class="qrcode-scan-action-wrap">
+            <button 
+              class="qrcode-btn-modal-scan ${this.isScanned ? 'is-scanned' : ''}" 
+              id="btn-modal-trigger-scan" 
+              type="button" 
+              title="${this.isScanned ? 'QRCode lido com sucesso' : 'Clique para simular a leitura do QRCode'}"
+              ${this.isScanned ? 'disabled' : ''}
+            >
+              ${this.isScanned 
+                ? `${lucide('check', { size: 18, stroke: '#ffffff', strokeWidth: 2.5 })} <span>QRCode Lido com Sucesso</span>`
+                : `${lucide('qr-code', { size: 18, stroke: '#ffffff', strokeWidth: 2 })} <span>Simula Ler QRCode</span>`
+              }
+            </button>
+          </div>
+
+          <!-- Card 2: Instruções e Dados do Spool e Componentes -->
           <div class="qrcode-card-instructions">
             <div class="qrcode-instr-main-title">Ler o QRCode do Spool e Componentes.</div>
             <div class="qrcode-instr-item">1 - Ler o QRCode do Spool.</div>
@@ -388,11 +410,21 @@ export class ModalQrCodeComponent {
               <div class="qrcode-modal-spool-title">Spool:</div>
               <div class="qrcode-modal-spool-meta">
                 <span class="qrcode-modal-meta-label">Código:</span>
-                <span class="qrcode-modal-meta-value">${MOCK_SPOOL_CADASTRADO.codigo}</span>
+                <span class="qrcode-modal-meta-value">
+                  ${this.isScanned 
+                    ? MOCK_SPOOL_CADASTRADO.codigo 
+                    : '<span class="qrcode-placeholder-text">Aguardando leitura do QRCode...</span>'
+                  }
+                </span>
               </div>
               <div class="qrcode-modal-spool-meta">
                 <span class="qrcode-modal-meta-label">Descrição:</span>
-                <span class="qrcode-modal-meta-value">${MOCK_SPOOL_CADASTRADO.descricao}</span>
+                <span class="qrcode-modal-meta-value">
+                  ${this.isScanned 
+                    ? MOCK_SPOOL_CADASTRADO.descricao 
+                    : '<span class="qrcode-placeholder-text">Clique em "Simula Ler QRCode" acima para capturar</span>'
+                  }
+                </span>
               </div>
 
               <!-- Listagem de Componentes -->
@@ -407,23 +439,33 @@ export class ModalQrCodeComponent {
                     </tr>
                   </thead>
                   <tbody>
-                    ${MOCK_SPOOL_CADASTRADO.componentes.map(comp => `
-                      <tr>
-                        <td class="col-modal-item">${comp.item}</td>
-                        <td class="col-modal-desc">${comp.descricao}</td>
-                        <td class="col-modal-qtd">${comp.qtd}</td>
-                      </tr>
-                    `).join('')}
+                    ${this.isScanned 
+                      ? MOCK_SPOOL_CADASTRADO.componentes.map(comp => `
+                        <tr>
+                          <td class="col-modal-item">${comp.item}</td>
+                          <td class="col-modal-desc">${comp.descricao}</td>
+                          <td class="col-modal-qtd">${comp.qtd}</td>
+                        </tr>
+                      `).join('')
+                      : `
+                        <tr>
+                          <td colspan="3" class="col-modal-placeholder text-center" style="padding: 16px; color: #9ca3af; font-style: italic;">Aguardando leitura do QRCode do Spool e componentes...</td>
+                        </tr>
+                      `
+                    }
                   </tbody>
                 </table>
               </div>
             </div>
           </div>
 
-          <!-- Card 2: Último QRCode Lido -->
+          <!-- Card 3: Último QRCode Lido -->
           <div class="qrcode-card-last-read">
             <div class="qrcode-last-read-title">Último QRCode lido:</div>
-            <div class="qrcode-last-read-inline-data">SPL-2024-001 | Tubo Condução Aço Carbono 4" Sch 40 | 3 componentes</div>
+            ${this.isScanned 
+              ? `<div class="qrcode-last-read-inline-data">SPL-2024-001 | Tubo Condução Aço Carbono 4" Sch 40 | 3 componentes</div>` 
+              : `<div class="qrcode-waiting-text">Aguardando leitura...</div>`
+            }
           </div>
 
           <!-- Botão Fechar no Rodapé -->
@@ -464,7 +506,11 @@ export class ModalQrCodeComponent {
       e.stopPropagation();
       if (!this.isScanned) {
         this.isScanned = true;
-        this.renderCaldeirariaMode();
+        if (this.mode === 'caldeiraria') {
+          this.renderCaldeirariaMode();
+        } else {
+          this.renderCadastroMode();
+        }
         this.bindEvents();
       }
     };
@@ -473,7 +519,7 @@ export class ModalQrCodeComponent {
       btnTriggerScan.addEventListener('click', handleTriggerScan);
     }
 
-    if (viewfinder && this.mode === 'caldeiraria') {
+    if (viewfinder) {
       viewfinder.addEventListener('click', handleTriggerScan);
     }
 

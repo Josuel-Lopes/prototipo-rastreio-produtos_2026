@@ -532,6 +532,14 @@
   color: #1e293b;
 }
 
+.qrcode-modal-comp-table td.col-modal-placeholder {
+  padding: 16px;
+  color: #9ca3af;
+  font-style: italic;
+  text-align: center;
+  border-right: none;
+}
+
 /* Card 2: Último QRCode Lido (CARD BRANCO SÓLIDO INDEPENDENTE) */
 .qrcode-card-last-read {
   background: #ffffff !important;
