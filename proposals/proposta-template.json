@@ -1,0 +1,208 @@
+{
+  "meta": {
+    "id": "PROP-2026-001",
+    "version": "1.0",
+    "issuedAt": "2026-11-24",
+    "validityDays": 30,
+    "currency": "BRL",
+    "hourlyRate": 90,
+    "hoursPerBusinessDay": 8,
+    "title": "Sistema de Rastreio de Produtos e Gestão de Spools"
+  },
+  "theme": {
+    "navy": "#0B2545",
+    "royal": "#1F4FD8",
+    "industrialGray": "#5B6670",
+    "background": "#F2F4F7"
+  },
+  "proponent": {
+    "name": "MAXCODE42",
+    "url": "https://maxcode42.com.br",
+    "slogan": "Construindo seu software — Código limpo, produto no centro e entregas orgânicas contínuas.",
+    "stats": [
+      { "label": "Anos de experiência", "value": "8+" },
+      { "label": "Repositórios", "value": "50" },
+      { "label": "Projetos entregues", "value": "26" },
+      { "label": "Humano + IA", "value": "100%" }
+    ],
+    "pillars": ["Custo", "Valor", "Tempo", "Qualidade"],
+    "engineering": [
+      "Clean Architecture",
+      "APIs & Microsserviços",
+      "Cloud/Kubernetes",
+      "Segurança Zero Trust",
+      "LGPD",
+      "Continuous QA"
+    ],
+    "responsible": {
+      "name": "Josuel Lopes",
+      "url": "https://josuellopes.maxcode42.com.br",
+      "role": "Desenvolvedor Full Stack",
+      "bio": "8+ anos em engenharia de software corporativa, arquitetura, Node.js, React, TypeScript, APIs RESTful e IA contextual."
+    }
+  },
+  "client": {
+    "name": "Alvenius Tubos e Conexões",
+    "url": "https://alvenius.ind.br",
+    "about": "Líder em sistemas de tubulações ranhuradas (grooved), spools industriais, caldeiraria e revestimentos."
+  },
+  "executiveSummary": {
+    "context": "Quanto maior o volume de peças, maior o desafio de saber onde cada spool está, em que etapa e quanto custou.",
+    "outcomes": [
+      "Menos retrabalho e perdas: cada peça tem histórico e responsável.",
+      "Decisão rápida: painel único da fábrica para diretores e gerentes.",
+      "Operação simples: uso por celular ou tablet no chão de fábrica."
+    ]
+  },
+  "features": [
+    {
+      "id": "qr-rastreio",
+      "phase": 1,
+      "title": "Rastreio de Produtos por QR Code",
+      "businessGoal": "Saber em segundos o que é, onde está e em que etapa está cada peça, sem planilhas e papel.",
+      "steps": [
+        "O sistema gera uma etiqueta com QR Code para cada spool/produto.",
+        "O encarregado cola a etiqueta na peça.",
+        "A cada etapa, o operador aponta o celular para o QR Code.",
+        "Confirma a etapa com um toque; o sistema registra data, hora e responsável.",
+        "O histórico completo da peça fica disponível para consulta."
+      ],
+      "visuals": [
+        { "type": "screenshot", "caption": "Tela de leitura do QR Code", "src": null },
+        { "type": "screenshot", "caption": "Modelo da etiqueta impressa", "src": null },
+        { "type": "diagram", "caption": "Fluxo de etapas da peça", "src": null }
+      ],
+      "hours": 40,
+      "businessDays": 5,
+      "price": 3600
+    },
+    {
+      "id": "gestao-spools",
+      "phase": 2,
+      "title": "Gestão de Spools e Projetos",
+      "businessGoal": "Dar visão agrupada por projeto para saber se o pedido será entregue no prazo.",
+      "steps": [
+        "O gerente cadastra o projeto/pedido e seus spools (ou importa uma lista).",
+        "Define prazo, prioridade e responsável.",
+        "O encarregado vê a fila de trabalho do dia e atualiza o andamento.",
+        "O sistema calcula automaticamente o percentual de conclusão.",
+        "Atrasos e pendências ficam destacados em cores."
+      ],
+      "visuals": [
+        { "type": "screenshot", "caption": "Lista de projetos com percentual de conclusão", "src": null },
+        { "type": "screenshot", "caption": "Detalhe do spool (dados, etapas, histórico)", "src": null },
+        { "type": "diagram", "caption": "Projeto → spools → etapas", "src": null }
+      ],
+      "hours": 40,
+      "businessDays": 5,
+      "price": 3600
+    },
+    {
+      "id": "sucata-retrabalho",
+      "phase": 3,
+      "title": "Controle de Sucata e Retrabalho",
+      "businessGoal": "Tornar visível o custo escondido de material descartado ou refeito e seus motivos.",
+      "steps": [
+        "Na leitura do QR Code, o operador escolhe Sucata ou Retrabalho.",
+        "Informa o motivo em uma lista simples e, opcionalmente, anexa foto.",
+        "O sistema abre a ocorrência e avisa o responsável.",
+        "Ao resolver, o encarregado encerra a ocorrência.",
+        "Relatórios mostram motivos mais frequentes e custo estimado das perdas."
+      ],
+      "visuals": [
+        { "type": "screenshot", "caption": "Formulário de ocorrência", "src": null },
+        { "type": "diagram", "caption": "Gráfico de perdas por motivo", "src": null }
+      ],
+      "hours": 36,
+      "businessDays": 4.5,
+      "price": 3240
+    },
+    {
+      "id": "painel-gerencial",
+      "phase": 4,
+      "title": "Painel Gerencial",
+      "businessGoal": "Oferecer visão única da fábrica a diretores e gerentes, sem relatórios manuais.",
+      "steps": [
+        "O gestor acessa o painel pelo navegador, no computador ou celular.",
+        "Vê spools por etapa, entregas no prazo, atrasos e perdas.",
+        "Filtra por projeto, cliente ou período.",
+        "Exporta relatórios em PDF ou planilha."
+      ],
+      "visuals": [
+        { "type": "screenshot", "caption": "Painel com indicadores principais", "src": null },
+        { "type": "screenshot", "caption": "Exemplo de relatório exportado", "src": null }
+      ],
+      "hours": 48,
+      "businessDays": 6,
+      "price": 4320
+    },
+    {
+      "id": "integracao-erp",
+      "phase": 5,
+      "title": "Integração com o ERP / Sistema Atual",
+      "businessGoal": "Eliminar digitação dupla, reduzindo erros e perda de tempo.",
+      "steps": [
+        "O sistema recebe automaticamente pedidos e cadastros já existentes.",
+        "Na expedição do spool, o status retorna ao sistema atual.",
+        "Falhas de comunicação são registradas e reenviadas automaticamente."
+      ],
+      "visuals": [
+        { "type": "diagram", "caption": "Integração entre os sistemas", "src": null },
+        { "type": "screenshot", "caption": "Monitoramento das integrações", "src": null }
+      ],
+      "hours": 36,
+      "businessDays": 4.5,
+      "price": 3240,
+      "assumption": "A Alvenius disponibiliza acesso e documentação do sistema a ser integrado."
+    }
+  ],
+  "investment": {
+    "phases": [
+      { "phase": 0, "name": "Descoberta, alinhamento e design das telas", "hours": 24, "businessDays": 3, "price": 2160 },
+      { "phase": 1, "name": "Rastreio por QR Code", "hours": 40, "businessDays": 5, "price": 3600 },
+      { "phase": 2, "name": "Gestão de Spools e Projetos", "hours": 40, "businessDays": 5, "price": 3600 },
+      { "phase": 3, "name": "Controle de Sucata e Retrabalho", "hours": 36, "businessDays": 4.5, "price": 3240 },
+      { "phase": 4, "name": "Painel Gerencial", "hours": 48, "businessDays": 6, "price": 4320 },
+      { "phase": 5, "name": "Integração com ERP", "hours": 36, "businessDays": 4.5, "price": 3240 },
+      { "phase": 6, "name": "Homologação, treinamento e entrada em produção", "hours": 24, "businessDays": 3, "price": 2160 }
+    ],
+    "totals": { "hours": 248, "businessDays": 31, "approxWeeks": 6, "price": 22320 },
+    "sprints": [
+      { "sprint": 1, "phases": [0, 1], "businessDays": 8 },
+      { "sprint": 2, "phases": [2], "businessDays": 5 },
+      { "sprint": 3, "phases": [3, 4], "businessDays": 10.5 },
+      { "sprint": 4, "phases": [5, 6], "businessDays": 7.5 }
+    ],
+    "payment": [
+      { "milestone": "Aprovação da proposta", "percent": 30, "amount": 6696 },
+      { "milestone": "Entrega da Sprint 2", "percent": 40, "amount": 8928 },
+      { "milestone": "Homologação final", "percent": 30, "amount": 6696 }
+    ]
+  },
+  "postDelivery": {
+    "homologation": {
+      "responseBusinessDays": 5,
+      "rule": "Entregas aprovadas por escrito passam a compor o escopo homologado."
+    },
+    "warranty": {
+      "days": 90,
+      "coverage": "Correção de desvios do escopo homologado sem custo adicional.",
+      "support": "E-mail e WhatsApp em horário comercial; resposta em até 1 dia útil."
+    },
+    "newRequests": {
+      "hourlyRate": 90,
+      "rule": "Alterações ou funcionalidades fora do escopo homologado são orçadas à parte, com estimativa de horas e prazo, e só iniciam após aprovação prévia."
+    }
+  },
+  "assumptions": [
+    "Responsável da Alvenius disponível para dúvidas e homologação.",
+    "Dados e acessos fornecidos para a integração.",
+    "Internet e dispositivos (celular/tablet) disponíveis no chão de fábrica."
+  ],
+  "outOfScope": [
+    "Compra de hardware (impressoras de etiqueta, leitores, tablets)",
+    "Hospedagem em nuvem (orçada separadamente)",
+    "Customizações não listadas",
+    "Treinamento além do previsto"
+  ]
+}

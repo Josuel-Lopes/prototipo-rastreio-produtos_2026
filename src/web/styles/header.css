@@ -1,240 +1,706 @@
 /**
- * Alvenius Spool Management - Header & Navigation Bar
+ * Alvenius Spool Management - Header & Navigation Bar (v2)
+ * Arquitetura Unificada e Condicional sem recriação do Header no toggle do menu
  */
 
 .app-header-container {
   width: 100%;
-  background-color: var(--color-surface);
-  border-bottom: 1px solid var(--color-border-light);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-/* Faixa Superior Global */
-.header-top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-sm) var(--space-xl);
-  min-height: 56px;
-  max-width: 1300px;
-  margin: 0 auto;
-}
-
-/* Lado Esquerdo: Logo + Versão */
-.header-brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.brand-logo-rings {
-  display: flex;
-  align-items: center;
+  background-color: #c0c2c7;
+  border-bottom: 2px solid #8ea8cc;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
   position: relative;
-  width: 44px;
-  height: 28px;
+  z-index: 150;
+  height: 145px;
+  min-height: 145px;
+  box-sizing: border-box;
+  overflow: visible !important;
 }
 
-.brand-logo-rings svg {
-  width: 100%;
+/* Faixa Superior Principal */
+.header-main-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 24px 60px 0 60px;
   height: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  position: relative;
+  box-sizing: border-box;
 }
 
-.brand-info {
+/* Seção de Marca (Esquerda) */
+.header-brand-section {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Bloco Logo + Versão Vertical (Modo Login e Modo Home) */
+.header-brand-block {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  line-height: 1;
 }
 
-.brand-title {
-  font-size: var(--font-md);
-  font-weight: var(--weight-bold);
-  color: var(--color-primary-dark);
-  letter-spacing: 0.5px;
-  line-height: 1.1;
+.brand-logo-img {
+  width: auto;
+  height: 38px;
+  max-height: 38px;
+  object-fit: contain;
+  display: block;
+}
+
+.brand-version-sub {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+  margin-top: 4px;
+  text-align: center;
+}
+
+/* Bloco Logo + RASTREIO DE PRODUTOS Inline (Modo Work) */
+.header-brand-inline {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.header-brand-logo-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+.header-brand-inline .brand-logo-img {
+  height: 38px;
+  max-height: 38px;
+}
+
+.header-brand-title {
+  font-size: var(--font-md, 16px);
+  font-weight: var(--weight-bold, 700);
+  color: var(--color-header-title, #0a2540);
+  letter-spacing: 0.6px;
   text-transform: uppercase;
 }
 
-.brand-version {
-  font-size: var(--font-xs);
-  color: var(--color-text-muted);
-  font-weight: var(--weight-medium);
-}
-
-/* Centro: Pill Flutuante */
+/* ==========================================================================
+   Centro: Pill Retangular Flutuante a Cavaleiro
+   ========================================================================== */
 .header-center-pill {
+  position: absolute;
+  top: 145px;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 300 !important;
+  pointer-events: none;
 }
 
-.floating-pill {
+.header-center-pill .floating-pill,
+.header-center-pill #header-pill-label {
+  width: 200px !important;
+  max-width: calc(100vw - 32px) !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  background-color: #ffffff !important;
+  border: 1px solid #d0d7de !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+  padding: 0 20px !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: auto;
+  letter-spacing: 0.2px;
+  text-align: center;
+  box-sizing: border-box !important;
+  line-height: 1 !important;
+}
+
+.header-center-pill .floating-pill span,
+.header-center-pill #header-pill-label span {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: auto !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
+  font-size: 18px !important;
+  text-align: center !important;
+}
+
+/* Tabs Inline Horizontais (Desktop Modo Work) */
+.header-inline-tabs {
+  display: none;
+  align-items: center;
+  overflow-x: auto;
+}
+
+.header-tabs-list {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+}
+
+.tab-link {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-xs);
-  padding: 5px var(--space-lg);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-pill);
-  font-size: var(--font-sm);
-  font-weight: var(--weight-semibold);
-  color: var(--color-navy);
-  letter-spacing: 0.3px;
-  text-transform: capitalize;
-  transition: all 0.2s ease;
+  padding: 16px 12px 14px;
+  font-size: 13px;
+  font-weight: var(--weight-bold, 700);
+  color: var(--color-text-muted, #64748b);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
-.floating-pill .pill-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--color-primary);
+.tab-link:hover {
+  color: var(--color-primary, #0070ba);
+  text-decoration: none;
 }
 
-/* Lado Direito: Usuário & Sair */
+.tab-link.active {
+  color: var(--color-primary, #0070ba);
+  border-bottom: 2px solid var(--color-primary, #0070ba);
+}
+
+/* Lado Direito Desktop: Perfil Usuário + Sair */
 .header-user-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
+  gap: var(--space-md, 12px);
+  margin-top: 8px;
 }
 
-.user-badge {
+.header-divider-v {
+  color: var(--color-divider, #cbd5e1);
+  font-weight: 300;
+  font-size: 16px;
+  user-select: none;
+}
+
+.user-profile-badge {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  font-size: var(--font-base);
-  color: var(--color-text);
+  gap: 6px;
+  font-size: var(--font-base, 14px);
+  color: var(--color-text, #1e293b);
 }
 
-.user-badge strong {
-  color: var(--color-primary-dark);
-  font-weight: var(--weight-bold);
+.user-profile-icon {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-muted, #64748b);
+}
+
+.user-welcome-text strong {
+  color: var(--color-navy, #0a2540);
+  font-weight: var(--weight-bold, 700);
 }
 
 .btn-header-logout {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-xs);
-  padding: 6px var(--space-md);
+  gap: 5px;
+  padding: 4px 10px;
   background-color: transparent;
-  color: var(--color-action-danger);
-  border: 1px solid rgba(220, 53, 69, 0.25);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-sm);
-  font-weight: var(--weight-semibold);
-  transition: all 0.2s ease;
+  color: #dc2626;
+  border: 1px solid transparent;
+  border-radius: 0px;
+  font-size: var(--font-base, 14px);
+  font-weight: var(--weight-semibold, 600);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-header-logout svg {
+  color: #dc2626;
+  stroke: #dc2626;
 }
 
 .btn-header-logout:hover {
-  background-color: rgba(220, 53, 69, 0.08);
-  border-color: var(--color-action-danger);
+  background-color: rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.3);
 }
 
-/* Espaçador invisível para alinhamento simétrico da pill */
-.header-user-spacer {
+/* Espaçador para tela de login */
+.header-spacer-right {
+  display: none;
+  min-width: 80px;
+}
+
+/* Botão Hambúrguer Mobile (Oculto no Desktop) */
+.btn-header-hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: #757c96;
+  padding: 0;
+  outline: none;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: opacity 0.15s ease;
+  z-index: 250 !important;
+}
+
+.btn-header-hamburger:hover {
+  background: transparent;
+  border: none;
+  opacity: 0.8;
+}
+
+.btn-header-hamburger svg {
+  display: block;
+}
+
+.btn-header-hamburger.is-active svg {
+  stroke: #ef4444;
+  color: #ef4444;
+}
+
+/* ==========================================================================
+   REGRAS CONDICIONAIS DE EXIBIÇÃO POR ESTADO
+   ========================================================================== */
+
+/* 1. MODO LOGIN:
+   - Exibe: Logo 3 anéis + v2.0.0 à esquerda e pill "Rastreio de produtos" no centro.
+   - NÃO exibe: Usuário, Sair, tabs, hambúrguer, nem menu expandido.
+*/
+.app-header-container.mode-login .header-brand-block {
   display: flex;
-  min-width: 130px;
+}
+.app-header-container.mode-login .header-brand-inline {
+  display: none;
+}
+.app-header-container.mode-login .header-inline-tabs {
+  display: none;
+}
+.app-header-container.mode-login .header-user-actions {
+  display: none;
+}
+.app-header-container.mode-login .btn-header-hamburger {
+  display: none !important;
+}
+.app-header-container.mode-login .header-spacer-right {
+  display: block;
+}
+.app-header-container.mode-login .header-drawer-panel {
+  display: none !important;
 }
 
-/* Barra de Navegação Horizontal Secundária (Tabs) */
-.header-nav-bar {
-  background-color: #fcfdfe;
-  border-top: 1px solid var(--color-border-light);
-  overflow-x: auto;
-  white-space: nowrap;
+/* 2. MODO HOME:
+   - Exibe: Logo 3 anéis + v2.0.0 à esquerda, pill "Rastreio de produtos" no centro.
+   - Desktop: Usuário + Sair.
+   - Mobile: Botão hambúrguer.
+   - Drawer da Home: exibe APENAS Usuário + divisor + botão Sair retangular.
+*/
+.app-header-container.mode-home .header-brand-block {
+  display: flex;
+  cursor: pointer;
+}
+.app-header-container.mode-home .header-brand-inline {
+  display: none;
+}
+.app-header-container.mode-home .header-inline-tabs {
+  display: none;
+}
+.app-header-container.mode-home .header-user-actions {
+  display: flex;
+}
+.app-header-container.mode-home .header-spacer-right {
+  display: none;
+}
+.app-header-container.mode-home .home-drawer-section {
+  display: block;
+}
+.app-header-container.mode-home .work-drawer-section {
+  display: none;
 }
 
-.header-nav-list {
+/* 3. MODO WORK (Cadastro, Caldeiraria, etc.):
+   - Exibe: Logo 3 anéis + RASTREIO DE PRODUTOS à esquerda, pill da tela ativa no centro.
+   - Desktop: Tabs inline de trabalho + Usuário + Sair.
+   - Mobile: Botão hambúrguer.
+   - Drawer do Work: exibe Usuário + lista completa dos 8 módulos com chevron + botão Sair com scroll.
+*/
+.app-header-container.mode-work .header-brand-block {
+  display: none;
+}
+.app-header-container.mode-work .header-brand-inline {
+  display: flex;
+}
+.app-header-container.mode-work .header-inline-tabs {
+  display: flex;
+}
+.app-header-container.mode-work .header-user-actions {
+  display: flex;
+}
+.app-header-container.mode-work .header-spacer-right {
+  display: none;
+}
+.app-header-container.mode-work .home-drawer-section {
+  display: none;
+}
+.app-header-container.mode-work .work-drawer-section {
+  display: block;
+}
+
+/* ==========================================================================
+   EXPANSÃO / COLAPSO DO MENU (Drawer Dropdown Overlay)
+   - Não destrói a casca do header
+   - Transição suave sobreposta sobre a tela de fundo intacta
+   ========================================================================== */
+.header-drawer-panel {
+  display: none;
+  position: fixed;
+  top: 145px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: calc(100vh - 145px);
+  z-index: 150 !important;
+  background: rgba(225, 230, 238, 0.94);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+
+/* Quando container tem .menu-expanded, o drawer se torna visível */
+.app-header-container.menu-expanded .header-drawer-panel,
+.menu-expanded .header-drawer-panel {
+  display: block !important;
+}
+
+.drawer-backdrop {
+  display: none;
+}
+
+.drawer-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 580px;
+  margin: 0 auto;
+  padding: 42px 0 32px 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* Linha do Usuário compartilhada no topo do menu */
+.drawer-user-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 0 0 16px 0;
+  margin: 0 16px 0 16px;
+  border-bottom: 2px solid #7188a4;
+  box-sizing: border-box;
+}
+
+.drawer-user-row .user-profile-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-xs);
-  list-style: none;
-  padding: 0 var(--space-xl);
-  max-width: 1300px;
-  margin: 0 auto;
+  width: 24px;
+  height: 24px;
+  color: #111827;
+  flex-shrink: 0;
 }
 
-.header-nav-item {
-  display: inline-block;
+.drawer-user-row .user-profile-icon svg {
+  stroke: #111827;
+  width: 24px;
+  height: 24px;
 }
 
-.header-nav-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 14px;
-  font-size: var(--font-sm);
-  font-weight: var(--weight-semibold);
-  color: var(--color-text-muted);
-  text-decoration: none;
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s ease;
+.drawer-user-row .user-welcome-text {
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.2;
 }
 
-.header-nav-link:hover {
-  color: var(--color-primary);
-  background-color: rgba(0, 112, 186, 0.04);
-  text-decoration: none;
+.drawer-user-row .user-welcome-text strong {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
 }
 
-.header-nav-link.active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
-  background-color: var(--color-primary-light);
-  border-radius: 4px 4px 0 0;
+/* 1. Menu expandido da Home (copilot-image-988b75.png) */
+.home-drawer-section {
+  display: block;
 }
 
-/* Mobile Toggle */
-.mobile-menu-toggle {
+.home-drawer-divider {
   display: none;
-  background: none;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 4px 8px;
-  color: var(--color-text);
+}
+
+/* Botão Sair Unificado do Drawer (Home e Telas Internas) */
+.btn-drawer-logout {
+  box-sizing: border-box;
+  width: calc(100% - 32px);
+  margin: 24px 16px;
+  height: 52px;
+  background: transparent;
+  border: 2px solid #7188a4;
+  border-radius: 0px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #dc2626;
+  font-size: 17px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-@media (max-width: 900px) {
-  .header-top-bar {
-    padding: var(--space-sm) var(--space-md);
-  }
-
-  .header-nav-list {
-    justify-content: flex-start;
-    padding: 0 var(--space-sm);
-  }
-
-  .header-nav-link {
-    padding: 8px 10px;
-    font-size: var(--font-xs);
-  }
-
-  .floating-pill {
-    padding: 3px var(--space-sm);
-    font-size: var(--font-xs);
-  }
+.btn-drawer-logout:hover {
+  background-color: rgba(220, 38, 38, 0.06);
 }
 
-@media (max-width: 640px) {
-  .header-top-bar {
-    flex-wrap: wrap;
-    gap: var(--space-sm);
+.btn-drawer-logout svg {
+  color: #dc2626;
+  stroke: #dc2626;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.btn-drawer-logout span {
+  color: #dc2626;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* 2. Menu expandido das Telas de Trabalho (copilot-image-ed8d08.png & copilot-image-dc8611.png) */
+.mobile-nav-panel {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  margin: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+.mobile-drawer-nav-list {
+  list-style: none;
+  margin: 0 16px;
+  padding: 0;
+}
+
+.mobile-drawer-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  min-height: 52px;
+  padding: 14px 0;
+  border-bottom: 2px solid #7188a4;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.mobile-drawer-nav-item:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.drawer-item-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.drawer-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: #111827;
+  flex-shrink: 0;
+}
+
+.drawer-item-icon svg {
+  stroke: #111827;
+  width: 22px;
+  height: 22px;
+}
+
+.drawer-item-label {
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.drawer-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.drawer-chevron svg {
+  stroke: #6b7280;
+  width: 22px;
+  height: 22px;
+}
+
+.drawer-item-external-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Item da tela ativa: esmaecido com opacidade 0.45 */
+.mobile-drawer-nav-item.active,
+.mobile-drawer-nav-item.is-active,
+.mobile-drawer-nav-item[aria-current="page"] {
+  background-color: transparent;
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}
+
+.work-drawer-logout-box {
+  display: block;
+  padding: 0;
+  margin: 0;
+}
+
+/* ==========================================================================
+   COMPORTAMENTO RESPONSIVO (< 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .app-header-container {
+    height: 145px;
+    min-height: 145px;
+  }
+
+  .header-main-bar {
+    height: 100%;
+    padding: 24px 20px 0 20px;
+    align-items: flex-start;
+  }
+
+  .brand-logo-img {
+    height: 38px;
+    max-height: 38px;
+  }
+
+  .brand-version-sub {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 4px;
   }
 
   .header-center-pill {
-    order: 3;
-    width: 100%;
-    margin-top: var(--space-xs);
+    top: 145px;
+    z-index: 300 !important;
   }
 
-  .user-badge {
-    font-size: var(--font-xs);
+  .header-center-pill .floating-pill,
+  .header-center-pill #header-pill-label {
+    width: 200px !important;
+    max-width: calc(100vw - 32px) !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+    padding: 0 20px !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    line-height: 1 !important;
+  }
+
+  .header-center-pill .floating-pill span,
+  .header-center-pill #header-pill-label span {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 18px !important;
+  }
+
+  .header-drawer-panel {
+    top: 145px;
+    height: calc(100vh - 145px);
+    z-index: 150 !important;
+  }
+
+  .btn-header-hamburger {
+    z-index: 250 !important;
+  }
+
+  .drawer-content {
+    max-width: 100%;
+    padding: 42px 0 32px 0;
+  }
+
+  /* Oculta seções desktop no mobile */
+  .header-inline-tabs {
+    display: none !important;
+  }
+
+  .header-user-actions {
+    display: none !important;
+  }
+
+  /* Exibe o hambúrguer no mobile para Home e Work screens (exceto login) */
+  .app-header-container.mode-home .btn-header-hamburger,
+  .app-header-container.mode-work .btn-header-hamburger {
+    display: flex !important;
+    margin: 6px 4px 0 auto;
   }
 }

@@ -1,180 +1,409 @@
 /**
- * Componente Header Global & Navbar - Alvenius
+ * Componente Header Global & Navbar - Alvenius (v2)
  * Responsabilidade Única: Identidade da marca, status de autenticação, pill e rotas de topo
+ * Arquitetura Unificada e Condicional sem recriação destrutiva no expandir/colapsar.
  */
 
-export const ALVENIUS_RINGS_SVG = `
-<svg viewBox="0 0 120 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- 3 anéis entrelaçados Alvenius -->
-  <circle cx="36" cy="35" r="22" stroke="#0070ba" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.95"/>
-  <circle cx="60" cy="35" r="22" stroke="#005696" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.95"/>
-  <circle cx="84" cy="35" r="22" stroke="#00bcd4" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.95"/>
-</svg>
-`;
+import { lucide } from './icons.js';
+import { PageTitle } from './page-title.js';
 
 export const ICONS = {
-  logout: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`,
-  home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`,
-  cadastro: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>`,
-  caldeiraria: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
-  qrcode: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>`,
-  truck: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>`
+  logout: lucide('log-out', { size: 16, strokeWidth: 2.2, className: 'header-icon-logout' }),
+  user: lucide('user', { size: 24, stroke: '#111827', strokeWidth: 2, className: 'header-icon-user' }),
+  menu: `<svg width="24" height="20" viewBox="0 0 24 20" fill="none" stroke="#757c96" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="0" y1="2" x2="24" y2="2"></line><line x1="0" y1="10" x2="24" y2="10"></line><line x1="0" y1="18" x2="24" y2="18"></line></svg>`,
+  close: lucide('x', { size: 24, stroke: '#ef4444', strokeWidth: 2.2, className: 'header-icon-close' })
 };
 
 export class HeaderComponent {
   constructor(containerId = 'app-header', options = {}) {
     this.container = document.getElementById(containerId);
     this.options = options;
+    this.isMenuExpanded = false;
+    this.initialized = false;
+    this.lastState = null;
   }
 
-  render({ user, activeRoute = 'login', pillLabel = 'Rastreio de produtos' }) {
+  /**
+   * Expansão / Colapso suave sem reconstruir o header
+   * Alterna apenas a classe no container e o ícone do botão
+   */
+  toggleMenu(forceState) {
+    this.isMenuExpanded = typeof forceState === 'boolean' ? forceState : !this.isMenuExpanded;
+
     if (!this.container) return;
 
-    const isLoggedIn = !!(user && user.isLoggedIn);
-    const isLoginPage = activeRoute === 'login' || !isLoggedIn;
-    const currentPill = isLoginPage ? 'Rastreio de produtos' : (pillLabel || (activeRoute === 'cadastro' ? 'Cadastro' : activeRoute === 'caldeiraria' ? 'Caldeiraria' : 'Rastreio de produtos'));
+    const innerHeader = this.container.querySelector('#app-header-inner');
+    const hamburgerBtn = this.container.querySelector('#btn-header-hamburger');
 
-    if (isLoginPage) {
-      // Header exclusivo para tela de Login:
-      // Apenas o logo Alvenius (3 anéis + v1.3.1) à esquerda e a pill central 'Rastreio de produtos'
-      // Sem ações de usuário (Bem vindo / Sair) e sem barra de navegação
-      this.container.innerHTML = `
-        <div class="app-header-container">
-          <div class="header-top-bar">
-            <div class="header-brand" title="Alvenius - Rastreio de Produtos">
-              <div class="brand-logo-rings">
-                ${ALVENIUS_RINGS_SVG}
-              </div>
-              <div class="brand-info">
-                <span class="brand-title">Alvenius</span>
-                <span class="brand-version">v1.3.1</span>
-              </div>
-            </div>
+    if (this.isMenuExpanded) {
+      this.container.classList.add('menu-expanded');
+      if (innerHeader) innerHeader.classList.add('menu-expanded');
+      document.body.style.overflow = 'hidden';
+      if (hamburgerBtn) {
+        hamburgerBtn.classList.add('is-active');
+        hamburgerBtn.innerHTML = ICONS.close;
+        hamburgerBtn.setAttribute('aria-label', 'Fechar Menu');
+        hamburgerBtn.setAttribute('title', 'Fechar Menu');
+      }
+    } else {
+      this.container.classList.remove('menu-expanded');
+      if (innerHeader) innerHeader.classList.remove('menu-expanded');
+      document.body.style.overflow = '';
+      if (hamburgerBtn) {
+        hamburgerBtn.classList.remove('is-active');
+        hamburgerBtn.innerHTML = ICONS.menu;
+        hamburgerBtn.setAttribute('aria-label', 'Abrir Menu');
+        hamburgerBtn.setAttribute('title', 'Abrir Menu');
+      }
+    }
+  }
 
-            <div class="header-center-pill">
-              <span class="floating-pill">
-                <span class="pill-dot"></span>
-                ${currentPill}
-              </span>
-            </div>
-
-            <!-- Espaçador invisível para manter a pill central perfeitamente centralizada -->
-            <div class="header-user-spacer" style="min-width: 130px;" aria-hidden="true"></div>
-          </div>
-        </div>
-      `;
-      this.bindEvents();
+  /**
+   * Renderiza a casca estática unificada caso ainda não tenha sido criada
+   */
+  ensureStructure() {
+    if (this.initialized && this.container.querySelector('.app-header-container')) {
       return;
     }
 
-    // Usuário autenticado
-    const isMenuPage = activeRoute === 'menu';
-
-    // Barra de navegação horizontal (Tabs secundárias)
-    // Exibida apenas nas telas de trabalho/processo; oculta no Menu Principal (onde estão os 6 cards de ação)
-    const navBarHtml = !isMenuPage ? `
-      <nav class="header-nav-bar" aria-label="Navegação secundária">
-        <ul class="header-nav-list">
-          <li class="header-nav-item">
-            <a href="#" class="header-nav-link ${activeRoute === 'menu' ? 'active' : ''}" data-nav="menu">
-              INÍCIO
-            </a>
-          </li>
-          <li class="header-nav-item">
-            <a href="#" class="header-nav-link ${activeRoute === 'cadastro' ? 'active' : ''}" data-nav="cadastro">
-              CADASTRO
-            </a>
-          </li>
-          <li class="header-nav-item">
-            <a href="#" class="header-nav-link ${activeRoute === 'caldeiraria' ? 'active' : ''}" data-nav="caldeiraria">
-              CALDEIRARIA
-            </a>
-          </li>
-          <li class="header-nav-item">
-            <a href="#" class="header-nav-link ${activeRoute === 'revestimento' ? 'active' : ''}" data-nav="revestimento">
-              REVESTIMENTO
-            </a>
-          </li>
-          <li class="header-nav-item">
-            <a href="#" class="header-nav-link ${activeRoute === 'pintura' ? 'active' : ''}" data-nav="pintura">
-              PINTURA
-            </a>
-          </li>
-          <li class="header-nav-item">
-            <a href="#" class="header-nav-link ${activeRoute === 'validar-qrcode' ? 'active' : ''}" data-nav="validar-qrcode">
-              VALIDAR QRCODE
-            </a>
-          </li>
-          <li class="header-nav-item">
-            <a href="#" class="header-nav-link ${activeRoute === 'transferencia' ? 'active' : ''}" data-nav="transferencia">
-              TRANSFERÊNCIA
-            </a>
-          </li>
-        </ul>
-      </nav>
-    ` : '';
-
     this.container.innerHTML = `
-      <div class="app-header-container">
-        <!-- Faixa Superior Global -->
-        <div class="header-top-bar">
-          <div class="header-brand" data-nav="menu" title="Voltar ao Menu Principal">
-            <div class="brand-logo-rings">
-              ${ALVENIUS_RINGS_SVG}
+      <div class="app-header-container" id="app-header-inner">
+        
+        <!-- Barra Superior Primária -->
+        <div class="header-main-bar">
+          
+          <!-- Lado Esquerdo: Logo + Versão (Login / Home) OU Logo + Versão + Título (Work screens) -->
+          <div class="header-brand-section">
+            <div class="header-brand-block" id="header-brand-block" title="Alvenius">
+              <img src="assets/logo-alvenius-rings-clean.png" alt="Alvenius" class="brand-logo-img">
+              <span class="brand-version-sub" id="header-brand-version">v1.3.1</span>
             </div>
-            <div class="brand-info">
-              <span class="brand-title">Alvenius</span>
-              <span class="brand-version">v1.3.1</span>
+            
+            <div class="header-brand-inline" id="header-brand-work" title="Voltar ao Início" data-nav="menu">
+              <div class="header-brand-logo-col">
+                <img src="assets/logo-alvenius-rings-clean.png" alt="Alvenius" class="brand-logo-img">
+                <span class="brand-version-sub">v1.3.1</span>
+              </div>
+              <span class="header-brand-title">RASTREIO DE PRODUTOS</span>
             </div>
           </div>
 
-          <div class="header-center-pill">
-            <span class="floating-pill">
-              <span class="pill-dot"></span>
-              ${currentPill}
-            </span>
-          </div>
+          <!-- Centro Desktop: Tabs inline de trabalho -->
+          <nav class="header-inline-tabs" id="header-inline-tabs" aria-label="Navegação de Módulos">
+            <ul class="header-tabs-list">
+              <li><a href="#" class="tab-link" data-nav="menu">INÍCIO</a></li>
+              <li><a href="#" class="tab-link" data-nav="cadastro">CADASTRO</a></li>
+              <li><a href="#" class="tab-link" data-nav="caldeiraria">CALDEIRARIA</a></li>
+              <li><a href="#" class="tab-link" data-nav="revestimento">REVESTIMENTO</a></li>
+              <li><a href="#" class="tab-link" data-nav="pintura">PINTURA</a></li>
+              <li><a href="#" class="tab-link" data-nav="validar-qrcode">VALIDAR QRCODE</a></li>
+              <li><a href="#" class="tab-link" data-nav="transferencia">TRANSFERÊNCIA</a></li>
+            </ul>
+          </nav>
 
-          <div class="header-user-actions">
-            <span class="user-badge">
-              Bem vindo, <strong>${user.username || 'josuel'}</strong>
-            </span>
+          <!-- Lado Direito Desktop: Usuário + Sair -->
+          <div class="header-user-actions" id="header-desktop-user-actions">
+            <span class="header-divider-v">|</span>
+            <div class="user-profile-badge">
+              <span class="user-profile-icon">${ICONS.user}</span>
+              <span class="user-welcome-text">Bem vindo, <strong id="header-user-name">josuellopes</strong></span>
+            </div>
+            <span class="header-divider-v">|</span>
             <button class="btn-header-logout" id="btn-header-logout" title="Encerrar Sessão">
               ${ICONS.logout}
               <span>Sair</span>
             </button>
           </div>
+
+          <!-- Botão Hambúrguer Mobile (Topo Direito) -->
+          <button class="btn-header-hamburger" id="btn-header-hamburger" aria-label="Abrir Menu" title="Abrir Menu">
+            ${ICONS.menu}
+          </button>
+
+          <!-- Espaçador de compensação para Login -->
+          <div class="header-spacer-right" id="header-spacer-right" aria-hidden="true"></div>
+
         </div>
 
-        ${navBarHtml}
+        <!-- Pill Central Flutuante -->
+        ${PageTitle.render('Rastreio de produtos')}
+
+        <!-- Painel Dropdown do Menu Expandido (Home e Work Screens) -->
+        <div class="header-drawer-panel" id="header-drawer-panel">
+          <div class="drawer-backdrop" id="drawer-backdrop"></div>
+          <div class="drawer-content" id="drawer-content">
+            
+            <!-- 1. Linha do Usuário (Compartilhada Mobile / Work) -->
+            <div class="drawer-user-row" id="drawer-user-row">
+              <span class="user-profile-icon">${lucide('user', { size: 24, stroke: '#111827', strokeWidth: 2 })}</span>
+              <span class="user-welcome-text">Bem vindo, <strong id="drawer-user-name">josuel</strong></span>
+            </div>
+
+            <!-- 2. Sub-painel Exclusivo da Home: Apenas botão Sair (sem barra divisória extra) -->
+            <div class="home-drawer-section" id="home-drawer-section">
+              <button class="btn-drawer-logout" id="btn-home-drawer-logout" title="Encerrar Sessão">
+                ${lucide('log-out', { size: 22, stroke: '#dc2626', strokeWidth: 2.2 })}
+                <span>Sair</span>
+              </button>
+            </div>
+
+            <!-- 3. Sub-painel Exclusivo das Telas de Trabalho (copilot-image-ed8d08.png & dc8611.png): Lista de 8 módulos + scroll + botão Sair -->
+            <div class="work-drawer-section" id="work-drawer-section">
+              <div class="mobile-nav-panel">
+                <ul class="mobile-drawer-nav-list" id="work-drawer-nav-list">
+                  
+                  <li class="mobile-drawer-nav-item" data-nav="menu" role="button" tabindex="0">
+                    <div class="drawer-item-left">
+                      <span class="drawer-item-icon">
+                        ${lucide('home', { size: 22, stroke: '#111827', strokeWidth: 2 })}
+                      </span>
+                      <span class="drawer-item-label">INÍCIO</span>
+                    </div>
+                    <span class="drawer-chevron">${lucide('chevron-right', { size: 22, stroke: '#6b7280', strokeWidth: 2 })}</span>
+                  </li>
+
+                  <li class="mobile-drawer-nav-item" data-nav="cadastro" role="button" tabindex="0">
+                    <div class="drawer-item-left">
+                      <span class="drawer-item-icon">
+                        ${lucide('package-plus', { size: 22, stroke: '#111827', strokeWidth: 2 })}
+                      </span>
+                      <span class="drawer-item-label">CADASTRO</span>
+                    </div>
+                    <span class="drawer-chevron">${lucide('chevron-right', { size: 22, stroke: '#6b7280', strokeWidth: 2 })}</span>
+                  </li>
+
+                  <li class="mobile-drawer-nav-item" data-nav="caldeiraria" role="button" tabindex="0">
+                    <div class="drawer-item-left">
+                      <span class="drawer-item-icon">
+                        ${lucide('paint-bucket', { size: 22, stroke: '#111827', strokeWidth: 2 })}
+                      </span>
+                      <span class="drawer-item-label">CALDEIRARIA</span>
+                    </div>
+                    <span class="drawer-chevron">${lucide('chevron-right', { size: 22, stroke: '#6b7280', strokeWidth: 2 })}</span>
+                  </li>
+
+                  <li class="mobile-drawer-nav-item" data-nav="revestimento" role="button" tabindex="0">
+                    <div class="drawer-item-left">
+                      <span class="drawer-item-icon">
+                        ${lucide('spray-can', { size: 22, stroke: '#111827', strokeWidth: 2 })}
+                      </span>
+                      <span class="drawer-item-label">REVESTIMENTO</span>
+                    </div>
+                    <span class="drawer-chevron">${lucide('chevron-right', { size: 22, stroke: '#6b7280', strokeWidth: 2 })}</span>
+                  </li>
+
+                  <li class="mobile-drawer-nav-item" data-nav="pintura" role="button" tabindex="0">
+                    <div class="drawer-item-left">
+                      <span class="drawer-item-icon">
+                        ${lucide('paint-roller', { size: 22, stroke: '#111827', strokeWidth: 2 })}
+                      </span>
+                      <span class="drawer-item-label">PINTURA</span>
+                    </div>
+                    <span class="drawer-chevron">${lucide('chevron-right', { size: 22, stroke: '#6b7280', strokeWidth: 2 })}</span>
+                  </li>
+
+                  <li class="mobile-drawer-nav-item" data-nav="validar-qrcode" role="button" tabindex="0">
+                    <div class="drawer-item-left">
+                      <span class="drawer-item-icon">
+                        ${lucide('qr-code', { size: 22, stroke: '#111827', strokeWidth: 2 })}
+                      </span>
+                      <span class="drawer-item-label">VALIDAR QRCODE</span>
+                    </div>
+                    <span class="drawer-chevron">${lucide('chevron-right', { size: 22, stroke: '#6b7280', strokeWidth: 2 })}</span>
+                  </li>
+
+                  <li class="mobile-drawer-nav-item" data-nav="transferencia" role="button" tabindex="0">
+                    <div class="drawer-item-left">
+                      <span class="drawer-item-icon">
+                        ${lucide('truck', { size: 22, stroke: '#111827', strokeWidth: 2 })}
+                      </span>
+                      <span class="drawer-item-label">TRANSFERÊNCIA</span>
+                    </div>
+                    <span class="drawer-chevron">${lucide('chevron-right', { size: 22, stroke: '#6b7280', strokeWidth: 2 })}</span>
+                  </li>
+
+                  <li class="mobile-drawer-nav-item" data-action="external" role="button" tabindex="0">
+                    <a href="https://www.alvenius.com.br" target="_blank" rel="noopener noreferrer" class="drawer-item-external-link">
+                      <div class="drawer-item-left">
+                        <span class="drawer-item-icon">
+                          ${lucide('globe', { size: 22, stroke: '#111827', strokeWidth: 2 })}
+                        </span>
+                        <span class="drawer-item-label">IR PARA SITE ALVENIUS</span>
+                      </div>
+                      <span class="drawer-chevron">${lucide('chevron-right', { size: 22, stroke: '#6b7280', strokeWidth: 2 })}</span>
+                    </a>
+                  </li>
+
+                </ul>
+              </div>
+
+              <div class="work-drawer-logout-box">
+                <button class="btn-drawer-logout" id="btn-work-drawer-logout" title="Encerrar Sessão">
+                  ${lucide('log-out', { size: 22, stroke: '#dc2626', strokeWidth: 2.2 })}
+                  <span>Sair</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     `;
 
     this.bindEvents();
+    this.initialized = true;
+  }
+
+  /**
+   * Atualização condicional de visibilidade e dados sem recriar o DOM
+   */
+  render({ user, activeRoute = 'login', pillLabel = 'Rastreio de produtos' } = {}) {
+    if (!this.container) return;
+
+    this.ensureStructure();
+
+    // Fecha o drawer sempre que há transição de rota/renderização
+    this.toggleMenu(false);
+
+    const isLoggedIn = !!(user && user.isLoggedIn);
+    const isLoginPage = activeRoute === 'login' || !isLoggedIn;
+    const isHome = isLoggedIn && activeRoute === 'menu';
+    const isWorkScreen = isLoggedIn && !isLoginPage && !isHome;
+
+    const username = user?.username || 'josuel';
+    const currentPill = pillLabel || (activeRoute === 'cadastro' ? 'Cadastro' : activeRoute === 'caldeiraria' ? 'Caldeiraria' : 'Rastreio de produtos');
+
+    const innerHeader = this.container.querySelector('#app-header-inner');
+    if (!innerHeader) return;
+
+    // Remove todas as classes de modo anteriores
+    innerHeader.classList.remove('mode-login', 'mode-home', 'mode-work');
+
+    // Atualiza nome do usuário em todos os locais
+    const userNames = this.container.querySelectorAll('#header-user-name, #drawer-user-name');
+    userNames.forEach(el => { el.textContent = username; });
+
+    // Atualiza texto da pill central
+    PageTitle.setTitle(isWorkScreen ? currentPill : 'Rastreio de produtos');
+
+    if (isLoginPage) {
+      // 1. ESTADO LOGIN:
+      // Exibe: Logo 3 anéis + v2.0.0 à esquerda e pill "Rastreio de produtos" no centro.
+      // NÃO exibe: Usuário, Sair, hambúrguer, nem menu expandido.
+      innerHeader.classList.add('mode-login');
+      return;
+    }
+
+    if (isHome) {
+      // 2. ESTADO HOME:
+      // Exibe: Logo 3 anéis + v2.0.0 à esquerda, pill "Rastreio de produtos" no centro.
+      // Desktop: | 👤 Bem vindo, {user} | 🚪 Sair.
+      // Mobile: Botão hambúrguer no topo direito.
+      // Menu expandido da Home: Exibe APENAS 👤 Bem vindo, {user} + divisor + botão retangular [-> Sair.
+      // NÃO exibe lista de módulos no menu expandido da Home!
+      innerHeader.classList.add('mode-home');
+      return;
+    }
+
+    if (isWorkScreen) {
+      // 3. ESTADO TELAS DE TRABALHO:
+      // Exibe: Logo 3 anéis + RASTREIO DE PRODUTOS à esquerda, pill da tela ativa no centro.
+      // Desktop: tabs de trabalho + | 👤 Bem vindo, {user} | 🚪 Sair.
+      // Mobile: Botão hambúrguer no topo direito.
+      // Menu expandido das demais telas: Exibe 👤 Bem vindo + lista completa dos 8 módulos com chevron + botão Sair.
+      innerHeader.classList.add('mode-work');
+
+      // Atualiza tabs desktop ativas
+      const tabs = this.container.querySelectorAll('.tab-link');
+      tabs.forEach(tab => {
+        const route = tab.getAttribute('data-nav');
+        if (route === activeRoute) {
+          tab.classList.add('active');
+        } else {
+          tab.classList.remove('active');
+        }
+      });
+
+      // Atualiza itens do menu expandido ativos
+      const drawerItems = this.container.querySelectorAll('.mobile-drawer-nav-item');
+      drawerItems.forEach(item => {
+        const route = item.getAttribute('data-nav');
+        if (route === activeRoute) {
+          item.classList.add('active');
+          item.classList.add('is-active');
+          item.setAttribute('aria-current', 'page');
+        } else {
+          item.classList.remove('active');
+          item.classList.remove('is-active');
+          item.removeAttribute('aria-current');
+        }
+      });
+    }
   }
 
   bindEvents() {
-    // Links de navegação
-    const navLinks = this.container.querySelectorAll('[data-nav]');
-    navLinks.forEach(link => {
-      link.addEventListener('click', (e) => {
+    // 1. Alternância de menu mobile
+    const hamburgerBtn = this.container.querySelector('#btn-header-hamburger');
+    if (hamburgerBtn) {
+      hamburgerBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        const route = link.getAttribute('data-nav');
+        e.stopPropagation();
+        this.toggleMenu();
+      });
+    }
+
+    // 2. Fechar ao clicar no backdrop translúcido
+    const backdrop = this.container.querySelector('#drawer-backdrop');
+    if (backdrop) {
+      backdrop.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.toggleMenu(false);
+      });
+    }
+
+    const drawerPanel = this.container.querySelector('#header-drawer-panel');
+    if (drawerPanel) {
+      drawerPanel.addEventListener('click', (e) => {
+        if (e.target === drawerPanel) {
+          e.preventDefault();
+          this.toggleMenu(false);
+        }
+      });
+    }
+
+    // 3. Links de navegação interna (desktop e mobile)
+    const navItems = this.container.querySelectorAll('[data-nav]');
+    navItems.forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        const route = el.getAttribute('data-nav');
+        this.toggleMenu(false);
         if (typeof this.options.onNavigate === 'function') {
           this.options.onNavigate(route);
         }
       });
     });
 
-    // Botão de Sair
-    const logoutBtn = this.container.querySelector('#btn-header-logout');
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', (e) => {
+    // 4. Links externos
+    const externalLinks = this.container.querySelectorAll('[data-action="external"]');
+    externalLinks.forEach(item => {
+      item.addEventListener('click', () => {
+        this.toggleMenu(false);
+      });
+    });
+
+    // 5. Botões de Sair (Desktop, Home Drawer, Work Drawer)
+    const logoutButtons = this.container.querySelectorAll('#btn-header-logout, #btn-home-drawer-logout, #btn-work-drawer-logout');
+    logoutButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
         e.preventDefault();
+        this.toggleMenu(false);
         if (typeof this.options.onLogout === 'function') {
           this.options.onLogout();
         }
       });
-    }
+    });
   }
 }

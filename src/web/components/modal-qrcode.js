@@ -1,16 +1,25 @@
 /**
  * Componente Modal Leitor de QRCode (Scanner Industrial)
- * Responsabilidade Única: Visor escuro com miras azuis, laser animado e simulação de leitura interativa
+ * Responsabilidade Única: Visor escuro com miras azuis fluorescentes e QRCode vetorizado,
+ * exibição de instruções e retorno dos dados do Spool mockado lido.
  */
 
-import { getSpoolByCode, getSpools, updateSpoolStatus } from '../mocks/spools-mock.js';
-import { toast } from './toast.js';
+import { lucide } from './icons.js';
+
+export const MOCK_SPOOL_CADASTRADO = {
+  codigo: 'SPL-2024-001',
+  descricao: 'Tubo Condução Aço Carbono 4" Sch 40',
+  componentes: [
+    { item: '1', descricao: 'Tubo Condução Aço Carbono 4" Sch 40 x 6000mm', qtd: '1 UN' },
+    { item: '2', descricao: 'Flange WNRF 4" 150# ANSI B16.5', qtd: '2 UN' },
+    { item: '3', descricao: 'Curva 90° LR 4" Sch 40 A234 WPB', qtd: '1 UN' }
+  ]
+};
 
 export class ModalQrCodeComponent {
   constructor(containerId = 'modal-root') {
     this.container = document.getElementById(containerId);
     this.isOpen = false;
-    this.lastScannedCode = null;
     this.onScanCallback = null;
     this.onCloseCallback = null;
     this.handleKeyDown = this.handleKeyDown.bind(this);
@@ -19,21 +28,27 @@ export class ModalQrCodeComponent {
   open({ onScan, onClose, defaultCode = null } = {}) {
     this.onScanCallback = onScan;
     this.onCloseCallback = onClose;
-    this.lastScannedCode = defaultCode || null;
     this.isOpen = true;
     this.render();
     document.addEventListener('keydown', this.handleKeyDown);
   }
 
   close() {
+    if (!this.isOpen) return;
     this.isOpen = false;
     if (this.container) {
       this.container.innerHTML = '';
       this.container.classList.remove('has-modal');
     }
     document.removeEventListener('keydown', this.handleKeyDown);
+
+    const payload = { ...MOCK_SPOOL_CADASTRADO };
+
+    if (typeof this.onScanCallback === 'function') {
+      this.onScanCallback(payload.codigo, payload);
+    }
     if (typeof this.onCloseCallback === 'function') {
-      this.onCloseCallback(this.lastScannedCode);
+      this.onCloseCallback(payload.codigo, payload);
     }
   }
 
@@ -43,153 +58,129 @@ export class ModalQrCodeComponent {
     }
   }
 
-  // Efeito sonoro industrial simulado de bipe de scanner via Web Audio API (sem assets externos)
-  playBeep() {
-    try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(1200, ctx.currentTime);
-      gain.gain.setValueAtTime(0.12, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.15);
-    } catch {
-      // Ignora erro se áudio não permitido pelo navegador
-    }
-  }
-
-  triggerScan(codeToScan) {
-    if (!codeToScan || !codeToScan.trim()) {
-      toast.warning('Aviso', 'Digite ou selecione um código para simular o escaneamento.');
-      return;
-    }
-
-    const code = codeToScan.trim().toUpperCase();
-    this.lastScannedCode = code;
-    this.playBeep();
-
-    // Efeito visual de flash no viewfinder
-    const vf = this.container.querySelector('.scanner-viewfinder-container');
-    if (vf) {
-      vf.style.transition = 'box-shadow 0.15s ease';
-      vf.style.boxShadow = 'inset 0 0 30px #00d2ff, 0 0 20px rgba(0, 210, 255, 0.6)';
-      setTimeout(() => {
-        if (vf) vf.style.boxShadow = 'inset 0 0 20px rgba(0, 0, 0, 0.8)';
-      }, 300);
-    }
-
-    // Atualiza caixa do último código lido
-    const lastDisplay = this.container.querySelector('#scanner-last-code-display');
-    if (lastDisplay) {
-      lastDisplay.innerHTML = `<span style="color: #0070ba;">${code}</span>`;
-    }
-
-    const spool = getSpoolByCode(code);
-    if (spool) {
-      toast.success('QRCode Lido com Sucesso!', `Spool ${spool.codigo} identificado. Status: ${spool.status.toUpperCase()}`);
-    } else {
-      toast.info('Código Escaneado', `Código ${code} capturado pelo sensor.`);
-    }
-
-    if (typeof this.onScanCallback === 'function') {
-      this.onScanCallback(code, spool);
-    }
-  }
-
   render() {
     if (!this.container) return;
 
-    const spoolsList = getSpools();
-    const defaultPlaceholderCode = spoolsList.length > 0 ? spoolsList[0].codigo : 'SP-0414-00002-004';
-
     this.container.classList.add('has-modal');
     this.container.innerHTML = `
-      <div class="modal-backdrop" id="qrcode-modal-backdrop">
-        <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="qrcode-modal-title">
+      <div class="modal-backdrop qrcode-backdrop-fullscreen" id="qrcode-modal-backdrop">
+        <div class="qrcode-container-wrapper" role="dialog" aria-modal="true" aria-labelledby="qrcode-modal-header-title">
           
-          <!-- Cabeçalho do Leitor com Pill Centralizada -->
-          <div class="modal-header">
-            <div class="scanner-pill-header">
-              <span class="scanner-pill" id="qrcode-modal-title">
-                Leitor de QRCode
-              </span>
-            </div>
-            <button class="modal-close-btn" id="qrcode-btn-close-x" aria-label="Fechar">
-              &times;
-            </button>
+          <!-- Header no Topo (Branco puro, centralizado com linha fina clara abaixo) -->
+          <div class="qrcode-top-header">
+            <h2 class="qrcode-top-title" id="qrcode-modal-header-title">Leitor de QRCode</h2>
+            <div class="qrcode-top-divider"></div>
           </div>
 
-          <div class="modal-body">
-            <!-- Viewfinder da Câmera com Miras Ciano e Linha Laser -->
-            <div class="scanner-viewfinder-container" title="Área de Leitura de QRCode">
-              <div class="scanner-grid-bg"></div>
-              
-              <!-- 4 Miras de Canto -->
-              <div class="scanner-corner top-left"></div>
-              <div class="scanner-corner top-right"></div>
-              <div class="scanner-corner bottom-left"></div>
-              <div class="scanner-corner bottom-right"></div>
+          <!-- Card 1: Visor da Câmera (Quadro preto com borda branca 4px, miras azuis, QRCode vetorizado sem laser) -->
+          <div class="qrcode-camera-viewfinder" title="Área de Leitura de QRCode">
+            <!-- Feixe de brilho ciano/azul no topo -->
+            <div class="qrcode-viewfinder-glow-beam"></div>
 
-              <!-- Linha de Varredura Laser Animada -->
-              <div class="scanner-laser-line"></div>
+            <!-- Caixa de enquadramento centralizada próxima ao QRCode com 4 miras azuis fluorescentes -->
+            <div class="qrcode-scanner-frame">
+              <div class="qrcode-corner top-left"></div>
+              <div class="qrcode-corner top-right"></div>
+              <div class="qrcode-corner bottom-left"></div>
+              <div class="qrcode-corner bottom-right"></div>
+
+              <!-- QRCode vetorizado SVG centralizado no quadro de enquadramento -->
+              <svg class="qrcode-camera-svg" viewBox="0 0 100 100" width="135" height="135" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
+                <!-- Marcador Superior Esquerdo -->
+                <rect x="6" y="6" width="26" height="26" fill="none" stroke="#ffffff" stroke-width="4" rx="2" />
+                <rect x="14" y="14" width="10" height="10" fill="#ffffff" rx="1" />
+                <!-- Marcador Superior Direito -->
+                <rect x="68" y="6" width="26" height="26" fill="none" stroke="#ffffff" stroke-width="4" rx="2" />
+                <rect x="76" y="14" width="10" height="10" fill="#ffffff" rx="1" />
+                <!-- Marcador Inferior Esquerdo -->
+                <rect x="6" y="68" width="26" height="26" fill="none" stroke="#ffffff" stroke-width="4" rx="2" />
+                <rect x="14" y="76" width="10" height="10" fill="#ffffff" rx="1" />
+                <!-- Padrões e Blocos Centrais -->
+                <rect x="38" y="8" width="6" height="6" rx="1" />
+                <rect x="50" y="8" width="6" height="6" rx="1" />
+                <rect x="44" y="20" width="6" height="6" rx="1" />
+                <rect x="56" y="20" width="6" height="6" rx="1" />
+                <rect x="8" y="38" width="6" height="6" rx="1" />
+                <rect x="20" y="44" width="6" height="6" rx="1" />
+                <rect x="38" y="38" width="8" height="8" rx="1" />
+                <rect x="52" y="38" width="6" height="6" rx="1" />
+                <rect x="64" y="38" width="6" height="6" rx="1" />
+                <rect x="76" y="38" width="6" height="6" rx="1" />
+                <rect x="86" y="38" width="6" height="6" rx="1" />
+                <rect x="38" y="52" width="6" height="6" rx="1" />
+                <rect x="48" y="48" width="8" height="8" rx="1" />
+                <rect x="62" y="52" width="6" height="6" rx="1" />
+                <rect x="74" y="48" width="8" height="8" rx="1" />
+                <rect x="86" y="52" width="6" height="6" rx="1" />
+                <rect x="38" y="66" width="6" height="6" rx="1" />
+                <rect x="50" y="66" width="8" height="8" rx="1" />
+                <rect x="64" y="66" width="6" height="6" rx="1" />
+                <rect x="76" y="66" width="8" height="8" rx="1" />
+                <rect x="88" y="66" width="6" height="6" rx="1" />
+                <rect x="38" y="80" width="8" height="8" rx="1" />
+                <rect x="52" y="80" width="6" height="6" rx="1" />
+                <rect x="64" y="80" width="8" height="8" rx="1" />
+                <rect x="76" y="80" width="6" height="6" rx="1" />
+                <rect x="86" y="82" width="6" height="6" rx="1" />
+              </svg>
             </div>
+          </div>
 
-            <!-- Card de Orientações e Instruções -->
-            <div class="scanner-instructions-card">
-              <div class="scanner-handle"></div>
-              <div class="scanner-instruction-line1">Ler o QRCode do Spool.</div>
-              <div class="scanner-instruction-line2">PARA SEGUIR processo produto.</div>
-              <div class="scanner-divider-gradient"></div>
+          <!-- Card 1: Instruções e Dados do Spool e Componentes (Card branco separado com cantos arredondados) -->
+          <div class="qrcode-card-instructions">
+            <div class="qrcode-instr-main-title">Ler o QRCode do Spool e Componentes.</div>
+            <div class="qrcode-instr-item">1 - Ler o QRCode do Spool.</div>
+            <div class="qrcode-instr-item">2 - Ler o QRCode dos componentes.</div>
+            <div class="qrcode-blue-gradient-line"></div>
 
-              <!-- Caixa do Último QRCode Lido -->
-              <div class="scanner-last-code-box">
-                <span class="scanner-last-label">Último QRCode lido:</span>
-                <span class="scanner-last-value" id="scanner-last-code-display">
-                  ${this.lastScannedCode || '<em style="color:#8a939e; font-weight:normal;">Aguardando leitura...</em>'}
-                </span>
+            <!-- Seção Spool e Componentes abaixo do separador azul -->
+            <div class="qrcode-modal-spool-section">
+              <div class="qrcode-modal-spool-title">Spool:</div>
+              <div class="qrcode-modal-spool-meta">
+                <span class="qrcode-modal-meta-label">Código:</span>
+                <span class="qrcode-modal-meta-value">${MOCK_SPOOL_CADASTRADO.codigo}</span>
+              </div>
+              <div class="qrcode-modal-spool-meta">
+                <span class="qrcode-modal-meta-label">Descrição:</span>
+                <span class="qrcode-modal-meta-value">${MOCK_SPOOL_CADASTRADO.descricao}</span>
+              </div>
+
+              <!-- Listagem de Componentes -->
+              <div class="qrcode-modal-components-box">
+                <div class="qrcode-modal-comp-header-title">COMPONENTES</div>
+                <table class="qrcode-modal-comp-table">
+                  <thead>
+                    <tr>
+                      <th class="th-modal-item">ITENS</th>
+                      <th class="th-modal-desc">DESCRIÇÃO</th>
+                      <th class="th-modal-qtd">QTD.</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${MOCK_SPOOL_CADASTRADO.componentes.map(comp => `
+                      <tr>
+                        <td class="col-modal-item">${comp.item}</td>
+                        <td class="col-modal-desc">${comp.descricao}</td>
+                        <td class="col-modal-qtd">${comp.qtd}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
               </div>
             </div>
-
-            <!-- Painel Interativo de Simulação para Coletor / Demonstração -->
-            <div class="scanner-simulation-actions">
-              <button class="btn btn-primary btn-block" id="btn-simulate-instant-scan" style="font-size: 13px;">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                </svg>
-                <span>Simular Leitura Automática</span>
-              </button>
-            </div>
-
-            <div class="scanner-manual-input-box">
-              <input 
-                type="text" 
-                id="scanner-manual-code-input" 
-                class="form-input" 
-                placeholder="Ex: SP-0414-00002-004"
-                value="${defaultPlaceholderCode}"
-                style="font-size: 13px; font-family: monospace;"
-              />
-              <button class="btn btn-outline" id="btn-scan-manual-code" style="padding: 6px 12px; font-size: 13px;">
-                Escanear
-              </button>
-            </div>
           </div>
 
-          <div class="modal-footer">
-            <button class="btn btn-danger" id="qrcode-btn-close-bottom">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-              <span>Fechar</span>
-            </button>
+          <!-- Card 2: Último QRCode Lido (Card branco separado) -->
+          <div class="qrcode-card-last-read">
+            <div class="qrcode-last-read-title">Último QRCode lido:</div>
+            <div class="qrcode-last-read-inline-data">SPL-2024-001 | Tubo Condução Aço Carbono 4" Sch 40 | 3 componentes</div>
           </div>
+
+          <!-- Botão Fechar no Rodapé (Vermelho sólido #dc2626 com cantos 8px e ícone circle-x) -->
+          <button class="qrcode-btn-close-red" id="qrcode-btn-close-bottom" type="button">
+            ${lucide('circle-x', { size: 20, stroke: '#ffffff', strokeWidth: 2.2 })}
+            <span>Fechar</span>
+          </button>
 
         </div>
       </div>
@@ -200,7 +191,6 @@ export class ModalQrCodeComponent {
 
   bindEvents() {
     const backdrop = this.container.querySelector('#qrcode-modal-backdrop');
-    const closeBtnX = this.container.querySelector('#qrcode-btn-close-x');
     const closeBtnBottom = this.container.querySelector('#qrcode-btn-close-bottom');
 
     const handleClose = (e) => {
@@ -208,7 +198,6 @@ export class ModalQrCodeComponent {
       this.close();
     };
 
-    if (closeBtnX) closeBtnX.addEventListener('click', handleClose);
     if (closeBtnBottom) closeBtnBottom.addEventListener('click', handleClose);
 
     if (backdrop) {
@@ -218,36 +207,6 @@ export class ModalQrCodeComponent {
         }
       });
     }
-
-    // Botão de simular leitura automática (escolhe um spool do mock)
-    const btnSimulate = this.container.querySelector('#btn-simulate-instant-scan');
-    if (btnSimulate) {
-      btnSimulate.addEventListener('click', () => {
-        const spools = getSpools();
-        const randomSpool = spools[Math.floor(Math.random() * spools.length)];
-        const code = randomSpool ? randomSpool.codigo : 'SP-0414-00002-004';
-        
-        const manualInput = this.container.querySelector('#scanner-manual-code-input');
-        if (manualInput) manualInput.value = code;
-
-        this.triggerScan(code);
-      });
-    }
-
-    // Botão de escanear código manual digitado
-    const btnManual = this.container.querySelector('#btn-scan-manual-code');
-    const inputManual = this.container.querySelector('#scanner-manual-code-input');
-    if (btnManual && inputManual) {
-      const runManual = () => {
-        this.triggerScan(inputManual.value);
-      };
-      btnManual.addEventListener('click', runManual);
-      inputManual.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          runManual();
-        }
-      });
-    }
   }
 }
+

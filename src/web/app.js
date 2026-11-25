@@ -7,6 +7,7 @@ import { HeaderComponent } from './components/header.js';
 import { toast } from './components/toast.js';
 import { ModalTransferenciaComponent } from './components/modal-transferencia.js';
 import { ModalQrCodeComponent } from './components/modal-qrcode.js';
+import { lucide } from './components/icons.js';
 
 import { LoginView } from './views/login-view.js';
 import { MenuView } from './views/menu-view.js';
@@ -52,40 +53,70 @@ class App {
   }
 
   init() {
-    console.log('Alvenius Spool Management v1.3.1 iniciado.');
+    console.log('Alvenius Spool Management v2.1.0 iniciado.');
     
-    // Inicia no login para exibição fiel de todas as telas solicitadas
-    this.navigateTo('login');
-  }
-
-  handleLogin({ username, password }) {
-    if (!username) {
-      toast.warning('Aviso', 'Por favor preencha o nome de usuário.');
-      return;
+    const savedUser = sessionStorage.getItem('app_user');
+    if (savedUser) {
+      try {
+        this.currentUser = JSON.parse(savedUser);
+        setCurrentUser(this.currentUser);
+      } catch (e) {
+        this.currentUser = null;
+      }
     }
 
+    const savedRoute = sessionStorage.getItem('app_current_route');
+    if (savedRoute && this.currentUser && this.currentUser.isLoggedIn) {
+      this.navigateTo(savedRoute);
+    } else {
+      this.navigateTo('login');
+    }
+
+    const savedScroll = sessionStorage.getItem('app_scroll_y');
+    if (savedScroll) {
+      setTimeout(() => {
+        window.scrollTo({ top: parseInt(savedScroll, 10), behavior: 'instant' });
+      }, 50);
+    }
+
+    window.addEventListener('beforeunload', () => {
+      sessionStorage.setItem('app_scroll_y', window.scrollY.toString());
+    });
+  }
+
+  handleLogin({ username, password } = {}) {
+    const finalUsername = (username && username.trim()) || 'josuellopes';
+
     const updatedUser = {
-      username: username,
-      name: username.charAt(0).toUpperCase() + username.slice(1),
+      username: finalUsername,
+      name: finalUsername === 'josuellopes' ? 'josuellopes' : (finalUsername.charAt(0).toUpperCase() + finalUsername.slice(1)),
       isLoggedIn: true
     };
     
     setCurrentUser(updatedUser);
     this.currentUser = getCurrentUser();
+    sessionStorage.setItem('app_user', JSON.stringify(this.currentUser));
+    sessionStorage.setItem('app_current_route', 'menu');
 
-    toast.success('Login Realizado', `Bem vindo ao sistema Alvenius, ${this.currentUser.username}!`);
+    toast.success('Login Realizado', `Bem vindo ao sistema Alvenius, ${this.currentUser?.username || 'josuellopes'}!`);
     this.navigateTo('menu');
   }
 
   handleLogout() {
     logoutUser();
     this.currentUser = null;
+    sessionStorage.removeItem('app_user');
+    sessionStorage.removeItem('app_current_route');
+    sessionStorage.removeItem('app_scroll_y');
     toast.info('Sessão Encerrada', 'Você saiu do sistema com segurança.');
     this.navigateTo('login');
   }
 
   navigateTo(route) {
     const isAuthed = !!(this.currentUser && this.currentUser.isLoggedIn);
+    if (isAuthed && route !== 'validar-qrcode' && route !== 'transferencia') {
+      sessionStorage.setItem('app_current_route', route);
+    }
     if (!isAuthed && route !== 'login') {
       this.currentRoute = 'login';
       this.render();
@@ -172,7 +203,7 @@ class App {
           </div>
           <div class="card-body" style="text-align: center; padding: 48px 24px;">
             <div class="info-box" style="display: inline-flex; text-align: left; margin-bottom: 24px;">
-              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+              ${lucide('info', { size: 18, strokeWidth: 2 })}
               <span>${stageDescription}</span>
             </div>
             <h3 style="font-size: 20px; color: var(--color-navy); margin-bottom: 12px;">Etapa de Produção: ${stageTitle}</h3>
@@ -181,12 +212,7 @@ class App {
             </p>
             <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
               <button class="btn btn-primary btn-lg" id="btn-stage-scan-qrcode">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="3" width="7" height="7"></rect>
-                  <rect x="14" y="3" width="7" height="7"></rect>
-                  <rect x="14" y="14" width="7" height="7"></rect>
-                  <rect x="3" y="14" width="7" height="7"></rect>
-                </svg>
+                ${lucide('qr-code', { size: 20, strokeWidth: 2 })}
                 <span>Ler QRCode de Spool</span>
               </button>
               <button class="btn btn-outline btn-lg" id="btn-stage-back-menu">

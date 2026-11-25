@@ -21,3 +21,9 @@ agent: alvenius-frontend
     - código limpo, modular e responsivo
     - fetch request para integração com a API/backend
     - evolução controlada para bibliotecas e frameworks adicionais apenas quando solicitado formalmente
+
+ ## Diretrizes para Replicação de Layout a partir de Prints
+ - **Extração Prévia de Tokens Numéricos**: ao receber prints de referência, extrair rigorosamente as proporções e medidas (larguras %, alturas px, paddings, tamanhos de fonte, line-height, alinhamentos e códigos hexadecimais exatos de cores) antes de codificar.
+ - **Consumo de Tokens e Especificações**: basear a implementação estritamente nos artefatos visuais e tokens (`tokens.json` e wireframe detalhado) documentados pelo designer em `docs/designer/<nome_do_layout>`, evitando suposições.
+ - **Viewport Fixo de Validação**: fixar a resolução mobile alvo (ex: 360x740) e comparar o preview navegável lado a lado com a imagem de referência antes de cada entrega.
+ - **Regra de Ouro em Caso de Dúvidas**: em caso de qualquer dúvida, inconsistência ou ambiguidade visual de layout, NUNCA adivinhar: SEMPRE parar e perguntar ao usuário antes de implementar.
