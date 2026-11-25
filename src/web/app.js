@@ -17,6 +17,7 @@ import { CaldeirariaView } from './views/caldeiraria-view.js';
 import { RevestimentoView } from './views/revestimento-view.js';
 import { PinturaView } from './views/pintura-view.js';
 import { TransferenciaComponenteView } from './views/transferencia-componente-view.js';
+import { TransferenciaSpoolView } from './views/transferencia-spool-view.js';
 import { NovaTransferenciaView } from './views/nova-transferencia-view.js';
 
 import { getCurrentUser, setCurrentUser, logoutUser, getSpoolByCode } from './mocks/spools-mock.js';
@@ -67,6 +68,9 @@ class App {
         onSpoolSelected: (code) => this.handleSpoolSelected(code)
       }),
       transferenciaComponente: new TransferenciaComponenteView('app-view', {
+        onNavigate: (route) => this.navigateTo(route)
+      }),
+      transferenciaSpool: new TransferenciaSpoolView('app-view', {
         onNavigate: (route) => this.navigateTo(route)
       }),
       novaTransferencia: new NovaTransferenciaView('app-view', {
@@ -176,6 +180,12 @@ class App {
       return;
     }
 
+    if (route === 'transferencia-spool') {
+      this.currentRoute = 'transferencia-spool';
+      this.render();
+      return;
+    }
+
     if (route === 'nova-transferencia') {
       this.currentRoute = 'nova-transferencia';
       this.render();
@@ -195,6 +205,7 @@ class App {
       case 'transferencia':
       case 'transferencia-componente':
       case 'nova-transferencia': return 'Transferência';
+      case 'transferencia-spool': return 'Caldeiraria';
       case 'validar-qrcode': return 'Validar QRCode';
       default: return 'Rastreio de produtos';
     }
@@ -223,6 +234,8 @@ class App {
       this.views.pintura.render();
     } else if (this.currentRoute === 'transferencia-componente') {
       this.views.transferenciaComponente.render();
+    } else if (this.currentRoute === 'transferencia-spool') {
+      this.views.transferenciaSpool.render();
     } else if (this.currentRoute === 'nova-transferencia') {
       this.views.novaTransferencia.render();
     }
@@ -321,6 +334,11 @@ class App {
           setTimeout(() => {
             this.modalProcessoTransferencia.open({
               onSelect: (processo) => {
+                if (processo === 'caldeiraria-revestimento') {
+                  this.navigateTo('transferencia-spool');
+                  return;
+                }
+
                 const PROCESSO_LABELS = {
                   'caldeiraria-revestimento': 'CALDEIRARIA → REVESTIMENTO',
                   'revestimento-pintura': 'REVESTIMENTO → PINTURA',
@@ -364,6 +382,11 @@ class App {
           setTimeout(() => {
             this.modalProcessoTransferencia.open({
               onSelect: (processo) => {
+                if (processo === 'caldeiraria-revestimento') {
+                  this.navigateTo('transferencia-spool');
+                  return;
+                }
+
                 const PROCESSO_LABELS = {
                   'caldeiraria-revestimento': 'CALDEIRARIA → REVESTIMENTO',
                   'revestimento-pintura': 'REVESTIMENTO → PINTURA',

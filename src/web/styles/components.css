@@ -1530,26 +1530,28 @@
   justify-content: center;
   width: 26px;
   height: 26px;
-  background-color: #f0f7ff;
-  border: 1.5px solid #93c5fd;
+  background: #ffffff;
+  border: 1px solid #c7d2fe;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   padding: 0;
 }
 
 .btn-toggle-transfer-items:hover {
-  background-color: #dbeafe;
-  border-color: #3b82f6;
+  background-color: #f8fafc;
+  border-color: #93c5fd;
 }
 
 .btn-toggle-transfer-items.is-expanded {
-  background-color: #1956ce;
-  border-color: #1956ce;
+  background: #ffffff;
+  border-color: #c7d2fe;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .btn-toggle-transfer-items.is-expanded .btn-toggle-transfer-icon svg {
-  stroke: #ffffff;
+  stroke: #1956ce;
 }
 
 .btn-toggle-transfer-icon {
@@ -1615,6 +1617,38 @@
   font-weight: 700;
   color: #1956ce;
   flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Ajuste fino da Lista de Spools Expandida (copilot-image-a134f2.png)
+   ========================================================================== */
+[data-transfer-type="spool"] .transfer-items-container {
+  background: transparent;
+  border: none;
+  padding: 4px 0 6px 0;
+  margin-top: 4px;
+  gap: 2px;
+}
+
+[data-transfer-type="spool"] .transfer-item-code-entry {
+  border-bottom: none;
+  padding: 1px 0;
+  gap: 2px;
+}
+
+[data-transfer-type="spool"] .transfer-item-entry-label {
+  font-weight: 700;
+  color: #111827;
+  font-size: 11.5px;
+  margin-right: 2px;
+}
+
+[data-transfer-type="spool"] .transfer-item-entry-code {
+  font-weight: 600;
+  color: #111827;
+  font-size: 11.5px;
+  font-family: inherit;
+  letter-spacing: 0;
 }
 
 .transfer-no-items {

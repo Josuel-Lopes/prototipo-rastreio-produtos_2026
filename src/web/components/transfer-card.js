@@ -28,19 +28,28 @@ export class TransferCard {
     const etapaAtual = Number(transfer.etapaAtual || 1);
 
     // Itens vinculados (suporta itens ou spools)
-    const itens = Array.isArray(transfer.itens)
+    const itens = Array.isArray(transfer.itens) && transfer.itens.length > 0
       ? transfer.itens
       : (Array.isArray(transfer.spools) ? transfer.spools : []);
 
     // Renderiza a lista de itens vinculados
-    const itemsListHtml = itens.map(item => `
+    const itemsListHtml = itens.map(item => {
+      if (tipo === 'spool') {
+        const spoolCode = (typeof item === 'object' && item !== null) ? (item.codigo || '') : String(item);
+        return `
+      <div class="transfer-item-code-entry">
+        <span class="transfer-item-entry-label">codigo:</span> <span class="transfer-item-entry-code">${spoolCode}</span>
+      </div>`;
+      }
+
+      return `
       <div class="transfer-item-code-entry">
         <span class="transfer-item-entry-label">codigo:</span>
         <span class="transfer-item-entry-code">${item.codigo}</span>
         ${item.descricao ? `<span class="transfer-item-entry-desc">- ${item.descricao}</span>` : ''}
         ${item.quantidade ? `<span class="transfer-item-entry-qty">(${item.quantidade}x)</span>` : ''}
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
 
     // Renderiza o pipeline de chevrons
     const pipelineHtml = PIPELINE_STAGES.map((stage) => {

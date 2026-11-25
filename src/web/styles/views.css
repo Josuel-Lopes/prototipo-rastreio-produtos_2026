@@ -1246,13 +1246,15 @@
 }
 
 /* ==========================================================================
-   5. Tela de Transferência - Componente (Fidelidade copilot-image-fc3082.png)
+   5. Tela de Transferência - Componente & SPOOL (Fidelidade copilot-image-fc3082.png e copilot-image-554851.png)
    ========================================================================== */
-.view-transferencia-componente-container {
+.view-transferencia-componente-container,
+.view-transferencia-spool-container {
   width: 100%;
 }
 
-.card-transferencia-componente {
+.card-transferencia-componente,
+.card-transferencia-spool {
   /* Segue o card padrão industrial branco Alvenius */
 }
 

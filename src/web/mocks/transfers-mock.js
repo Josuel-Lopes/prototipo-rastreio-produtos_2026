@@ -117,12 +117,118 @@ let transfersComponentesData = [
   }
 ];
 
+let transfersSpoolsData = [
+  {
+    id: 'tr-spool-001',
+    sequencial: '0001',
+    codigo: '000001',
+    tipo: 'spool',
+    status: 'Em Trânsito',
+    statusCor: '#f59e0b',
+    etapaAtual: 3, // Aguardando ROM
+    fornecedorOrigem: '000052 - 01 - ALVENIUS',
+    fornecedorDestino: '003385 - 01 - PETROPASY TECNOLOGIA',
+    inicio: '21/08/2026 às 00:00h',
+    finalizado: '-- / -- / ---- às -- : --',
+    spools: [
+      { codigo: 'SP041400035004' },
+      { codigo: 'SP041400035007' },
+      { codigo: 'SP041400035046' },
+      { codigo: 'SP041400035047' },
+      { codigo: 'SP041400035051' },
+      { codigo: 'SP041400035057' },
+      { codigo: 'SP041400036013' },
+      { codigo: 'SP041400036032' },
+      { codigo: 'SP041400036042' },
+      { codigo: 'SP041400036043' },
+      { codigo: 'SP041400036045' },
+      { codigo: 'SP041400038037' }
+    ]
+  },
+  {
+    id: 'tr-spool-002',
+    sequencial: '0002',
+    codigo: '000002',
+    tipo: 'spool',
+    status: 'Em Trânsito',
+    statusCor: '#f59e0b',
+    etapaAtual: 3, // Aguardando ROM
+    fornecedorOrigem: '000052 - 01 - ALVENIUS',
+    fornecedorDestino: '003385 - 01 - PETROPASY TECNOLOGIA',
+    inicio: '03/09/2026 às 00:00h',
+    finalizado: '-- / -- / ---- às -- : --',
+    spools: [
+      { codigo: 'SP041400038038' },
+      { codigo: 'SP041400038039' },
+      { codigo: 'SP041400038040' },
+      { codigo: 'SP041400038041' },
+      { codigo: 'SP041400038042' }
+    ]
+  },
+  {
+    id: 'tr-spool-003',
+    sequencial: '0003',
+    codigo: '000003',
+    tipo: 'spool',
+    status: 'Em Trânsito',
+    statusCor: '#f59e0b',
+    etapaAtual: 3, // Aguardando ROM
+    fornecedorOrigem: '000052 - 01 - ALVENIUS',
+    fornecedorDestino: '003385 - 01 - PETROPASY TECNOLOGIA',
+    inicio: '10/09/2026 às 00:00h',
+    finalizado: '-- / -- / ---- às -- : --',
+    spools: [
+      { codigo: 'SP041400039001' },
+      { codigo: 'SP041400039002' },
+      { codigo: 'SP041400039003' }
+    ]
+  }
+];
+
 export function getTransfersComponentes() {
   return [...transfersComponentesData];
 }
 
 export function getTransferComponenteById(id) {
   return transfersComponentesData.find(item => item.id === id);
+}
+
+export function getTransfersSpools() {
+  return [...transfersSpoolsData];
+}
+
+export function getTransferSpoolById(id) {
+  return transfersSpoolsData.find(item => item.id === id);
+}
+
+export function addTransferSpool(dados = {}) {
+  const nextSeqNum = transfersSpoolsData.length + 1;
+  const sequencial = String(nextSeqNum).padStart(4, '0');
+  const codigo = String(nextSeqNum).padStart(6, '0');
+
+  const novaTransferencia = {
+    id: `tr-spool-${Date.now()}`,
+    sequencial,
+    codigo,
+    tipo: 'spool',
+    status: dados.status || 'Em Trânsito',
+    statusCor: dados.statusCor || '#f59e0b',
+    etapaAtual: dados.etapaAtual || 3,
+    fornecedorOrigem: dados.fornecedorOrigem || '000052 - 01 - ALVENIUS',
+    fornecedorDestino: dados.fornecedorDestino || '003385 - 01 - PETROPASY TECNOLOGIA',
+    terceiro: dados.terceiro || 'SIM',
+    inicio: dados.inicio || new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    }).format(new Date()).replace(',', ' às') + 'h',
+    finalizado: dados.finalizado || '-- / -- / ---- às -- : --',
+    spools: dados.spools && dados.spools.length > 0 ? dados.spools : [
+      { codigo: 'SP041400035004' }
+    ]
+  };
+
+  transfersSpoolsData.unshift(novaTransferencia);
+  return novaTransferencia;
 }
 
 export function addTransferComponente(dados = {}) {
