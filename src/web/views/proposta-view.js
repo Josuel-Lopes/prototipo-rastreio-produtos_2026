@@ -559,7 +559,19 @@ export class PropostaView {
           ${this.renderCollapseToolbar('Expandir ou recolher funcionalidades')}
 
           <div class="features-list" data-collapsible-list>
-            ${features.map(f => this.renderFeatureCard(f, meta)).join('')}
+            ${(() => {
+              const done = features.filter(f => isExisting(f));
+              const fresh = features.filter(f => !isExisting(f));
+              const nums = [...done.map(f => f.phase), ...((d.investment?.phases || []).filter(isExisting).map(p => p.phase))];
+              const group = done.length ? `
+                <div class="delivered-group ${this.deliveredExpanded ? '' : 'is-group-collapsed'}" data-delivered-group>
+                  ${this.renderDeliveredToggle('delivered-features-body', this.deliveredGroupLabel(nums), { price: brl(0), range: this.deliveredRange(nums) })}
+                  <div class="delivered-group-body" id="delivered-features-body" data-delivered-body>
+                    ${done.map(f => this.renderFeatureCard(f, meta)).join('')}
+                  </div>
+                </div>` : '';
+              return group + fresh.map(f => this.renderFeatureCard(f, meta)).join('');
+            })()}
             ${this.renderDeliveryPhaseCard(d)}
           </div>
           </div>
@@ -1425,10 +1437,18 @@ export class PropostaView {
               </tr>
             </thead>
             <tbody>
-              ${phases.filter(p => !isSuperseded(p)).map(item => {
+              ${phases.filter(p => !isSuperseded(p)).map((item, idx, arr) => {
                 const existing = isExisting(item);
-                return `
-                  <tr class="${existing ? 'row-existing' : ''}">
+                const groupRow = existing && arr.findIndex(isExisting) === idx ? `
+                  <tr class="row-group" data-delivered-row>
+                    <td class="text-center cell-group" data-label="Fase">${this.renderDeliveredRowToggle(arr.filter(isExisting).map(p => `delivered-row-${t(p.phase)}`).join(' '), this.deliveredRange(arr.filter(isExisting).map(p => p.phase)))}</td>
+                    <td class="cell-group cell-group-name" data-label="Etapa / Módulo"><span class="delivered-group-icon" aria-hidden="true">${lucide('circle-check', { size: 16, strokeWidth: 2.4 })}</span>${this.deliveredGroupLabel(arr.filter(isExisting).map(p => p.phase))}</td>
+                    <td class="text-center cell-group-num" data-label="Horas">0 h</td>
+                    <td class="text-center cell-group-num" data-label="Prazo (dias úteis)">—</td>
+                    <td class="text-right cell-group-num" data-label="Valor (R$)">${brl(0)}</td>
+                  </tr>` : '';
+                return `${groupRow}
+                  <tr class="${existing ? `row-existing ${this.deliveredExpanded ? '' : 'is-group-collapsed'}` : ''}" ${existing ? `data-delivered-body id="delivered-row-${t(item.phase)}"` : ''}>
                     <td class="text-center cell-phase" data-label="Fase"><strong>${t(item.phase)}</strong></td>
                     <td class="cell-name" data-label="Etapa / Módulo">
                       <span>${t(existing ? stripExistingSuffix(item.name) : item.name)}</span>
@@ -2120,11 +2140,83 @@ export class PropostaView {
     `;
   }
 
+  /** Rótulo do grupo "Já entregues" (ex.: "Já entregues (Fases 0 a 6) · R$ 0,00"). */
+  deliveredGroupLabel(nums) {
+    const list = nums.filter(n => n !== undefined && n !== null).map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+    const range = !list.length ? '' : list.length === 1 ? ` (Fase ${list[0]})` : ` (Fases ${list[0]} a ${list[list.length - 1]})`;
+    return `Já entregues${range}`;
+  }
+
+  /** Intervalo de fases já entregues a partir dos dados (ex.: "0 a 6"; "6" se única). */
+  deliveredRange(nums = []) {
+    const list = nums.filter(n => n !== undefined && n !== null).map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+    if (!list.length) return '';
+    return list.length === 1 ? `${list[0]}` : `${list[0]} a ${list[list.length - 1]}`;
+  }
+
+  /** Texto do tooltip conforme o estado (title, aria-label e data-tooltip). */
+  deliveredTip(open, range) {
+    const r = range ? ` (${range})` : '';
+    return open
+      ? `Recolher: ocultar as fases já entregues${r}`
+      : `Expandir: exibir as fases já entregues${r}, sem custo nesta proposta`;
+  }
+
+  /** Atributos comuns dos botões do grupo (tooltip + estado). */
+  deliveredToggleAttrs(id, range) {
+    const open = this.deliveredExpanded === true;
+    const tip = t(this.deliveredTip(open, range));
+    return `data-delivered-toggle data-range="${t(range)}" aria-expanded="${open ? 'true' : 'false'}" aria-controls="${id}" title="${tip}" aria-label="${tip}" data-tooltip="${tip}"`;
+  }
+
+  /** Botão de expandir/recolher do grupo "Já entregues" (iniciando colapsado). Com `price`, exibe o valor à direita (cards). */
+  renderDeliveredToggle(id, label, { cls = '', price = null, range = '' } = {}) {
+    const open = this.deliveredExpanded === true;
+    return `
+      <button type="button" class="delivered-group-toggle ${cls}" ${this.deliveredToggleAttrs(id, range)}>
+        <span class="delivered-group-icon" aria-hidden="true">${lucide('circle-check', { size: 16, strokeWidth: 2.4 })}</span>
+        <span class="delivered-group-label">${label}</span>
+        ${price !== null ? `<span class="prop-badge price delivered-group-price">${price}</span>` : ''}
+        <span class="delivered-group-pill feature-toggle" aria-hidden="true">
+          <span class="delivered-group-action">${open ? 'Recolher' : 'Expandir'}</span>
+          <span class="delivered-group-chevron">${lucide('chevron-down', { size: 18, strokeWidth: 2.4 })}</span>
+        </span>
+      </button>
+    `;
+  }
+
+  /** Botão compacto (só chevron) da linha de grupo na tabela, na coluna "Fase". */
+  renderDeliveredRowToggle(id, range = '') {
+    const open = this.deliveredExpanded === true;
+    return `
+      <button type="button" class="delivered-row-toggle" ${this.deliveredToggleAttrs(id, range)}>
+        <span class="delivered-group-action sr-only">${open ? 'Recolher' : 'Expandir'}</span>
+        <span class="delivered-group-chevron" aria-hidden="true">${lucide('chevron-down', { size: 18, strokeWidth: 2.4 })}</span>
+        <span class="sr-only">fases já entregues</span>
+      </button>
+    `;
+  }
+
+  setDeliveredExpanded(open) {
+    this.deliveredExpanded = !!open;
+    this.container.querySelectorAll('[data-delivered-toggle]').forEach(btn => {
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      const tip = this.deliveredTip(!!open, btn.dataset.range || '');
+      btn.setAttribute('title', tip);
+      btn.setAttribute('aria-label', tip);
+      btn.setAttribute('data-tooltip', tip);
+      const a = btn.querySelector('.delivered-group-action');
+      if (a) a.textContent = open ? 'Recolher' : 'Expandir';
+    });
+    this.container.querySelectorAll('[data-delivered-body]').forEach(el => el.classList.toggle('is-group-collapsed', !open));
+    this.container.querySelectorAll('[data-delivered-group]').forEach(el => el.classList.toggle('is-group-collapsed', !open));
+    this.syncToggleAll();
+  }
+
   renderCollapseToolbar(label) {
     return `
       <div class="features-toolbar" role="group" aria-label="${t(label)}">
-        <button type="button" class="features-toolbar-btn" data-features-all="expand">${lucide('chevrons-up-down', { size: 15, strokeWidth: 2.2 })}Expandir todas</button>
-        <button type="button" class="features-toolbar-btn" data-features-all="collapse">${lucide('chevrons-down-up', { size: 15, strokeWidth: 2.2 })}Recolher todas</button>
+        <button type="button" class="features-toolbar-btn" data-features-toggle-all data-mode="expand" aria-expanded="false" title="Expandir todas" aria-label="Expandir todas">${lucide('chevrons-up-down', { size: 15, strokeWidth: 2.2 })}<span class="features-toolbar-label">Expandir todas</span></button>
       </div>
     `;
   }
@@ -2158,6 +2250,26 @@ export class PropostaView {
     `;
   }
 
+  /** Atualiza o botão único "Expandir/Recolher todas" do escopo (ou de todos, sem argumento). */
+  syncToggleAll(scope = null) {
+    const scopes = scope ? [scope] : [...this.container.querySelectorAll('[data-collapsible-scope]')];
+    scopes.forEach(sc => {
+      const btn = sc.querySelector('[data-features-toggle-all]');
+      if (!btn) return;
+      const cards = [...sc.querySelectorAll('[data-feature-card]')];
+      const groups = [...sc.querySelectorAll('[data-delivered-group]')];
+      const allOpen = (cards.length || groups.length)
+        && cards.every(c => !c.classList.contains('is-collapsed'))
+        && groups.every(g => !g.classList.contains('is-group-collapsed'));
+      const label = allOpen ? 'Recolher todas' : 'Expandir todas';
+      btn.dataset.mode = allOpen ? 'collapse' : 'expand';
+      btn.setAttribute('aria-expanded', allOpen ? 'true' : 'false');
+      btn.setAttribute('aria-label', label);
+      btn.setAttribute('title', label);
+      btn.innerHTML = `${lucide(allOpen ? 'chevrons-down-up' : 'chevrons-up-down', { size: 15, strokeWidth: 2.2 })}<span class="features-toolbar-label">${label}</span>`;
+    });
+  }
+
   /** Expande/recolhe um card de funcionalidade (a11y + transição; sem animação quando animate=false). */
   setFeatureExpanded(card, expanded, { animate = true } = {}) {
     if (!card) return;
@@ -2171,6 +2283,7 @@ export class PropostaView {
     card.classList.toggle('no-anim', !animate || reduce);
     card.classList.add('is-animating');
     card.classList.toggle('is-collapsed', !expanded);
+    this.syncToggleAll(card.closest('[data-collapsible-scope]'));
     btn?.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     const label = card.querySelector('.feature-toggle-label');
     if (label) label.textContent = expanded ? 'Recolher' : 'Expandir';
@@ -2187,9 +2300,13 @@ export class PropostaView {
   revealFeatureTarget(el) {
     const card = el?.closest?.('[data-feature-card]');
     if (card && card.classList.contains('is-collapsed')) this.setFeatureExpanded(card, true, { animate: false });
+    if (el?.closest?.('[data-delivered-group]') && !this.deliveredExpanded) this.setDeliveredExpanded(true);
   }
 
   bindFeatureToggles() {
+    this.container.querySelectorAll('[data-delivered-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => this.setDeliveredExpanded(!this.deliveredExpanded));
+    });
     this.container.querySelectorAll('[data-collapsible-list]').forEach(list => {
       list.addEventListener('click', (e) => {
         const area = e.target.closest('[data-feature-toggle-area]');
@@ -2199,13 +2316,16 @@ export class PropostaView {
         this.setFeatureExpanded(card, card.classList.contains('is-collapsed'));
       });
     });
-    this.container.querySelectorAll('[data-features-all]').forEach(btn => {
+    this.container.querySelectorAll('[data-features-toggle-all]').forEach(btn => {
       btn.addEventListener('click', () => {
-        const expand = btn.dataset.featuresAll === 'expand';
+        const expand = btn.dataset.mode !== 'collapse';
         const scope = btn.closest('[data-collapsible-scope]') || this.container;
+        if (scope.querySelector('[data-delivered-group]')) this.setDeliveredExpanded(expand);
         scope.querySelectorAll('[data-feature-card]').forEach(card => this.setFeatureExpanded(card, expand));
+        this.syncToggleAll(scope);
       });
     });
+    this.syncToggleAll();
   }
 
   /* --------------------------------- Eventos -------------------------------- */
