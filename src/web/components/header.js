@@ -6,6 +6,7 @@
 
 import { lucide } from './icons.js';
 import { PageTitle } from './page-title.js';
+import { ProjectTag } from './project-tag.js';
 import { APP_VERSION } from '../version.js';
 
 export const ICONS = {
@@ -140,8 +141,22 @@ export class HeaderComponent {
               <span class="user-welcome-text">Bem vindo, <strong id="drawer-user-name">josuel</strong></span>
             </div>
 
+            <!-- 1b. Projeto ativo (exibido quando houver projeto selecionado) -->
+            <div class="drawer-project-row" id="drawer-project-row" hidden></div>
+
             <!-- 2. Sub-painel Exclusivo da Home: Apenas botão Sair (sem barra divisória extra) -->
             <div class="home-drawer-section" id="home-drawer-section">
+              <ul class="mobile-drawer-nav-list home-drawer-project-list" id="home-drawer-project-list" hidden>
+                  <li class="mobile-drawer-nav-item drawer-item-switch-project" data-action="switch-project" role="button" tabindex="0">
+                    <div class="drawer-item-left">
+                      <span class="drawer-item-icon">
+                        ${lucide('arrow-left-right', { size: 22, stroke: '#1956ce', strokeWidth: 2 })}
+                      </span>
+                      <span class="drawer-item-label">TROCAR PROJETO</span>
+                    </div>
+                    <span class="drawer-chevron">${lucide('chevron-right', { size: 22, stroke: '#6b7280', strokeWidth: 2 })}</span>
+                  </li>
+              </ul>
               <button class="btn-drawer-logout" id="btn-home-drawer-logout" title="Encerrar Sessão">
                 ${lucide('log-out', { size: 22, stroke: '#dc2626', strokeWidth: 2.2 })}
                 <span>Sair</span>
@@ -159,6 +174,16 @@ export class HeaderComponent {
                         ${lucide('home', { size: 22, stroke: '#111827', strokeWidth: 2 })}
                       </span>
                       <span class="drawer-item-label">INÍCIO</span>
+                    </div>
+                    <span class="drawer-chevron">${lucide('chevron-right', { size: 22, stroke: '#6b7280', strokeWidth: 2 })}</span>
+                  </li>
+
+                  <li class="mobile-drawer-nav-item drawer-item-switch-project" data-action="switch-project" role="button" tabindex="0">
+                    <div class="drawer-item-left">
+                      <span class="drawer-item-icon">
+                        ${lucide('arrow-left-right', { size: 22, stroke: '#1956ce', strokeWidth: 2 })}
+                      </span>
+                      <span class="drawer-item-label">TROCAR PROJETO</span>
                     </div>
                     <span class="drawer-chevron">${lucide('chevron-right', { size: 22, stroke: '#6b7280', strokeWidth: 2 })}</span>
                   </li>
@@ -259,7 +284,7 @@ export class HeaderComponent {
   /**
    * Atualização condicional de visibilidade e dados sem recriar o DOM
    */
-  render({ user, activeRoute = 'login', pillLabel = 'Rastreio de produtos' } = {}) {
+  render({ user, activeRoute = 'login', pillLabel = 'Rastreio de produtos', project = null } = {}) {
     if (!this.container) return;
 
     this.ensureStructure();
@@ -269,7 +294,7 @@ export class HeaderComponent {
 
     const isLoggedIn = !!(user && user.isLoggedIn);
     const isLoginPage = activeRoute === 'login' || !isLoggedIn;
-    const isHome = isLoggedIn && activeRoute === 'menu';
+    const isHome = isLoggedIn && (activeRoute === 'menu' || activeRoute === 'projetos');
     const isWorkScreen = isLoggedIn && !isLoginPage && !isHome;
 
     const username = user?.username || 'josuel';
@@ -284,6 +309,16 @@ export class HeaderComponent {
     // Atualiza nome do usuário em todos os locais
     const userNames = this.container.querySelectorAll('#header-user-name, #drawer-user-name');
     userNames.forEach(el => { el.textContent = username; });
+
+    // Projeto ativo no drawer + atalho "Trocar projeto" (somente com projeto selecionado)
+    const projectRow = this.container.querySelector('#drawer-project-row');
+    const projectHtml = isLoggedIn ? ProjectTag.renderRow(project, { label: 'Projeto:' }) : '';
+    if (projectRow) {
+      projectRow.innerHTML = projectHtml;
+      projectRow.hidden = !projectHtml;
+    }
+    const homeProjectList = this.container.querySelector('#home-drawer-project-list');
+    if (homeProjectList) homeProjectList.hidden = !projectHtml;
 
     // Atualiza texto da pill central
     PageTitle.setTitle(isWorkScreen ? currentPill : 'Rastreio de produtos');
@@ -384,6 +419,19 @@ export class HeaderComponent {
         if (typeof this.options.onNavigate === 'function') {
           this.options.onNavigate(route);
         }
+      });
+    });
+
+    // 3b. Trocar projeto (drawer Home e Work)
+    this.container.querySelectorAll('[data-action="switch-project"]').forEach(el => {
+      const handleSwitch = (e) => {
+        e.preventDefault();
+        this.toggleMenu(false);
+        if (typeof this.options.onSwitchProject === 'function') this.options.onSwitchProject();
+      };
+      el.addEventListener('click', handleSwitch);
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') handleSwitch(e);
       });
     });
 

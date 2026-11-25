@@ -1,7 +1,10 @@
 /**
  * Mock de Dados de Transferência de Componentes e Spools - Alvenius
  * Responsabilidade Única: Fonte de dados simulada para romaneios/transferências entre fornecedores e etapas
+ * Cada transferência é vinculada a um projeto (projetoId → projetoCodigo/projetoNome via projects-mock)
  */
+
+import { getProjectRef } from './projects-mock.js';
 
 export const PIPELINE_STAGES = [
   { id: 1, key: 'sc', label: 'Aguardando SC', color: '#f97316' },
@@ -14,6 +17,7 @@ export const PIPELINE_STAGES = [
 let transfersComponentesData = [
   {
     id: 'tr-001',
+    projetoId: 'prj-0414',
     sequencial: '0001',
     codigo: '000001',
     tipo: 'componente',
@@ -32,6 +36,7 @@ let transfersComponentesData = [
   },
   {
     id: 'tr-002',
+    projetoId: 'prj-0414',
     sequencial: '0002',
     codigo: '000002',
     tipo: 'componente',
@@ -49,6 +54,7 @@ let transfersComponentesData = [
   },
   {
     id: 'tr-003',
+    projetoId: 'prj-0427',
     sequencial: '0003',
     codigo: '000003',
     tipo: 'componente',
@@ -67,6 +73,7 @@ let transfersComponentesData = [
   },
   {
     id: 'tr-004',
+    projetoId: 'prj-0414',
     sequencial: '0004',
     codigo: '000004',
     tipo: 'componente',
@@ -84,6 +91,7 @@ let transfersComponentesData = [
   },
   {
     id: 'tr-005',
+    projetoId: 'prj-0463',
     sequencial: '0005',
     codigo: '000005',
     tipo: 'componente',
@@ -101,6 +109,7 @@ let transfersComponentesData = [
   },
   {
     id: 'tr-006',
+    projetoId: 'prj-0388',
     sequencial: '0006',
     codigo: '000006',
     tipo: 'componente',
@@ -121,6 +130,7 @@ let transfersSpoolsData = [
   // --- Processo 1: Caldeiraria -> Revestimento ---
   {
     id: 'tr-spool-001',
+    projetoId: 'prj-0414',
     sequencial: '0001',
     codigo: '000001',
     tipo: 'spool',
@@ -149,6 +159,7 @@ let transfersSpoolsData = [
   },
   {
     id: 'tr-spool-002',
+    projetoId: 'prj-0427',
     sequencial: '0002',
     codigo: '000002',
     tipo: 'spool',
@@ -170,6 +181,7 @@ let transfersSpoolsData = [
   },
   {
     id: 'tr-spool-003',
+    projetoId: 'prj-0414',
     sequencial: '0003',
     codigo: '000003',
     tipo: 'spool',
@@ -191,6 +203,7 @@ let transfersSpoolsData = [
   // --- Processo 2: Revestimento -> Pintura ---
   {
     id: 'tr-spool-004',
+    projetoId: 'prj-0414',
     sequencial: '0004',
     codigo: '000004',
     tipo: 'spool',
@@ -211,6 +224,7 @@ let transfersSpoolsData = [
   },
   {
     id: 'tr-spool-005',
+    projetoId: 'prj-0463',
     sequencial: '0005',
     codigo: '000005',
     tipo: 'spool',
@@ -230,6 +244,7 @@ let transfersSpoolsData = [
   },
   {
     id: 'tr-spool-006',
+    projetoId: 'prj-0427',
     sequencial: '0006',
     codigo: '000006',
     tipo: 'spool',
@@ -250,6 +265,7 @@ let transfersSpoolsData = [
   // --- Processo 3: Pintura -> Faturamento ---
   {
     id: 'tr-spool-007',
+    projetoId: 'prj-0414',
     sequencial: '0007',
     codigo: '000007',
     tipo: 'spool',
@@ -270,6 +286,7 @@ let transfersSpoolsData = [
   },
   {
     id: 'tr-spool-008',
+    projetoId: 'prj-0388',
     sequencial: '0008',
     codigo: '000008',
     tipo: 'spool',
@@ -288,6 +305,7 @@ let transfersSpoolsData = [
   },
   {
     id: 'tr-spool-009',
+    projetoId: 'prj-0414',
     sequencial: '0009',
     codigo: '000009',
     tipo: 'spool',
@@ -307,23 +325,49 @@ let transfersSpoolsData = [
   }
 ];
 
-export function getTransfersComponentes() {
-  return [...transfersComponentesData];
+/** Completa projetoCodigo/projetoNome a partir do projetoId (coerente com spools-mock) */
+function withProject(item) {
+  return item.projetoId ? { ...getProjectRef(item.projetoId), ...item } : item;
+}
+
+transfersComponentesData = transfersComponentesData.map(withProject);
+transfersSpoolsData = transfersSpoolsData.map(withProject);
+
+const byProject = (list, projectId) => (projectId ? list.filter(item => item.projetoId === projectId) : list);
+
+/** Transferências de componente (opcionalmente só do projeto) */
+export function getTransfersComponentes(projectId = null) {
+  return [...byProject(transfersComponentesData, projectId)];
 }
 
 export function getTransferComponenteById(id) {
   return transfersComponentesData.find(item => item.id === id);
 }
 
-export function getTransfersSpools(processo = null) {
-  if (processo) {
-    return transfersSpoolsData.filter(item => item.processo === processo);
-  }
-  return [...transfersSpoolsData];
+/** Transferências de spool por processo (opcionalmente só do projeto) */
+export function getTransfersSpools(processo = null, projectId = null) {
+  const list = processo ? transfersSpoolsData.filter(item => item.processo === processo) : transfersSpoolsData;
+  return [...byProject(list, projectId)];
 }
 
 export function getTransferSpoolById(id) {
   return transfersSpoolsData.find(item => item.id === id);
+}
+
+/** Contadores por status (Em Trânsito / Concluído) de uma lista de transferências */
+export function getTransferCounters(list = []) {
+  const concluido = list.filter(isTransferConcluida).length;
+  return { emTransito: list.length - concluido, concluido, total: list.length };
+}
+
+export function isTransferConcluida(item = {}) {
+  return String(item.status || '').toLowerCase().includes('conclu') || Number(item.etapaAtual) === 5;
+}
+
+/** Referência de projeto da nova transferência ({projetoId, projetoCodigo, projetoNome}) */
+function projectFields(dados = {}) {
+  const ref = dados.projetoId ? (getProjectRef(dados.projetoId) || {}) : {};
+  return { projetoId: ref.projetoId || null, projetoCodigo: ref.projetoCodigo || null, projetoNome: ref.projetoNome || null };
 }
 
 export function addTransferSpool(dados = {}) {
@@ -349,6 +393,7 @@ export function addTransferSpool(dados = {}) {
     codigo,
     tipo: 'spool',
     processo,
+    ...projectFields(dados),
     status: dados.status || 'Em Trânsito',
     statusCor: dados.statusCor || '#f59e0b',
     etapaAtual: dados.etapaAtual || 3,
@@ -379,6 +424,7 @@ export function addTransferComponente(dados = {}) {
     sequencial,
     codigo,
     tipo: dados.tipo || 'componente',
+    ...projectFields(dados),
     status: dados.status || 'Em Trânsito',
     statusCor: dados.statusCor || '#f59e0b',
     etapaAtual: dados.etapaAtual || 1,

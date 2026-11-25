@@ -5,6 +5,7 @@
  */
 
 import { getTransfersComponentes, addTransferComponente } from '../mocks/transfers-mock.js';
+import { getActiveProject, getProjectRef } from '../mocks/projects-mock.js';
 import { TransferCard } from '../components/transfer-card.js';
 import { PageContainer } from '../components/page-container.js';
 import { PageTitle } from '../components/page-title.js';
@@ -19,8 +20,13 @@ export class TransferenciaComponenteView {
     this.expandedCards = new Set(); // Armazena IDs dos cards com itens expandidos
   }
 
+  /** Transferências do projeto ativo (sem filtro de busca) */
+  getProjectTransfers() {
+    return getTransfersComponentes(getActiveProject()?.id || null);
+  }
+
   getFilteredTransfers() {
-    const list = getTransfersComponentes();
+    const list = this.getProjectTransfers();
     const query = this.searchQuery.trim().toLowerCase();
 
     if (!query) return list;
@@ -40,6 +46,13 @@ export class TransferenciaComponenteView {
       );
 
       return codeMatch || seqMatch || statusMatch || originMatch || destMatch || dateMatch || itemsMatch;
+    });
+  }
+
+  renderEmpty() {
+    return TransferCard.renderEmpty({
+      hasQuery: Boolean(this.searchQuery.trim()),
+      projectRef: getProjectRef(getActiveProject())
     });
   }
 
@@ -69,13 +82,7 @@ export class TransferenciaComponenteView {
     // Renderiza a lista de cards de transferência
     let cardsHtml = '';
     if (transfers.length === 0) {
-      cardsHtml = `
-        <div class="transfer-empty-state">
-          ${lucide('search', { size: 36, stroke: '#9ca3af', strokeWidth: 1.5 })}
-          <div class="transfer-empty-title">Nenhuma transferência encontrada</div>
-          <div class="transfer-empty-subtitle">Tente outro termo na busca por código, status ou data.</div>
-        </div>
-      `;
+      cardsHtml = this.renderEmpty();
     } else {
       cardsHtml = transfers.map(item =>
         TransferCard.render(item, {
@@ -86,6 +93,9 @@ export class TransferenciaComponenteView {
     }
 
     const contentHtml = `
+      <!-- Projeto ativo + contadores por status das transferências do projeto -->
+      ${TransferCard.renderProjectSummary(getProjectRef(getActiveProject()), this.getProjectTransfers())}
+
       <!-- Linha de Ação: Busca + Botão Criar Nova Transferência -->
       <div class="transfer-action-row">
         <div class="transfer-search-box">
@@ -148,13 +158,7 @@ export class TransferenciaComponenteView {
         const listContainer = this.container.querySelector('#transfer-cards-list');
         if (listContainer) {
           if (filtered.length === 0) {
-            listContainer.innerHTML = `
-              <div class="transfer-empty-state">
-                ${lucide('search', { size: 36, stroke: '#9ca3af', strokeWidth: 1.5 })}
-                <div class="transfer-empty-title">Nenhuma transferência encontrada</div>
-                <div class="transfer-empty-subtitle">Tente outro termo na busca por código, status ou data.</div>
-              </div>
-            `;
+            listContainer.innerHTML = this.renderEmpty();
           } else {
             listContainer.innerHTML = filtered.map(item =>
               TransferCard.render(item, {

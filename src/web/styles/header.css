@@ -710,3 +710,26 @@
     margin: 6px 4px 0 auto;
   }
 }
+
+/* ==========================================================================
+   Drawer: projeto ativo (ProjectTag) + item "Trocar projeto"
+   ========================================================================== */
+.drawer-project-row {
+  margin: 0 16px;
+  padding: 12px 0;
+  border-bottom: 2px solid #7188a4;
+  box-sizing: border-box;
+}
+
+.drawer-project-row[hidden],
+.home-drawer-project-list[hidden] {
+  display: none !important;
+}
+
+.drawer-project-row .project-tag-label {
+  font-size: 14px;
+}
+
+.drawer-item-switch-project .drawer-item-label {
+  color: #1956ce;
+}

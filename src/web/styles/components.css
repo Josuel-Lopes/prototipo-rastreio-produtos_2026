@@ -845,6 +845,16 @@
   color: #ffffff;
 }
 
+.spool-badge-status.status-planejamento {
+  background-color: #f59e0b;
+  color: #ffffff;
+}
+
+.spool-badge-status.status-concluido {
+  background-color: #22c55e;
+  color: #ffffff;
+}
+
 .spool-item-code-row {
   display: flex;
   align-items: baseline;
@@ -1731,3 +1741,141 @@
 }
 
 
+
+/* ==========================================================================
+   Card de Projeto (ProjectCard) - extensão do SpoolCard (spool-item-*)
+   ========================================================================== */
+.project-item-name {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0a2540;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.project-item-card .spool-item-code-row,
+.project-item-card .spool-item-desc-row {
+  margin-bottom: 6px;
+}
+
+.project-item-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.project-item-percent {
+  font-size: 11px;
+  font-weight: 700;
+  color: #374151;
+  font-variant-numeric: tabular-nums;
+}
+
+.project-item-progress {
+  height: 4px;
+  margin-top: 6px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.project-item-progress-bar {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background-color: #00bcd4;
+}
+
+.project-item-progress-bar.status-planejamento { background-color: #f59e0b; }
+.project-item-progress-bar.status-concluido { background-color: #22c55e; }
+
+.project-item-card:focus-visible {
+  outline: 2px solid #1956ce;
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   ProjectTag - identificação compacta do projeto (cards, cadastro, modal QRCode)
+   ========================================================================== */
+.project-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.project-tag-label {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.project-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 2px 8px;
+  background-color: #eef4ff;
+  border: 1px solid #c7d7f5;
+  border-radius: 10px;
+  color: #1956ce;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.project-tag-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.project-tag-code {
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.project-tag-sep {
+  flex-shrink: 0;
+  color: #64748b;
+}
+
+.project-tag-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #0a2540;
+}
+
+.project-tag-empty {
+  font-size: 11px;
+  font-style: italic;
+  color: #64748b;
+}
+
+.spool-item-project-row {
+  margin-bottom: 8px;
+}
+
+/* Fora dos cards (cadastro / modal QRCode) o nome do projeto quebra linha em vez de truncar */
+.project-tag-row:not(.spool-item-project-row) .project-tag {
+  white-space: normal;
+  flex-wrap: wrap;
+  border-radius: 8px;
+}
+
+.project-tag-row:not(.spool-item-project-row) .project-tag-name {
+  overflow: visible;
+}
+
+/* Projeto vinculado no card de transferência (reaproveita .spool-item-project-row) */
+.transfer-item-project-row {
+  font-size: 13px;
+}

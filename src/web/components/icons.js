@@ -24,6 +24,8 @@ export const LUCIDE_PATHS = {
   'home': `<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" /><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />`,
   'chevron-right': `<path d="m9 18 6-6-6-6" />`,
   'chevron-up': `<path d="m18 15-6-6-6 6" />`,
+  'chevrons-up-down': `<path d="m7 15 5 5 5-5" /><path d="m7 9 5-5 5 5" />`,
+  'chevrons-down-up': `<path d="m7 20 5-5 5 5" /><path d="m7 4 5 5 5-5" />`,
   'chevron-down': `<path d="m6 9 6 6 6-6" />`,
 
   // 3. Login & Formulários
@@ -49,7 +51,11 @@ export const LUCIDE_PATHS = {
   'info': `<circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" />`,
   'circle-check': `<circle cx="12" cy="12" r="10" /><path d="m16 9-5.5 5.5L8 12" />`,
   'circle-alert': `<circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" />`,
-  'circle-x': `<circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" />`
+  'circle-x': `<circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" />`,
+
+  // 6. Projetos
+  'folder-kanban': `<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" /><path d="M8 10v4" /><path d="M12 10v2" /><path d="M16 10v6" />`,
+  'arrow-left-right': `<path d="M8 3 4 7l4 4" /><path d="M4 7h16" /><path d="m16 21 4-4-4-4" /><path d="M20 17H4" />`
 };
 
 /**

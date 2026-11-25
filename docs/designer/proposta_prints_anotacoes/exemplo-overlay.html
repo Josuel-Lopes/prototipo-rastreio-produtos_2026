@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exemplo de anotação de prints · PROP-2026-011</title>
+<!--
+  Compositor de anotação de prints da proposta comercial (PROP-2026-011).
+  Uso manual:   abrir no navegador (exemplo desktop) ou com ?device=mobile.
+  Uso automação: window.renderAnnotation(spec) → aguardar body[data-ready="1"] → screenshot de #board.
+  Spec: ver README.md §5.
+-->
+<style>
+  :root {
+    --anno-novo: #F97316;
+    --anno-novo-tag: #C2410C;
+    --anno-ajustado: #7C3AED;
+    --anno-ajustado-tag: #6D28D9;
+    --anno-navy: #0B2545;
+    --anno-gray: #5B6670;
+    --anno-text: #1A1A1A;
+    --anno-divider: #E4E7EC;
+    --anno-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: #D0D5DD; padding: 24px; font-family: var(--anno-font); }
+
+  /* Board = arte final exportada */
+  .anno-board { background: #FFFFFF; display: flex; }
+  .anno-board--desktop { flex-direction: row; width: 1726px; height: 768px; }
+  .anno-board--mobile { flex-direction: column; width: 360px; }
+
+  .anno-shot { position: relative; flex-shrink: 0; overflow: hidden; background: #F0F2F5; }
+  .anno-img { position: absolute; inset: 0; display: block; }
+  .anno-svg { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+  .anno-tag-text { font: 800 11px var(--anno-font); letter-spacing: 0.06em; fill: #FFFFFF; text-transform: uppercase; }
+  .anno-callout-text { font: 800 13px var(--anno-font); fill: #FFFFFF; }
+
+  /* Legenda */
+  .anno-legend { background: #FFFFFF; color: var(--anno-text); display: flex; flex-direction: column; }
+  .anno-board--desktop .anno-legend { width: 360px; height: 768px; border-left: 4px solid var(--anno-navy); padding: 20px; }
+  .anno-board--mobile .anno-legend { width: 360px; border-top: 4px solid var(--anno-navy); padding: 16px; }
+  .anno-legend-phase { margin: 0 0 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--anno-gray); }
+  .anno-legend-title { margin: 0 0 16px; font-size: 16px; font-weight: 800; color: var(--anno-navy); line-height: 1.25; }
+  .anno-legend-list { list-style: none; margin: 0; padding: 0; }
+  .anno-legend-item { display: grid; grid-template-columns: 22px 1fr; column-gap: 10px; row-gap: 4px; padding: 12px 0; border-top: 1px solid var(--anno-divider); }
+  .anno-legend-item:first-child { border-top: 0; padding-top: 0; }
+  .anno-num { grid-row: span 2; width: 22px; height: 22px; border-radius: 9999px; background: var(--anno-navy); color: #FFFFFF; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 3px var(--anno-navy); }
+  .anno-tag { justify-self: start; font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: #FFFFFF; padding: 2px 6px; border-radius: 3px; }
+  .anno-tag--novo { background: var(--anno-novo-tag); }
+  .anno-tag--ajustado { background: var(--anno-ajustado-tag); }
+  .anno-tag--incluso { background: #067647; }
+  .anno-text { font-size: 13px; line-height: 1.35; }
+
+  .anno-key { display: flex; gap: 16px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--anno-divider); font-size: 11px; color: var(--anno-gray); }
+  .anno-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .anno-key i { display: inline-block; width: 22px; height: 12px; border-radius: 3px; }
+  .anno-key .k-novo { border: 3px solid var(--anno-novo); background: rgba(249, 115, 22, 0.08); }
+  .anno-key .k-ajustado { border: 3px dashed var(--anno-ajustado); background: rgba(124, 58, 237, 0.08); }
+  .anno-key .k-incluso { border: 3px dotted #12B76A; background: rgba(18, 183, 106, 0.08); }
+  .anno-legend-foot { margin: 16px 0 0; font-size: 10px; color: var(--anno-gray); }
+  .anno-board--desktop .anno-legend-foot { margin-top: auto; }
+
+  /* Tela mock (somente quando spec.image ausente) */
+  .mock { position: absolute; inset: 0; background: #F0F2F5; color: #1E293B; font-size: 13px; }
+  .mock-header { position: absolute; left: 0; right: 0; top: 0; background: #CCD2DA; border-bottom: 2px solid #8EA8CC; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+  .mock--desktop .mock-header { height: 60px; }
+  .mock--mobile .mock-header { height: 56px; padding: 0 12px; }
+  .mock-logo { font-size: 20px; color: #1956CE; letter-spacing: -4px; display: flex; flex-direction: column; line-height: 1; }
+  .mock-logo small { font-size: 11px; color: #64748B; letter-spacing: 0; margin-top: 2px; }
+  .mock-seal { font-size: 9px; font-weight: 700; color: #92400E; background: #FEF3C7; border: 1px solid #F5B700; border-radius: 4px; padding: 0 4px; margin-left: 4px; }
+  .mock-user { font-size: 13px; color: #111827; }
+  .mock-burger { font-size: 22px; color: #757C96; }
+  .mock-pill { position: absolute; left: 50%; transform: translate(-50%, -50%); background: #FFFFFF; border: 1px solid #D0D7DE; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,.12); font-weight: 700; color: #1A365D; white-space: nowrap; }
+  .mock--desktop .mock-pill { top: 60px; padding: 8px 24px; font-size: 15px; }
+  .mock--mobile .mock-pill { top: 56px; padding: 6px 16px; font-size: 14px; }
+  .mock-title { position: absolute; left: 0; right: 0; text-align: center; font-size: 18px; font-weight: 700; color: #1A365D; }
+  .mock-card { position: absolute; background: #FFFFFF; border: 1px solid #CDD9E5; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 12px; }
+  .mock-card strong { font-size: 15px; color: #0A2540; }
+  .mock-card span { font-size: 12px; color: #64748B; }
+  .mock-icon { width: 48px; height: 48px; border-radius: 9999px; background: #E8F4FC; border: 2px solid #1956CE; }
+  .mock-ribbon { position: absolute; left: 0; right: 0; bottom: 0; background: #0B2545; color: #FFFFFF; border-top: 2px solid #F5B700; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 500; white-space: nowrap; }
+  .mock--desktop .mock-ribbon { height: 30px; font-size: 12px; }
+  .mock--mobile .mock-ribbon { height: 26px; font-size: 11px; }
+  .mock-ribbon b { text-transform: uppercase; letter-spacing: 0.08em; }
+  .mock-ribbon i { width: 8px; height: 8px; border-radius: 9999px; background: #F5B700; }
+</style>
+</head>
+<body>
+  <div id="board" class="anno-board"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var NS = 'http://www.w3.org/2000/svg';
+  var TYPES = {
+    novo:     { stroke: '#F97316', tag: '#C2410C', label: 'NOVO',     dash: null },
+    ajustado: { stroke: '#7C3AED', tag: '#6D28D9', label: 'AJUSTADO', dash: '8 5' },
+    incluso:  { stroke: '#12B76A', tag: '#067647', label: 'INCLUSO',  dash: '2 5' }
+  };
+  var PAD = 6;          // folga do contorno
+  var TAG_H = 20;       // altura da etiqueta
+  var TAG_OFFSET = 24;  // distância da etiqueta acima do contorno
+  var CALLOUT_R = 13;   // raio do callout (Ø26)
+  var EDGE = 16;        // margem mínima do callout às bordas
+
+  function svgEl(name, attrs, parent) {
+    var n = document.createElementNS(NS, name);
+    Object.keys(attrs).forEach(function (k) { n.setAttribute(k, attrs[k]); });
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+
+  function htmlEl(tag, className, text) {
+    var n = document.createElement(tag);
+    if (className) n.className = className;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  /* ---------- Exemplo padrão (Fase 1 · 01 Home pós-login) ---------- */
+  function sampleSpec(device) {
+    var mobile = device === 'mobile';
+    return {
+      phase: 'Fase 1 – Seleção de Projetos',
+      title: '01 · Home pós-login',
+      device: mobile ? 'mobile' : 'desktop',
+      viewport: mobile ? { width: 360, height: 780 } : { width: 1366, height: 768 },
+      image: null,
+      items: mobile ? [
+        { n: 1, type: 'novo', rect: { x: 12, y: 150, width: 336, height: 130 }, text: 'LISTAR PROJETOS abre a lista de projetos' },
+        { n: 2, type: 'novo', rect: { x: 12, y: 300, width: 336, height: 130 }, text: 'VALIDAR QRCODE já na home pós-login' },
+        { n: 3, type: 'ajustado', rect: { x: 0, y: 754, width: 360, height: 26 }, text: 'Exemplo AJUSTADO (tracejado)' }
+      ] : [
+        { n: 1, type: 'novo', rect: { x: 371, y: 200, width: 300, height: 190 }, text: 'Card LISTAR PROJETOS abre a lista de projetos' },
+        { n: 2, type: 'novo', rect: { x: 695, y: 200, width: 300, height: 190 }, text: 'VALIDAR QRCODE disponível já na home pós-login' },
+        { n: 3, type: 'ajustado', rect: { x: 0, y: 738, width: 1366, height: 30 }, text: 'Exemplo de AJUSTADO (contorno tracejado violeta)' }
+      ]
+    };
+  }
+
+  function mockScreen(device) {
+    var mobile = device === 'mobile';
+    var cards = mobile
+      ? [{ x: 12, y: 150, w: 336, h: 130 }, { x: 12, y: 300, w: 336, h: 130 }]
+      : [{ x: 371, y: 200, w: 300, h: 190 }, { x: 695, y: 200, w: 300, h: 190 }];
+    var labels = [
+      ['LISTAR PROJETOS', 'Selecione o projeto para acessar as etapas'],
+      ['VALIDAR QRCODE', 'Ler QRCode e validar / campos spool e componentes']
+    ];
+    var html = '<div class="mock mock--' + (mobile ? 'mobile' : 'desktop') + '">' +
+      '<div class="mock-header"><span class="mock-logo">◎◎◎<small>v2.8.0<b class="mock-seal">DEMO</b></small></span>' +
+      (mobile ? '<span class="mock-burger">☰</span>' : '<span class="mock-user">| Bem vindo, <strong>josuellopes</strong> | Sair</span>') +
+      '</div>' +
+      '<div class="mock-pill">Rastreio de produtos</div>' +
+      '<div class="mock-title" style="top:' + (mobile ? 104 : 140) + 'px">Clique no que deseja fazer</div>';
+    cards.forEach(function (c, i) {
+      html += '<div class="mock-card" style="left:' + c.x + 'px;top:' + c.y + 'px;width:' + c.w + 'px;height:' + c.h + 'px">' +
+        '<div class="mock-icon"></div><strong>' + labels[i][0] + '</strong><span>' + labels[i][1] + '</span></div>';
+    });
+    html += '<div class="mock-ribbon"><i></i><b>Ambiente de demonstração</b> · ' +
+      (mobile ? 'PROP-2026-011' : 'Proposta comercial PROP-2026-011 · MAXCODE42 → Alvenius · Dados fictícios') +
+      '</div></div>';
+    return html;
+  }
+
+  /* ---------- Desenho de um destaque ---------- */
+  function drawItem(svg, item, W, H) {
+    var t = TYPES[item.type] || TYPES.novo;
+    var r = item.rect;
+    var x = Math.max(2, r.x - PAD);
+    var y = Math.max(2, r.y - PAD);
+    var w = Math.min(W - 2, r.x + r.width + PAD) - x;
+    var h = Math.min(H - 2, r.y + r.height + PAD) - y;
+
+    var g = svgEl('g', { 'class': 'anno-item anno-item--' + item.type }, svg);
+
+    // Halo + contorno
+    svgEl('rect', { x: x, y: y, width: w, height: h, rx: 6, fill: 'none', stroke: '#FFFFFF', 'stroke-width': 7, 'stroke-opacity': 0.9 }, g);
+    var box = svgEl('rect', { x: x, y: y, width: w, height: h, rx: 6, fill: t.stroke, 'fill-opacity': 0.08, stroke: t.stroke, 'stroke-width': 3 }, g);
+    if (t.dash) box.setAttribute('stroke-dasharray', t.dash);
+    if (item.type === 'incluso') box.setAttribute('stroke-linecap', 'round');
+
+    // Etiqueta NOVO / AJUSTADO (acima; se não couber, dentro)
+    var outside = y - TAG_OFFSET >= 0;
+    var tx = outside ? x : x + 4;
+    var ty = outside ? y - TAG_OFFSET : y + 4;
+    var tagRect = svgEl('rect', { x: tx, y: ty, height: TAG_H, rx: 3, fill: t.tag, stroke: '#FFFFFF', 'stroke-width': 1.5 }, g);
+    var tagText = svgEl('text', { x: tx + 7, y: ty + 14, 'class': 'anno-tag-text' }, g);
+    tagText.textContent = t.label;
+    tagRect.setAttribute('width', Math.ceil(tagText.getComputedTextLength()) + 18);
+
+    // Callout numerado no canto superior direito
+    var cx = Math.min(Math.max(x + w, EDGE), W - EDGE);
+    var cy = Math.min(Math.max(y, EDGE), H - EDGE);
+    svgEl('circle', { cx: cx, cy: cy, r: CALLOUT_R, fill: '#0B2545', stroke: '#FFFFFF', 'stroke-width': 2 }, g);
+    var num = svgEl('text', { x: cx, y: cy + 4.5, 'text-anchor': 'middle', 'class': 'anno-callout-text' }, g);
+    num.textContent = String(item.n);
+  }
+
+  /* ---------- Legenda ---------- */
+  function buildLegend(spec) {
+    var aside = htmlEl('aside', 'anno-legend');
+    aside.appendChild(htmlEl('p', 'anno-legend-phase', spec.phase || ''));
+    aside.appendChild(htmlEl('h1', 'anno-legend-title', spec.title || ''));
+
+    var list = htmlEl('ol', 'anno-legend-list');
+    (spec.items || []).forEach(function (item) {
+      var t = TYPES[item.type] ? item.type : 'novo';
+      var li = htmlEl('li', 'anno-legend-item');
+      li.appendChild(htmlEl('span', 'anno-num', String(item.n)));
+      li.appendChild(htmlEl('span', 'anno-tag anno-tag--' + t, TYPES[t].label));
+      li.appendChild(htmlEl('span', 'anno-text', item.text || ''));
+      list.appendChild(li);
+    });
+    aside.appendChild(list);
+
+    var key = htmlEl('div', 'anno-key');
+    var used = (spec.items || []).map(function (i) { return i.type; });
+    key.innerHTML = '<span><i class="k-novo"></i>NOVO</span><span><i class="k-ajustado"></i>AJUSTADO</span>' +
+      (used.indexOf('incluso') > -1 ? '<span><i class="k-incluso"></i>INCLUSO</span>' : '');
+    aside.appendChild(key);
+
+    aside.appendChild(htmlEl('p', 'anno-legend-foot', 'PROP-2026-011 · Ambiente de demonstração · dados fictícios'));
+    return aside;
+  }
+
+  /* ---------- API pública ---------- */
+  function renderAnnotation(spec) {
+    document.body.dataset.ready = '0';
+    var device = spec.device === 'mobile' ? 'mobile' : 'desktop';
+    var W = spec.viewport.width;
+    var H = spec.viewport.height;
+
+    var board = document.getElementById('board');
+    board.className = 'anno-board anno-board--' + device;
+    board.innerHTML = '';
+
+    var shot = htmlEl('div', 'anno-shot');
+    shot.style.width = W + 'px';
+    shot.style.height = H + 'px';
+
+    var ready = Promise.resolve();
+    if (spec.image) {
+      var img = new Image(W, H);
+      img.className = 'anno-img';
+      img.alt = '';
+      ready = new Promise(function (res) { img.onload = res; img.onerror = res; });
+      img.src = spec.image;
+      shot.appendChild(img);
+    } else {
+      shot.insertAdjacentHTML('beforeend', mockScreen(device));
+    }
+
+    var svg = svgEl('svg', { 'class': 'anno-svg', width: W, height: H, viewBox: '0 0 ' + W + ' ' + H, 'aria-hidden': 'true' });
+    shot.appendChild(svg);
+    board.appendChild(shot);
+    board.appendChild(buildLegend(spec));
+
+    // Desenha após inserir no DOM (necessário para medir texto das etiquetas)
+    (spec.items || []).forEach(function (item) { drawItem(svg, item, W, H); });
+
+    return ready.then(function () {
+      return document.fonts ? document.fonts.ready : null;
+    }).then(function () {
+      document.body.dataset.ready = '1';
+    });
+  }
+
+  window.renderAnnotation = renderAnnotation;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (window.__ANNOTATION__) {
+      renderAnnotation(window.__ANNOTATION__);
+    } else {
+      var device = new URLSearchParams(location.search).get('device');
+      renderAnnotation(sampleSpec(device));
+    }
+  });
+})();
+</script>
+</body>
+</html>

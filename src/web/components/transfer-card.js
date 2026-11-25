@@ -6,7 +6,8 @@
  */
 
 import { lucide } from './icons.js';
-import { PIPELINE_STAGES } from '../mocks/transfers-mock.js';
+import { ProjectTag } from './project-tag.js';
+import { PIPELINE_STAGES, getTransferCounters } from '../mocks/transfers-mock.js';
 
 export class TransferCard {
   /**
@@ -103,6 +104,9 @@ export class TransferCard {
           <span class="transfer-code-value">${transfer.codigo || '000001'}</span>
         </div>
 
+        <!-- Linha 2.1: Projeto vinculado à transferência -->
+        ${ProjectTag.renderRow(transfer, { className: 'spool-item-project-row transfer-item-project-row' })}
+
         <!-- Linha 3: Fornecedor (Origem e Destino) -->
         <div class="transfer-item-supplier-block">
           <div class="transfer-supplier-title">Fornecedor:</div>
@@ -168,6 +172,40 @@ export class TransferCard {
             ${pipelineHtml}
           </div>
         </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Faixa "Projeto ativo" + contadores por status das transferências do projeto
+   * @param {object} projectRef - getProjectRef(getActiveProject())
+   * @param {Array} list - transferências do projeto (sem filtro de busca)
+   */
+  static renderProjectSummary(projectRef, list = []) {
+    const c = getTransferCounters(list);
+    return `
+      <div class="project-context-bar stage-project-bar transfer-project-bar">
+        ${ProjectTag.renderRow(projectRef, { label: 'Projeto ativo:' })}
+        <div class="transfer-project-counters" aria-label="Transferências do projeto por status">
+          <span class="transfer-counter is-transito"><strong>${c.emTransito}</strong> Em Trânsito</span>
+          <span class="transfer-counter is-concluido"><strong>${c.concluido}</strong> Concluído</span>
+          <span class="transfer-counter is-total"><strong>${c.total}</strong> Total</span>
+        </div>
+      </div>
+    `;
+  }
+
+  /** Estado vazio: sem resultados na busca ou projeto sem transferências */
+  static renderEmpty({ hasQuery = false, projectRef = null } = {}) {
+    const title = hasQuery ? 'Nenhuma transferência encontrada' : 'Nenhuma transferência neste projeto';
+    const subtitle = hasQuery
+      ? 'Tente outro termo na busca por código, status ou data.'
+      : `O projeto ${projectRef?.projetoCodigo || ''} ainda não possui transferências. Use "Criar Nova Transferência".`;
+    return `
+      <div class="transfer-empty-state">
+        ${lucide('search', { size: 36, stroke: '#9ca3af', strokeWidth: 1.5 })}
+        <div class="transfer-empty-title">${title}</div>
+        <div class="transfer-empty-subtitle">${subtitle}</div>
       </div>
     `;
   }

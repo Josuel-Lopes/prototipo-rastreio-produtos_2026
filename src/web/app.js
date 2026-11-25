@@ -8,10 +8,12 @@ import { toast } from './components/toast.js';
 import { ModalTransferenciaComponent } from './components/modal-transferencia.js';
 import { ModalProcessoTransferenciaComponent } from './components/modal-processo-transferencia.js';
 import { ModalQrCodeComponent } from './components/modal-qrcode.js';
+import { ModalProjetosComponent } from './components/modal-projetos.js';
 import { lucide } from './components/icons.js';
 
 import { LoginView } from './views/login-view.js';
 import { MenuView } from './views/menu-view.js';
+import { ProjetosView } from './views/projetos-view.js';
 import { CadastroView } from './views/cadastro-view.js';
 import { CaldeirariaView } from './views/caldeiraria-view.js';
 import { RevestimentoView } from './views/revestimento-view.js';
@@ -22,10 +24,18 @@ import { NovaTransferenciaView } from './views/nova-transferencia-view.js';
 import { PropostaView } from './views/proposta-view.js';
 
 import { getCurrentUser, setCurrentUser, logoutUser, getSpoolByCode } from './mocks/spools-mock.js';
+import { getProjects, getActiveProject, setActiveProject, clearActiveProject, getProjectRef } from './mocks/projects-mock.js';
 import { APP_VERSION } from './version.js';
 
 // Sinalização de "Ambiente de demonstração" (ribbon, selo DEMO e marcas no PDF da proposta)
 const DEMO_MODE = true;
+
+// Rotas que dependem de um projeto ativo (app_active_project)
+const PROJECT_ROUTES = new Set([
+  'menu', 'cadastro', 'caldeiraria', 'revestimento', 'pintura',
+  'transferencia', 'transferencia-componente', 'transferencia-spool',
+  'nova-transferencia', 'nova-transferencia-spool'
+]);
 
 class App {
   constructor() {
@@ -36,22 +46,30 @@ class App {
     // Inicialização dos componentes modais e globais
     this.header = new HeaderComponent('app-header', {
       onNavigate: (route) => this.navigateTo(route),
-      onLogout: () => this.handleLogout()
+      onLogout: () => this.handleLogout(),
+      onSwitchProject: () => this.switchProject()
     });
 
     this.modalTransferencia = new ModalTransferenciaComponent('modal-root');
     this.modalProcessoTransferencia = new ModalProcessoTransferenciaComponent('modal-root');
     this.modalQrCode = new ModalQrCodeComponent('modal-root');
+    this.modalProjetos = new ModalProjetosComponent('modal-root');
 
     // Inicialização das views
     this.views = {
       login: new LoginView('app-view', {
         onLogin: (credentials) => this.handleLogin(credentials)
       }),
+      projetos: new ProjetosView('app-view', {
+        onNavigate: (route) => this.navigateTo(route),
+        onOpenQrCode: (mode) => this.openQrCodeScanner(null, mode || 'validar-qrcode'),
+        onOpenProjects: () => this.openModalProjetos()
+      }),
       menu: new MenuView('app-view', {
         onNavigate: (route) => this.navigateTo(route),
         onOpenQrCode: (mode) => this.openQrCodeScanner(null, mode || 'validar-qrcode'),
-        onOpenTransfer: () => this.openModalTransferencia()
+        onOpenTransfer: () => this.openModalTransferencia(),
+        onSwitchProject: () => this.switchProject()
       }),
       cadastro: new CadastroView('app-view', {
         onNavigate: (route) => this.navigateTo(route),
@@ -163,10 +181,11 @@ class App {
     setCurrentUser(updatedUser);
     this.currentUser = getCurrentUser();
     sessionStorage.setItem('app_user', JSON.stringify(this.currentUser));
-    sessionStorage.setItem('app_current_route', 'menu');
+    clearActiveProject();
+    sessionStorage.setItem('app_current_route', 'projetos');
 
     toast.success('Login Realizado', `Bem vindo ao sistema Alvenius, ${this.currentUser?.username || 'josuellopes'}!`);
-    this.navigateTo('menu');
+    this.navigateTo('projetos');
   }
 
   handleLogout() {
@@ -175,6 +194,7 @@ class App {
     sessionStorage.removeItem('app_user');
     sessionStorage.removeItem('app_current_route');
     sessionStorage.removeItem('app_scroll_y');
+    clearActiveProject();
     toast.info('Sessão Encerrada', 'Você saiu do sistema com segurança.');
     this.navigateTo('login');
   }
@@ -188,6 +208,13 @@ class App {
     }
 
     const isAuthed = !!(this.currentUser && this.currentUser.isLoggedIn);
+
+    // Menu e telas de etapas/cadastro/transferência exigem projeto ativo: sem projeto, volta à home de projetos
+    if (isAuthed && PROJECT_ROUTES.has(route) && !getActiveProject()) {
+      route = 'projetos';
+      params = {};
+    }
+
     if (isAuthed && route !== 'validar-qrcode' && route !== 'transferencia') {
       sessionStorage.setItem('app_current_route', route);
     }
@@ -297,12 +324,15 @@ class App {
     this.header.render({
       user: this.currentUser,
       activeRoute: this.currentRoute,
-      pillLabel: this.getPillLabel(this.currentRoute)
+      pillLabel: this.getPillLabel(this.currentRoute),
+      project: getProjectRef(getActiveProject())
     });
 
     // 2. Renderiza a View correspondente
     if (this.currentRoute === 'login') {
       this.views.login.render();
+    } else if (this.currentRoute === 'projetos') {
+      this.views.projetos.render();
     } else if (this.currentRoute === 'menu') {
       this.views.menu.render();
     } else if (this.currentRoute === 'cadastro') {
@@ -329,7 +359,8 @@ class App {
     this.header.render({
       user: this.currentUser,
       activeRoute: this.currentRoute,
-      pillLabel: this.getPillLabel(this.currentRoute)
+      pillLabel: this.getPillLabel(this.currentRoute),
+      project: getProjectRef(getActiveProject())
     });
 
     const mainContainer = document.getElementById('app-view');
@@ -391,6 +422,23 @@ class App {
             onScanSuccess(data);
           }
         }
+      }
+    });
+  }
+
+  /** Limpa o projeto ativo e retorna à home de projetos */
+  switchProject() {
+    clearActiveProject();
+    this.navigateTo('projetos');
+  }
+
+  openModalProjetos() {
+    this.modalProjetos.open({
+      projects: getProjects(),
+      onSelect: (project) => {
+        setActiveProject(project);
+        toast.success('Projeto Selecionado', `${project.nome} (${project.codigo})`);
+        this.navigateTo('menu');
       }
     });
   }
